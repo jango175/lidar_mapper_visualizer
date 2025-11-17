@@ -31,4 +31,16 @@ target_compile_features(${NODE_NAME} PUBLIC c_std_99 cxx_std_17)  # Require C99 
 install(TARGETS ${NODE_NAME}
   DESTINATION lib/${PROJECT_NAME})
 
+# install launch files
+install(DIRECTORY
+  launch
+  DESTINATION share/${PROJECT_NAME}
+)
+
+# install config files
+install(DIRECTORY
+  config
+  DESTINATION share/${PROJECT_NAME}
+)
+
 ament_package()

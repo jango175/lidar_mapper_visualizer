@@ -12,7 +12,8 @@ def generate_launch_description():
     output = 'screen',
     parameters = [
       {'timestamp_diff_threshold': 0.02},
-      {'lidar_pitch_deg': 30.0}
+      {'lidar_pitch_deg': 30.0},
+      {'play_bag': False}
     ]
   )
 

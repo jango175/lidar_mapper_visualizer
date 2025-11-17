@@ -28,6 +28,10 @@ public:
     lidar_pitch_deg_param_desc.description = "Pitch angle of the LIDAR relative to the drone body frame (degrees)";
     this->declare_parameter("lidar_pitch_deg", 30.0, lidar_pitch_deg_param_desc);
 
+    auto play_bag_param_desc = rcl_interfaces::msg::ParameterDescriptor{};
+    play_bag_param_desc.description = "Whether to play a rosbag for testing";
+    this->declare_parameter("play_bag", false, play_bag_param_desc);
+
     // These define the callback groups
     callback_group_scan_sub_ = this->create_callback_group(
       rclcpp::CallbackGroupType::MutuallyExclusive);
@@ -101,8 +105,9 @@ private:
 
   std::shared_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster_;
   std::string world_link_ = "world";
-  std::string drone_link_ = "drone_base";
-  std::string lidar_link_ = "ldlidar_base";
+  std::string drone_base_link_ = "drone_base";
+  std::string lidar_base_link_ = "ldlidar_base";
+  std::string lidar_link_ = "ldlidar_link";
 
   rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr pose_pub_;
 
@@ -139,12 +144,16 @@ private:
     double lidar_pitch_deg = this->get_parameter("lidar_pitch_deg").as_double();
     euler_deg_to_quaternion(0.0, lidar_pitch_deg, 0.0, lqx, lqy, lqz, lqw);
 
-    auto timestamp = this->get_clock()->now();
+    auto timestamp = scan_msg->header.stamp; // To avoid issues with bag playback timing
+    bool play_bag = this->get_parameter("play_bag").as_bool();
+
+    if (play_bag == false)
+      timestamp = this->now();
 
     geometry_msgs::msg::TransformStamped world_drone_tf;
     world_drone_tf.header.stamp = timestamp;
     world_drone_tf.header.frame_id = world_link_;
-    world_drone_tf.child_frame_id = drone_link_;
+    world_drone_tf.child_frame_id = drone_base_link_;
     world_drone_tf.transform.translation.x = utm_x;
     world_drone_tf.transform.translation.y = utm_y;
     world_drone_tf.transform.translation.z = alt;
@@ -154,8 +163,8 @@ private:
 
     geometry_msgs::msg::TransformStamped drone_lidar_tf;
     drone_lidar_tf.header.stamp = timestamp;
-    drone_lidar_tf.header.frame_id = drone_link_;
-    drone_lidar_tf.child_frame_id = lidar_link_;
+    drone_lidar_tf.header.frame_id = drone_base_link_;
+    drone_lidar_tf.child_frame_id = lidar_base_link_;
     drone_lidar_tf.transform.translation.x = 0.0;
     drone_lidar_tf.transform.translation.y = 0.0;
     drone_lidar_tf.transform.translation.z = 0.0;
@@ -165,6 +174,24 @@ private:
     drone_lidar_tf.transform.rotation.w = lqw;
 
     tf_broadcaster_->sendTransform(drone_lidar_tf);
+
+    // LIDAR link tf (only when playing bag to avoid conflicts with real LIDAR TF)
+    if (play_bag)
+    {
+      geometry_msgs::msg::TransformStamped lidar_lidar_tf;
+      lidar_lidar_tf.header.stamp = timestamp;
+      lidar_lidar_tf.header.frame_id = lidar_base_link_;
+      lidar_lidar_tf.child_frame_id = lidar_link_;
+      lidar_lidar_tf.transform.translation.x = 0.0;
+      lidar_lidar_tf.transform.translation.y = 0.0;
+      lidar_lidar_tf.transform.translation.z = 0.02745;
+      lidar_lidar_tf.transform.rotation.x = 0.0;
+      lidar_lidar_tf.transform.rotation.y = 0.0;
+      lidar_lidar_tf.transform.rotation.z = 0.0;
+      lidar_lidar_tf.transform.rotation.w = 1.0;
+
+      tf_broadcaster_->sendTransform(lidar_lidar_tf);
+    }
 
     geometry_msgs::msg::PoseStamped pose_msg;
     pose_msg.header.stamp = timestamp;
@@ -190,9 +217,9 @@ private:
     double dlat = lat_rad - origin_lat_rad;
     double dlon = lon_rad - origin_lon_rad;
 
-    // ENU
-    x = R * dlon * cos(origin_lat_rad);
-    y = R * dlat;
+    // Simple equirectangular projection (ENU)
+    x = R * dlon * cos(origin_lat_rad); // East
+    y = R * dlat; // North
   }
 
 

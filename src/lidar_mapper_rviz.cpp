@@ -104,7 +104,7 @@ private:
   std::shared_ptr<message_filters::Synchronizer<ApproximateSyncPolicy>> sync_;
 
   std::shared_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster_;
-  std::string world_link_ = "world";
+  std::string world_link_ = "map";
   std::string drone_base_link_ = "drone_base";
   std::string lidar_base_link_ = "ldlidar_base";
   std::string lidar_link_ = "ldlidar_link";

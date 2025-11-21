@@ -1,7 +1,6 @@
 #include <iostream>
 #include <string>
 #include <ctime>
-#include <thread>
 #include <chrono>
 
 #include "rclcpp/rclcpp.hpp"
@@ -32,29 +31,12 @@ public:
     play_bag_param_desc.description = "Whether to play a rosbag for testing";
     this->declare_parameter("play_bag", false, play_bag_param_desc);
 
-    // These define the callback groups
-    callback_group_scan_sub_ = this->create_callback_group(
-      rclcpp::CallbackGroupType::MutuallyExclusive);
-    callback_group_orientation_sub_ = this->create_callback_group(
-      rclcpp::CallbackGroupType::MutuallyExclusive);
-    callback_group_gps_sub_ = this->create_callback_group(
-      rclcpp::CallbackGroupType::MutuallyExclusive);
-
-    // Each of these callback groups is basically a thread
-    // Everything assigned to one of them gets bundled into the same thread
-    auto scan_sub_opt = rclcpp::SubscriptionOptions();
-    scan_sub_opt.callback_group = callback_group_scan_sub_;
-    auto orientation_sub_opt = rclcpp::SubscriptionOptions();
-    orientation_sub_opt.callback_group = callback_group_orientation_sub_;
-    auto gps_sub_opt = rclcpp::SubscriptionOptions();
-    gps_sub_opt.callback_group = callback_group_gps_sub_;
-
     // subscribers
     auto qos = rclcpp::SensorDataQoS();
 
-    mf_scan_sub_.subscribe(this, "/ldlidar_node/scan", rmw_qos_profile_sensor_data, scan_sub_opt);
-    mf_orientation_sub_.subscribe(this, "/msp/orientation", rmw_qos_profile_sensor_data, orientation_sub_opt);
-    mf_gps_sub_.subscribe(this, "/msp/gps", rmw_qos_profile_sensor_data, gps_sub_opt);
+    mf_scan_sub_.subscribe(this, "/ldlidar_node/scan", qos.get_rmw_qos_profile());
+    mf_orientation_sub_.subscribe(this, "/msp/orientation", qos.get_rmw_qos_profile());
+    mf_gps_sub_.subscribe(this, "/msp/gps", qos.get_rmw_qos_profile());
 
     sync_ = std::make_shared<message_filters::Synchronizer<ApproximateSyncPolicy>>(
       ApproximateSyncPolicy(10),
@@ -89,10 +71,6 @@ public:
 
 
 private:
-  rclcpp::CallbackGroup::SharedPtr callback_group_scan_sub_;
-  rclcpp::CallbackGroup::SharedPtr callback_group_orientation_sub_;
-  rclcpp::CallbackGroup::SharedPtr callback_group_gps_sub_;
-
   message_filters::Subscriber<sensor_msgs::msg::LaserScan> mf_scan_sub_;
   message_filters::Subscriber<geometry_msgs::msg::QuaternionStamped> mf_orientation_sub_;
   message_filters::Subscriber<sensor_msgs::msg::NavSatFix> mf_gps_sub_;
@@ -251,10 +229,7 @@ int main(int argc, char* argv[])
 
   RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Starting LIDAR mapper visualiser node...");
 
-  rclcpp::executors::MultiThreadedExecutor executor(rclcpp::ExecutorOptions(), 4);
-  auto lidar_mapper_visualiser_node = std::make_shared<LidarMapperVisualiser>();
-  executor.add_node(lidar_mapper_visualiser_node);
-  executor.spin();
+  rclcpp::spin(std::make_shared<LidarMapperVisualiser>());
 
   rclcpp::shutdown();
 

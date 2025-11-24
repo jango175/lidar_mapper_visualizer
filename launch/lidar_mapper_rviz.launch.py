@@ -11,9 +11,10 @@ def generate_launch_description():
     name = 'lidar_mapper_rviz',
     output = 'screen',
     parameters = [
-      {'timestamp_diff_threshold': 0.02},
-      {'lidar_pitch_deg': 30.0},
-      {'play_bag': False}
+      {'timestamp_diff_threshold': 0.05},
+      {'lidar_pitch_deg': -30.0},
+      {'play_bag': True},
+      {'use_ned': True}
     ]
   )
 

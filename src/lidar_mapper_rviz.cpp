@@ -24,19 +24,29 @@ public:
     this->declare_parameter("timestamp_diff_threshold", 0.025, timestamp_param_desc);
 
     auto lidar_pitch_deg_param_desc = rcl_interfaces::msg::ParameterDescriptor{};
-    lidar_pitch_deg_param_desc.description = "Pitch angle of the LIDAR relative to the drone body frame (degrees)";
+    lidar_pitch_deg_param_desc.description = "Pitch angle (NED) of the LIDAR relative to the drone body frame (degrees)";
     this->declare_parameter("lidar_pitch_deg", 30.0, lidar_pitch_deg_param_desc);
 
     auto play_bag_param_desc = rcl_interfaces::msg::ParameterDescriptor{};
     play_bag_param_desc.description = "Whether to play a rosbag for testing";
     this->declare_parameter("play_bag", false, play_bag_param_desc);
 
+    auto use_ned_param_desc = rcl_interfaces::msg::ParameterDescriptor{};
+    use_ned_param_desc.description = "Use NED frame for orientation data (true) or ENU frame (false)";
+    this->declare_parameter("use_ned", true, use_ned_param_desc);
+
+    use_ned_ = this->get_parameter("use_ned").as_bool();
+    if (use_ned_)
+      orientation_topic_ = "/msp/orientation_ned";
+    else
+      orientation_topic_ = "/msp/orientation_enu";
+
     // subscribers
     auto qos = rclcpp::SensorDataQoS();
 
-    mf_scan_sub_.subscribe(this, "/ldlidar_node/scan", qos.get_rmw_qos_profile());
-    mf_orientation_sub_.subscribe(this, "/msp/orientation", qos.get_rmw_qos_profile());
-    mf_gps_sub_.subscribe(this, "/msp/gps", qos.get_rmw_qos_profile());
+    mf_scan_sub_.subscribe(this, scan_topic_, qos.get_rmw_qos_profile());
+    mf_orientation_sub_.subscribe(this, orientation_topic_, qos.get_rmw_qos_profile());
+    mf_gps_sub_.subscribe(this, gps_topic_, qos.get_rmw_qos_profile());
 
     sync_ = std::make_shared<message_filters::Synchronizer<ApproximateSyncPolicy>>(
       ApproximateSyncPolicy(10),
@@ -53,6 +63,12 @@ public:
                                       std::placeholders::_1,
                                       std::placeholders::_2,
                                       std::placeholders::_3));
+
+    orientation_sub_ = this->create_subscription<geometry_msgs::msg::QuaternionStamped>(
+      orientation_topic_,
+      qos,
+      std::bind(&LidarMapperVisualiser::orientation_callback, this, std::placeholders::_1)
+    );
 
     // tf broadcaster
     tf_broadcaster_ = std::make_shared<tf2_ros::TransformBroadcaster>(this);
@@ -71,6 +87,12 @@ public:
 
 
 private:
+  std::string scan_topic_ = "/ldlidar_node/scan";
+  std::string orientation_topic_ = "/msp/orientation_ned";
+  std::string gps_topic_ = "/msp/gps";
+
+  bool use_ned_ = true;
+
   message_filters::Subscriber<sensor_msgs::msg::LaserScan> mf_scan_sub_;
   message_filters::Subscriber<geometry_msgs::msg::QuaternionStamped> mf_orientation_sub_;
   message_filters::Subscriber<sensor_msgs::msg::NavSatFix> mf_gps_sub_;
@@ -88,11 +110,40 @@ private:
   std::string lidar_link_ = "ldlidar_link";
 
   rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr pose_pub_;
+  rclcpp::Subscription<geometry_msgs::msg::QuaternionStamped>::SharedPtr orientation_sub_;
 
   bool got_first_fix_ = false;
   double origin_lat_ = 0.0;
   double origin_lon_ = 0.0;
   double origin_alt_ = 0.0;
+
+
+  void orientation_callback(const geometry_msgs::msg::QuaternionStamped::SharedPtr orientation_msg)
+  {
+    if (use_ned_)
+    {
+      double x = 0.0, y = 0.0, z = 0.0;
+      ned_to_enu(x, y, z,
+                  orientation_msg->quaternion.x,
+                  orientation_msg->quaternion.y,
+                  orientation_msg->quaternion.z,
+                  orientation_msg->quaternion.w);
+    }
+
+    geometry_msgs::msg::TransformStamped orientation_tf;
+    orientation_tf.header.stamp = orientation_msg->header.stamp;
+    orientation_tf.header.frame_id = world_link_;
+    orientation_tf.child_frame_id = "drone_test_link";
+    orientation_tf.transform.translation.x = 0.0;
+    orientation_tf.transform.translation.y = 0.0;
+    orientation_tf.transform.translation.z = 0.0;
+    orientation_tf.transform.rotation.x = orientation_msg->quaternion.x;
+    orientation_tf.transform.rotation.y = orientation_msg->quaternion.y;
+    orientation_tf.transform.rotation.z = orientation_msg->quaternion.z;
+    orientation_tf.transform.rotation.w = orientation_msg->quaternion.w;
+
+    tf_broadcaster_->sendTransform(orientation_tf);
+  }
 
 
   void approximate_sync_callback(const sensor_msgs::msg::LaserScan::ConstSharedPtr& scan_msg,
@@ -113,14 +164,34 @@ private:
       RCLCPP_INFO(this->get_logger(), "Set origin to lat: %f, lon: %f", origin_lat_, origin_lon_);
     }
 
-    double utm_x = 0.0;
-    double utm_y = 0.0;
-    latlon_to_xy(gps_msg->latitude, gps_msg->longitude, utm_x, utm_y);
-    double alt = gps_msg->altitude - origin_alt_;
+    // drone data is in NED frame, but ROS2 uses ENU frame
+
+    double coord_x = 0.0;
+    double coord_y = 0.0;
+    latlon_to_xy(gps_msg->latitude, gps_msg->longitude, coord_x, coord_y);
+    double alt = gps_msg->altitude; // - origin_alt_;
+
+    double qx = orientation_msg->quaternion.x;
+    double qy = orientation_msg->quaternion.y;
+    double qz = orientation_msg->quaternion.z;
+    double qw = orientation_msg->quaternion.w;
+
+    if (use_ned_)
+    {
+      alt = -alt;
+      ned_to_enu(coord_x, coord_y, alt, qx, qy, qz, qw);
+    }
 
     double lqx, lqy, lqz, lqw;
     double lidar_pitch_deg = this->get_parameter("lidar_pitch_deg").as_double();
-    euler_deg_to_quaternion(0.0, lidar_pitch_deg, 0.0, lqx, lqy, lqz, lqw);
+    if (use_ned_ == true)
+    {
+      euler_deg_to_quaternion(0.0, lidar_pitch_deg, 0.0, lqx, lqy, lqz, lqw);
+    }
+    else
+    {
+      euler_deg_to_quaternion(lidar_pitch_deg, 0.0, 0.0, lqx, lqy, lqz, lqw);
+    }
 
     auto timestamp = scan_msg->header.stamp; // To avoid issues with bag playback timing
     bool play_bag = this->get_parameter("play_bag").as_bool();
@@ -132,10 +203,13 @@ private:
     world_drone_tf.header.stamp = timestamp;
     world_drone_tf.header.frame_id = world_link_;
     world_drone_tf.child_frame_id = drone_base_link_;
-    world_drone_tf.transform.translation.x = utm_x;
-    world_drone_tf.transform.translation.y = utm_y;
+    world_drone_tf.transform.translation.x = coord_x;
+    world_drone_tf.transform.translation.y = coord_y;
     world_drone_tf.transform.translation.z = alt;
-    world_drone_tf.transform.rotation = orientation_msg->quaternion;
+    world_drone_tf.transform.rotation.x = qx;
+    world_drone_tf.transform.rotation.y = qy;
+    world_drone_tf.transform.rotation.z = qz;
+    world_drone_tf.transform.rotation.w = qw;
 
     tf_broadcaster_->sendTransform(world_drone_tf);
 
@@ -174,10 +248,13 @@ private:
     geometry_msgs::msg::PoseStamped pose_msg;
     pose_msg.header.stamp = timestamp;
     pose_msg.header.frame_id = world_link_;
-    pose_msg.pose.position.x = utm_x;
-    pose_msg.pose.position.y = utm_y;
+    pose_msg.pose.position.x = coord_x;
+    pose_msg.pose.position.y = coord_y;
     pose_msg.pose.position.z = alt;
-    pose_msg.pose.orientation = orientation_msg->quaternion;
+    pose_msg.pose.orientation.x = qx;
+    pose_msg.pose.orientation.y = qy;
+    pose_msg.pose.orientation.z = qz;
+    pose_msg.pose.orientation.w = qw;
 
     pose_pub_->publish(pose_msg);
   }
@@ -195,9 +272,17 @@ private:
     double dlat = lat_rad - origin_lat_rad;
     double dlon = lon_rad - origin_lon_rad;
 
-    // Simple equirectangular projection (ENU)
-    x = R * dlon * cos(origin_lat_rad); // East
-    y = R * dlat; // North
+    // Simple equirectangular projection
+    if (use_ned_)
+    {
+      x = R * dlat; // North
+      y = R * dlon * cos(origin_lat_rad); // East
+    }
+    else
+    {
+      x = R * dlon * cos(origin_lat_rad); // East
+      y = R * dlat; // North
+    }
   }
 
 
@@ -219,6 +304,40 @@ private:
     qx = cy * sr * cp - sy * cr * sp;
     qy = cy * cr * sp + sy * sr * cp;
     qz = sy * cr * cp - cy * sr * sp;
+  }
+
+
+  void quaternion_mult(double q1x, double q1y, double q1z, double q1w,
+                       double q2x, double q2y, double q2z, double q2w,
+                       double& qrx, double& qry, double& qrz, double& qrw)
+  {
+    qrw = q1w * q2w - q1x * q2x - q1y * q2y - q1z * q2z;
+    qrx = q1w * q2x + q1x * q2w + q1y * q2z - q1z * q2y;
+    qry = q1w * q2y - q1x * q2z + q1y * q2w + q1z * q2x;
+    qrz = q1w * q2z + q1x * q2y - q1y * q2x + q1z * q2w;
+  }
+
+
+  void ned_to_enu(double& x, double& y, double& z,
+                  double& qx, double& qy, double& qz, double& qw)
+  {
+    double temp_x = x;
+    x = y;    // East
+    y = temp_x; // North
+    z = -z;   // Up
+
+    double t_qx, t_qy, t_qz, t_qw;
+    euler_deg_to_quaternion(180.0, 0.0, 90.0, t_qx, t_qy, t_qz, t_qw);
+
+    double enu_qx, enu_qy, enu_qz, enu_qw;
+    quaternion_mult(t_qx, t_qy, t_qz, t_qw,
+                    qx, qy, qz, qw,
+                    enu_qx, enu_qy, enu_qz, enu_qw);
+
+    qx = enu_qx;
+    qy = enu_qy;
+    qz = enu_qz;
+    qw = enu_qw;
   }
 };
 

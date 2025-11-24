@@ -80,7 +80,7 @@ Visualization Manager:
       Class: rviz_default_plugins/LaserScan
       Color: 255; 255; 255
       Color Transformer: Intensity
-      Decay Time: 60
+      Decay Time: 300
       Enabled: true
       Invert Rainbow: true
       Max Color: 255; 255; 255

@@ -23,10 +23,6 @@ public:
     timestamp_param_desc.description = "Threshold for timestamp difference in approximate sync (seconds)";
     this->declare_parameter("timestamp_diff_threshold", 0.025, timestamp_param_desc);
 
-    auto lidar_pitch_deg_param_desc = rcl_interfaces::msg::ParameterDescriptor{};
-    lidar_pitch_deg_param_desc.description = "Pitch angle (NED) of the LIDAR relative to the drone body frame (degrees)";
-    this->declare_parameter("lidar_pitch_deg", 30.0, lidar_pitch_deg_param_desc);
-
     auto play_bag_param_desc = rcl_interfaces::msg::ParameterDescriptor{};
     play_bag_param_desc.description = "Whether to play a rosbag for testing";
     this->declare_parameter("play_bag", false, play_bag_param_desc);
@@ -106,8 +102,6 @@ private:
   std::shared_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster_;
   std::string world_link_ = "map";
   std::string drone_base_link_ = "drone_base";
-  std::string lidar_base_link_ = "ldlidar_base";
-  std::string lidar_link_ = "ldlidar_link";
 
   rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr pose_pub_;
   rclcpp::Subscription<geometry_msgs::msg::QuaternionStamped>::SharedPtr orientation_sub_;
@@ -182,18 +176,8 @@ private:
       ned_to_enu(coord_x, coord_y, alt, qx, qy, qz, qw);
     }
 
-    double lqx, lqy, lqz, lqw;
-    double lidar_pitch_deg = this->get_parameter("lidar_pitch_deg").as_double();
-    if (use_ned_ == true)
-    {
-      euler_deg_to_quaternion(0.0, lidar_pitch_deg, 0.0, lqx, lqy, lqz, lqw);
-    }
-    else
-    {
-      euler_deg_to_quaternion(lidar_pitch_deg, 0.0, 0.0, lqx, lqy, lqz, lqw);
-    }
-
-    auto timestamp = scan_msg->header.stamp; // To avoid issues with bag playback timing
+    // auto timestamp = scan_msg->header.stamp; // To avoid issues with bag playback timing
+    auto timestamp = orientation_msg->header.stamp;
     bool play_bag = this->get_parameter("play_bag").as_bool();
 
     if (play_bag == false)
@@ -212,38 +196,6 @@ private:
     world_drone_tf.transform.rotation.w = qw;
 
     tf_broadcaster_->sendTransform(world_drone_tf);
-
-    geometry_msgs::msg::TransformStamped drone_lidar_tf;
-    drone_lidar_tf.header.stamp = timestamp;
-    drone_lidar_tf.header.frame_id = drone_base_link_;
-    drone_lidar_tf.child_frame_id = lidar_base_link_;
-    drone_lidar_tf.transform.translation.x = 0.0;
-    drone_lidar_tf.transform.translation.y = 0.0;
-    drone_lidar_tf.transform.translation.z = 0.0;
-    drone_lidar_tf.transform.rotation.x = lqx;
-    drone_lidar_tf.transform.rotation.y = lqy;
-    drone_lidar_tf.transform.rotation.z = lqz;
-    drone_lidar_tf.transform.rotation.w = lqw;
-
-    tf_broadcaster_->sendTransform(drone_lidar_tf);
-
-    // LIDAR link tf (only when playing bag to avoid conflicts with real LIDAR TF)
-    if (play_bag)
-    {
-      geometry_msgs::msg::TransformStamped lidar_lidar_tf;
-      lidar_lidar_tf.header.stamp = timestamp;
-      lidar_lidar_tf.header.frame_id = lidar_base_link_;
-      lidar_lidar_tf.child_frame_id = lidar_link_;
-      lidar_lidar_tf.transform.translation.x = 0.0;
-      lidar_lidar_tf.transform.translation.y = 0.0;
-      lidar_lidar_tf.transform.translation.z = 0.02745;
-      lidar_lidar_tf.transform.rotation.x = 0.0;
-      lidar_lidar_tf.transform.rotation.y = 0.0;
-      lidar_lidar_tf.transform.rotation.z = 0.0;
-      lidar_lidar_tf.transform.rotation.w = 1.0;
-
-      tf_broadcaster_->sendTransform(lidar_lidar_tf);
-    }
 
     geometry_msgs::msg::PoseStamped pose_msg;
     pose_msg.header.stamp = timestamp;

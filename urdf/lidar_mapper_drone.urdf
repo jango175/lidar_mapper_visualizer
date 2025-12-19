@@ -1,0 +1,562 @@
+<?xml version='1.0' encoding='utf-8'?>
+<robot name="lidar_mapper_drone">
+    <link name="drone_base">
+        <inertial>
+            <origin xyz="0.0017742381260655315 -2.336616218858151e-08 -0.008687057428001287" rpy="0.0 0.0 0.0" />
+            <mass value="0.5477973103340136" />
+            <inertia ixx="0.0019094178065128518" iyy="0.002322518439748747" izz="0.004133781364327163" ixy="-4.139932616070117e-08" iyz="-3.73034964297955e-09" ixz="2.617173307753408e-06" />
+        </inertial>
+        <visual name="drone_base_visual">
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+            <geometry>
+                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/drone_base.stl" scale="0.001 0.001 0.001" />
+            </geometry>
+        </visual>
+        <collision name="drone_base_collision">
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+            <geometry>
+                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/drone_base.stl" scale="0.001 0.001 0.001" />
+            </geometry>
+        </collision>
+    </link>
+    <link name="back_holder">
+        <inertial>
+            <origin xyz="0.009500064137675485 0.021979667667242176 -0.013046132751156988" rpy="0.0 -0.0 0.0" />
+            <mass value="0.07190673375826725" />
+            <inertia ixx="2.4383112407844968e-05" iyy="1.2052941641213041e-05" izz="2.2270631039077453e-05" ixy="8.677666593359814e-11" iyz="2.4523372972841612e-06" ixz="-6.462134644457356e-11" />
+        </inertial>
+        <visual name="back_holder_visual">
+            <origin xyz="0.009500001275705907 -0.08741136368379884 0.0025000000000005014" rpy="-3.141592653589793 -1.4988688458797391e-15 3.1415926535897922" />
+            <geometry>
+                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/back_holder.stl" scale="0.001 0.001 0.001" />
+            </geometry>
+        </visual>
+        <collision name="back_holder_collision">
+            <origin xyz="0.009500001275705907 -0.08741136368379884 0.0025000000000005014" rpy="-3.141592653589793 -1.4988688458797391e-15 3.1415926535897922" />
+            <geometry>
+                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/back_holder.stl" scale="0.001 0.001 0.001" />
+            </geometry>
+        </collision>
+    </link>
+    <link name="motor_stator_1">
+        <inertial>
+            <origin xyz="-0.0002474590445613245 -0.00017326961879559732 -0.007159919460084408" rpy="0.0 -0.0 0.0" />
+            <mass value="0.02742038806759487" />
+            <inertia ixx="1.4347040663850816e-06" iyy="1.4833339598671245e-06" izz="2.2682607080531676e-06" ixy="-6.680452908854094e-08" iyz="2.4731550152308642e-08" ixz="3.532037095441078e-08" />
+        </inertial>
+        <visual name="motor_stator_1_visual">
+            <origin xyz="-2.416265694193953e-09 1.0759120527836785e-09 -0.019100000000000707" rpy="-1.570796326794897 -5.586170499735508e-15 -2.530727415391781" />
+            <geometry>
+                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/motor_stator_1.stl" scale="0.001 0.001 0.001" />
+            </geometry>
+        </visual>
+        <collision name="motor_stator_1_collision">
+            <origin xyz="-2.416265694193953e-09 1.0759120527836785e-09 -0.019100000000000707" rpy="-1.570796326794897 -5.586170499735508e-15 -2.530727415391781" />
+            <geometry>
+                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/motor_stator_1.stl" scale="0.001 0.001 0.001" />
+            </geometry>
+        </collision>
+    </link>
+    <link name="motor_rotor_1">
+        <inertial>
+            <origin xyz="-1.971442474031804e-05 -0.00037169005035870396 2.301322422761487e-05" rpy="0.0 3.2842932757615744e-47 0.0" />
+            <mass value="0.024933799869240925" />
+            <inertia ixx="2.6477186520934993e-06" iyy="4.074405621321974e-06" izz="2.6489281604371857e-06" ixy="-8.731690319610704e-09" iyz="8.903212109051507e-09" ixz="5.296378629724921e-10" />
+        </inertial>
+        <visual name="motor_rotor_1_visual">
+            <origin xyz="-2.4162638467828403e-09 -0.006506196537574267 -1.0759121238379522e-09" rpy="-3.1415926535897913 0.610865238198012 4.910554660911456e-15" />
+            <geometry>
+                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/motor_rotor_1.stl" scale="0.001 0.001 0.001" />
+            </geometry>
+        </visual>
+        <collision name="motor_rotor_1_collision">
+            <origin xyz="-2.4162638467828403e-09 -0.006506196537574267 -1.0759121238379522e-09" rpy="-3.1415926535897913 0.610865238198012 4.910554660911456e-15" />
+            <geometry>
+                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/motor_rotor_1.stl" scale="0.001 0.001 0.001" />
+            </geometry>
+        </collision>
+    </link>
+    <link name="motor_stator_2">
+        <inertial>
+            <origin xyz="0.00024746159597286875 0.0001732722511983731 -0.007159919460084068" rpy="0.0 -0.0 0.0" />
+            <mass value="0.02742038806759487" />
+            <inertia ixx="1.4347040663849732e-06" iyy="1.4833339598672329e-06" izz="2.268260708053059e-06" ixy="-6.680452908848673e-08" iyz="-2.473155015229509e-08" ixz="-3.532037095441078e-08" />
+        </inertial>
+        <visual name="motor_stator_2_visual">
+            <origin xyz="4.967677202927234e-09 1.5564907407394913e-09 -0.019100000000000356" rpy="-1.5707963267948954 -3.2996435709238136e-15 0.6108652381980112" />
+            <geometry>
+                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/motor_stator_2.stl" scale="0.001 0.001 0.001" />
+            </geometry>
+        </visual>
+        <collision name="motor_stator_2_collision">
+            <origin xyz="4.967677202927234e-09 1.5564907407394913e-09 -0.019100000000000356" rpy="-1.5707963267948954 -3.2996435709238136e-15 0.6108652381980112" />
+            <geometry>
+                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/motor_stator_2.stl" scale="0.001 0.001 0.001" />
+            </geometry>
+        </collision>
+    </link>
+    <link name="motor_rotor_2">
+        <inertial>
+            <origin xyz="-1.9705444521882498e-05 -0.0003716900503586329 2.299396989483782e-05" rpy="0.0 -0.0 0.0" />
+            <mass value="0.024933799869240922" />
+            <inertia ixx="2.6477188876723083e-06" iyy="4.074405644428165e-06" izz="2.648927947964839e-06" ixy="-8.731379183734798e-09" iyz="8.899552097928122e-09" ixz="5.284010903524114e-10" />
+        </inertial>
+        <visual name="motor_rotor_2_visual">
+            <origin xyz="4.9676762614581096e-09 -0.006506196537574196 -1.5564907940301965e-09" rpy="-3.1415926535897913 0.6108652381980111 4.844262907304531e-15" />
+            <geometry>
+                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/motor_rotor_2.stl" scale="0.001 0.001 0.001" />
+            </geometry>
+        </visual>
+        <collision name="motor_rotor_2_collision">
+            <origin xyz="4.9676762614581096e-09 -0.006506196537574196 -1.5564907940301965e-09" rpy="-3.1415926535897913 0.6108652381980111 4.844262907304531e-15" />
+            <geometry>
+                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/motor_rotor_2.stl" scale="0.001 0.001 0.001" />
+            </geometry>
+        </collision>
+    </link>
+    <link name="motor_stator_3">
+        <inertial>
+            <origin xyz="-0.00024745876095652266 0.00017327265622768095 -0.00715991946008441" rpy="0.0 -0.0 0.0" />
+            <mass value="0.02742038806759487" />
+            <inertia ixx="1.434704219392788e-06" iyy="1.4833338068596892e-06" izz="2.2682607080533844e-06" ixy="6.680458477885658e-08" iyz="-2.4731603621520935e-08" ixz="3.532033351487688e-08" />
+        </inertial>
+        <visual name="motor_stator_3_visual">
+            <origin xyz="-2.41626473496126e-09 1.5564917354993214e-09 -0.019100000000000686" rpy="-1.5707963267948957 -5.760331053159689e-15 2.5307274153917763" />
+            <geometry>
+                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/motor_stator_3.stl" scale="0.001 0.001 0.001" />
+            </geometry>
+        </visual>
+        <collision name="motor_stator_3_collision">
+            <origin xyz="-2.41626473496126e-09 1.5564917354993214e-09 -0.019100000000000686" rpy="-1.5707963267948957 -5.760331053159689e-15 2.5307274153917763" />
+            <geometry>
+                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/motor_stator_3.stl" scale="0.001 0.001 0.001" />
+            </geometry>
+        </collision>
+    </link>
+    <link name="motor_rotor_3">
+        <inertial>
+            <origin xyz="-1.0659211928807366e-05 -0.0003716900503586418 2.834852796986809e-05" rpy="0.0 1.0947644252538562e-47 0.0" />
+            <mass value="0.024933799869240922" />
+            <inertia ixx="2.6481999705331395e-06" iyy="4.0744056444282735e-06" izz="2.648446865103954e-06" ixy="-5.160986504174528e-09" iyz="1.1349150994585232e-08" ixz="7.933632066733046e-10" />
+        </inertial>
+        <visual name="motor_rotor_3_visual">
+            <origin xyz="-2.416263829019272e-09 -0.006506196537574205 -1.5564908295573333e-09" rpy="-3.141592653589791 0.9599310885968841 8.473267269550925e-15" />
+            <geometry>
+                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/motor_rotor_3.stl" scale="0.001 0.001 0.001" />
+            </geometry>
+        </visual>
+        <collision name="motor_rotor_3_collision">
+            <origin xyz="-2.416263829019272e-09 -0.006506196537574205 -1.5564908295573333e-09" rpy="-3.141592653589791 0.9599310885968841 8.473267269550925e-15" />
+            <geometry>
+                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/motor_rotor_3.stl" scale="0.001 0.001 0.001" />
+            </geometry>
+        </collision>
+    </link>
+    <link name="motor_stator_4">
+        <inertial>
+            <origin xyz="0.00024746131236822675 -0.00017327002382527823 -0.007159919460084039" rpy="0.0 -0.0 0.0" />
+            <mass value="0.02742038806759487" />
+            <inertia ixx="1.434704219392788e-06" iyy="1.483333806859635e-06" izz="2.268260708053276e-06" ixy="6.680458477874816e-08" iyz="2.4731603621527712e-08" ixz="-3.532033351486333e-08" />
+        </inertial>
+        <visual name="motor_stator_4_visual">
+            <origin xyz="4.967676421330225e-09 1.0759106672253438e-09 -0.0191000000000003" rpy="-1.570796326794897 -3.408031235196887e-15 -0.6108652381980173" />
+            <geometry>
+                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/motor_stator_4.stl" scale="0.001 0.001 0.001" />
+            </geometry>
+        </visual>
+        <collision name="motor_stator_4_collision">
+            <origin xyz="4.967676421330225e-09 1.0759106672253438e-09 -0.0191000000000003" rpy="-1.570796326794897 -3.408031235196887e-15 -0.6108652381980173" />
+            <geometry>
+                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/motor_stator_4.stl" scale="0.001 0.001 0.001" />
+            </geometry>
+        </collision>
+    </link>
+    <link name="motor_rotor_4">
+        <inertial>
+            <origin xyz="-1.0651827988574781e-05 -0.0003716900503586018 2.8349008548698153e-05" rpy="0.0 5.473822126269106e-48 0.0" />
+            <mass value="0.024933799869240922" />
+            <inertia ixx="2.6481999705330853e-06" iyy="4.074405644428382e-06" izz="2.648446865104007e-06" ixy="-5.160986504187923e-09" iyz="1.1349150994571678e-08" ixz="7.933632066190957e-10" />
+        </inertial>
+        <visual name="motor_rotor_4_visual">
+            <origin xyz="4.967676403566657e-09 -0.0065061965375741646 -1.0759119994929733e-09" rpy="-3.141592653589791 0.9599310885968889 8.328515107319632e-15" />
+            <geometry>
+                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/motor_rotor_4.stl" scale="0.001 0.001 0.001" />
+            </geometry>
+        </visual>
+        <collision name="motor_rotor_4_collision">
+            <origin xyz="4.967676403566657e-09 -0.0065061965375741646 -1.0759119994929733e-09" rpy="-3.141592653589791 0.9599310885968889 8.328515107319632e-15" />
+            <geometry>
+                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/motor_rotor_4.stl" scale="0.001 0.001 0.001" />
+            </geometry>
+        </collision>
+    </link>
+    <link name="lidar_mount_30deg">
+        <inertial>
+            <origin xyz="-0.015708334556800336 0.00045835671193283467 -0.019451472737747277" rpy="0.0 -0.0 0.0" />
+            <mass value="0.07225780833971976" />
+            <inertia ixx="1.1431098640920958e-05" iyy="2.2105045886986965e-05" izz="1.974251754875082e-05" ixy="-5.330482587371328e-09" iyz="1.2672576130464547e-06" ixz="-4.2468470791778e-09" />
+        </inertial>
+        <visual name="lidar_mount_30deg_visual">
+            <origin xyz="-0.015699998724294003 0.0689999963162012 0.030000000000000315" rpy="-3.1415926535897927 -1.4997768651991965e-15 3.1415926535897922" />
+            <geometry>
+                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/lidar_mount_30deg.stl" scale="0.001 0.001 0.001" />
+            </geometry>
+        </visual>
+        <collision name="lidar_mount_30deg_collision">
+            <origin xyz="-0.015699998724294003 0.0689999963162012 0.030000000000000315" rpy="-3.1415926535897927 -1.4997768651991965e-15 3.1415926535897922" />
+            <geometry>
+                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/lidar_mount_30deg.stl" scale="0.001 0.001 0.001" />
+            </geometry>
+        </collision>
+    </link>
+    <link name="damper_1">
+        <inertial>
+            <origin xyz="1.2752132916293847e-09 0.0016133190833464894 0.000931451130662051" rpy="0.0 -0.0 0.0" />
+            <mass value="0.001146759858376565" />
+            <inertia ixx="9.124780925780058e-09" iyy="6.997707044583147e-09" izz="8.415755757268444e-09" ixy="9.53187356543416e-19" iyz="-1.2280662089893608e-09" ixz="5.502496157085111e-19" />
+        </inertial>
+        <visual name="damper_1_visual">
+            <origin xyz="1.2757057665790938e-09 0.004763137285820527 0.002749999517758868" rpy="2.094395102393206 -8.29236839087377e-16 1.6844058813121968e-15" />
+            <geometry>
+                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/damper_1.stl" scale="0.001 0.001 0.001" />
+            </geometry>
+        </visual>
+        <collision name="damper_1_collision">
+            <origin xyz="1.2757057665790938e-09 0.004763137285820527 0.002749999517758868" rpy="2.094395102393206 -8.29236839087377e-16 1.6844058813121968e-15" />
+            <geometry>
+                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/damper_1.stl" scale="0.001 0.001 0.001" />
+            </geometry>
+        </collision>
+    </link>
+    <link name="damper_2">
+        <inertial>
+            <origin xyz="1.2752134104232481e-09 0.0016133238910379078 0.0009314483549398079" rpy="0.0 -0.0 0.0" />
+            <mass value="0.001146759858376565" />
+            <inertia ixx="9.12478092577667e-09" iyy="6.997707044581347e-09" izz="8.415755757265585e-09" ixy="9.531098476492818e-19" iyz="-1.2280662089902777e-09" ixz="5.505388828394591e-19" />
+        </inertial>
+        <visual name="damper_2_visual">
+            <origin xyz="1.2757058831525114e-09 0.004763142093511945 0.0027499967420366155" rpy="2.094395102393206 -8.29236839087377e-16 1.6844058813121968e-15" />
+            <geometry>
+                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/damper_2.stl" scale="0.001 0.001 0.001" />
+            </geometry>
+        </visual>
+        <collision name="damper_2_collision">
+            <origin xyz="1.2757058831525114e-09 0.004763142093511945 0.0027499967420366155" rpy="2.094395102393206 -8.29236839087377e-16 1.6844058813121968e-15" />
+            <geometry>
+                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/damper_2.stl" scale="0.001 0.001 0.001" />
+            </geometry>
+        </collision>
+    </link>
+    <link name="damper_3">
+        <inertial>
+            <origin xyz="1.2752134070925791e-09 0.0016133200384753365 0.0009314505792176898" rpy="0.0 -0.0 0.0" />
+            <mass value="0.001146759858376565" />
+            <inertia ixx="9.124780925780058e-09" iyy="6.99770704458326e-09" izz="8.415755757269179e-09" ixy="9.53042722977942e-19" iyz="-1.2280662089905176e-09" ixz="5.50210861261444e-19" />
+        </inertial>
+        <visual name="damper_3_visual">
+            <origin xyz="1.2757058820422884e-09 0.004763138240949374 0.002749998966314502" rpy="2.094395102393206 -8.29236839087377e-16 1.6844058813121968e-15" />
+            <geometry>
+                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/damper_3.stl" scale="0.001 0.001 0.001" />
+            </geometry>
+        </visual>
+        <collision name="damper_3_collision">
+            <origin xyz="1.2757058820422884e-09 0.004763138240949374 0.002749998966314502" rpy="2.094395102393206 -8.29236839087377e-16 1.6844058813121968e-15" />
+            <geometry>
+                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/damper_3.stl" scale="0.001 0.001 0.001" />
+            </geometry>
+        </collision>
+    </link>
+    <link name="ldlidar_base">
+        <inertial>
+            <origin xyz="-0.008583066107333816 -0.027470894317146773 -0.0007814121447159029" rpy="0.0 -0.0 3.835229269763849e-93" />
+            <mass value="0.32337339572180207" />
+            <inertia ixx="6.096421092324864e-05" iyy="6.329886134438648e-05" izz="6.913499216217077e-05" ixy="9.059606148147087e-08" iyz="5.056586713641457e-06" ixz="1.5692005199447007e-07" />
+        </inertial>
+        <visual name="ldlidar_base_visual">
+            <origin xyz="1.2757057488155256e-09 -0.02026499368379815 0.011700001914315675" rpy="3.1415926535897913 -0.5235987755982936 -1.5707963267948966" />
+            <geometry>
+                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/LD19.stl" scale="0.001 0.001 0.001" />
+            </geometry>
+        </visual>
+        <collision name="ldlidar_base_collision">
+            <origin xyz="1.2757057488155256e-09 -0.02026499368379815 0.011700001914315675" rpy="3.1415926535897913 -0.5235987755982936 -1.5707963267948966" />
+            <geometry>
+                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/LD19.stl" scale="0.001 0.001 0.001" />
+            </geometry>
+        </collision>
+    </link>
+    <link name="right_cover">
+        <inertial>
+            <origin xyz="0.0029559522811767104 0.06893797273739984 -0.015250844907846015" rpy="0.0 -0.0 0.0" />
+            <mass value="0.09251921869007904" />
+            <inertia ixx="0.00022938338857835368" iyy="1.0727044677094809e-05" izz="0.00022305515405984704" ixy="3.1722601885953804e-06" iyz="1.513891919705409e-06" ixz="-5.15537414246318e-07" />
+        </inertial>
+        <visual name="right_cover_visual">
+            <origin xyz="-0.015699998724294093 0.06899999631620128 0.0025000000000004984" rpy="-3.141592653589793 -2.4161580939111007e-15 3.1415926535897922" />
+            <geometry>
+                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/right_cover.stl" scale="0.001 0.001 0.001" />
+            </geometry>
+        </visual>
+        <collision name="right_cover_collision">
+            <origin xyz="-0.015699998724294093 0.06899999631620128 0.0025000000000004984" rpy="-3.141592653589793 -2.4161580939111007e-15 3.1415926535897922" />
+            <geometry>
+                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/right_cover.stl" scale="0.001 0.001 0.001" />
+            </geometry>
+        </collision>
+    </link>
+    <link name="left_cover">
+        <inertial>
+            <origin xyz="-0.003031339774133253 0.06888346093905601 -0.015240865391362912" rpy="0.0 -0.0 0.0" />
+            <mass value="0.09341169364233115" />
+            <inertia ixx="0.00022942364830407294" iyy="1.0786958805358339e-05" izz="0.00022314591019308172" ixy="-3.2120105160639213e-06" iyz="1.5191183216306565e-06" ixz="5.228244309298281e-07" />
+        </inertial>
+        <visual name="left_cover_visual">
+            <origin xyz="0.015700001275705845 0.06899999631620132 0.0025000000000004697" rpy="-3.141592653589793 -2.4161580939111007e-15 3.1415926535897922" />
+            <geometry>
+                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/left_cover.stl" scale="0.001 0.001 0.001" />
+            </geometry>
+        </visual>
+        <collision name="left_cover_collision">
+            <origin xyz="0.015700001275705845 0.06899999631620132 0.0025000000000004697" rpy="-3.141592653589793 -2.4161580939111007e-15 3.1415926535897922" />
+            <geometry>
+                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/left_cover.stl" scale="0.001 0.001 0.001" />
+            </geometry>
+        </collision>
+    </link>
+    <link name="raspbox">
+        <inertial>
+            <origin xyz="0.040063061583440265 -0.0006101133598294656 -0.004051673233537789" rpy="0.0 -0.0 0.0" />
+            <mass value="0.09116521696158321" />
+            <inertia ixx="2.40259832612264e-05" iyy="0.00010236580166438707" izz="0.0001233939536943951" ixy="1.8983870892980465e-07" iyz="-3.319614035931198e-07" ixz="1.5972964478200705e-06" />
+        </inertial>
+        <visual name="raspbox_visual">
+            <origin xyz="0.051999996316201405 -1.2757058340555002e-09 -0.0012999999999996304" rpy="3.141592653589793 -1.5543257870023746e-15 1.5707963267948954" />
+            <geometry>
+                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/raspbox.stl" scale="0.001 0.001 0.001" />
+            </geometry>
+        </visual>
+        <collision name="raspbox_collision">
+            <origin xyz="0.051999996316201405 -1.2757058340555002e-09 -0.0012999999999996304" rpy="3.141592653589793 -1.5543257870023746e-15 1.5707963267948954" />
+            <geometry>
+                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/raspbox.stl" scale="0.001 0.001 0.001" />
+            </geometry>
+        </collision>
+    </link>
+    <link name="raspbox_top">
+        <inertial>
+            <origin xyz="0.00014042188474305733 -0.05560566853744057 0.00040983234065731014" rpy="0.0 -0.0 0.0" />
+            <mass value="0.05006056906445824" />
+            <inertia ixx="4.2240708399492646e-05" iyy="1.1176194305415009e-05" izz="5.325171324364752e-05" ixy="-2.8564646729498866e-07" iyz="-3.3418057037543184e-08" ixz="9.11720601581928e-08" />
+        </inertial>
+        <visual name="raspbox_top_visual">
+            <origin xyz="1.2757059769967146e-09 -0.06700717631620126 -0.013500000000000272" rpy="3.160991433881487e-16 8.881919722272811e-16 -3.1415926535897922" />
+            <geometry>
+                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/raspbox_top.stl" scale="0.001 0.001 0.001" />
+            </geometry>
+        </visual>
+        <collision name="raspbox_top_collision">
+            <origin xyz="1.2757059769967146e-09 -0.06700717631620126 -0.013500000000000272" rpy="3.160991433881487e-16 8.881919722272811e-16 -3.1415926535897922" />
+            <geometry>
+                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/raspbox_top.stl" scale="0.001 0.001 0.001" />
+            </geometry>
+        </collision>
+    </link>
+    <link name="orangepi">
+        <inertial>
+            <origin xyz="-0.01039685460720248 -0.02796168689420485 0.0010570546369523726" rpy="0.0 -0.0 0.0" />
+            <mass value="0.027043978677846872" />
+            <inertia ixx="8.935529380841458e-06" iyy="1.8561695688175145e-06" izz="1.0740411434616915e-05" ixy="-1.7856646089221248e-08" iyz="-2.0963020432708892e-08" ixz="-6.639417390525614e-08" />
+        </inertial>
+        <visual name="orangepi_visual">
+            <origin xyz="-0.011499878724294206 -0.029000006316201178 -3.68594044175552e-16" rpy="-1.554325787002375e-15 -5.5497598704101764e-17 1.5707963267948977" />
+            <geometry>
+                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/orangepi.stl" scale="0.001 0.001 0.001" />
+            </geometry>
+        </visual>
+        <collision name="orangepi_collision">
+            <origin xyz="-0.011499878724294206 -0.029000006316201178 -3.68594044175552e-16" rpy="-1.554325787002375e-15 -5.5497598704101764e-17 1.5707963267948977" />
+            <geometry>
+                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/orangepi.stl" scale="0.001 0.001 0.001" />
+            </geometry>
+        </collision>
+    </link>
+    <link name="camera_1800TVL">
+        <inertial>
+            <origin xyz="0.009458304468325412 0.0002995770417255339 -0.002131378258774106" rpy="0.0 -0.0 0.0" />
+            <mass value="0.04533052867876819" />
+            <inertia ixx="3.0746187973778585e-06" iyy="3.1559124237019883e-06" izz="2.131807206295138e-06" ixy="-1.1370282332515536e-08" iyz="1.4919288782613529e-07" ixz="-2.193821286805857e-08" />
+        </inertial>
+        <visual name="camera_1800TVL_visual">
+            <origin xyz="0.009500001275705758 0.0020056336994618285 -0.01137453301844042" rpy="1.7453292519943302 -1.2073675392798554e-15 -1.7347370285039618e-15" />
+            <geometry>
+                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/camera_1800TVL.stl" scale="0.001 0.001 0.001" />
+            </geometry>
+        </visual>
+        <collision name="camera_1800TVL_collision">
+            <origin xyz="0.009500001275705758 0.0020056336994618285 -0.01137453301844042" rpy="1.7453292519943302 -1.2073675392798554e-15 -1.7347370285039618e-15" />
+            <geometry>
+                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/camera_1800TVL.stl" scale="0.001 0.001 0.001" />
+            </geometry>
+        </collision>
+    </link>
+    <link name="CNHL_5S_2200MAH_LIPO">
+        <inertial>
+            <origin xyz="-6.689161032051788e-07 -0.006491228606117 0.02024823353015088" rpy="0.0 -0.0 0.0" />
+            <mass value="1.2133113702080662" />
+            <inertia ixx="0.001373139454022617" iyy="0.0002858554616860902" izz="0.0013335386235315658" ixy="1.5932302768230816e-08" iyz="3.9855465226940404e-08" ixz="1.642709352151563e-08" />
+        </inertial>
+        <visual name="CNHL_5S_2200MAH_LIPO_visual">
+            <origin xyz="1.275705975716272e-09 -0.061249996888855525 0.020249999999999588" rpy="-1.5707963267948966 -1.8873926943899277e-15 1.0685896612017163e-15" />
+            <geometry>
+                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/CNHL_5S_2200MAH_LIPO.stl" scale="0.001 0.001 0.001" />
+            </geometry>
+        </visual>
+        <collision name="CNHL_5S_2200MAH_LIPO_collision">
+            <origin xyz="1.275705975716272e-09 -0.061249996888855525 0.020249999999999588" rpy="-1.5707963267948966 -1.8873926943899277e-15 1.0685896612017163e-15" />
+            <geometry>
+                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/CNHL_5S_2200MAH_LIPO.stl" scale="0.001 0.001 0.001" />
+            </geometry>
+        </collision>
+    </link>
+    <link name="antena-stick">
+        <inertial>
+            <origin xyz="-3.92406455094074e-06 0.011196700641789441 -0.003519826607605454" rpy="0.0 -0.0 0.0" />
+            <mass value="0.03440631866056707" />
+            <inertia ixx="2.06631581999169e-05" iyy="4.0137578912156917e-07" izz="2.057244613526371e-05" ixy="3.1927581714866263e-09" iyz="-1.4010245244295823e-06" ixz="2.0497115579613305e-10" />
+        </inertial>
+        <visual name="antena-stick_visual">
+            <origin xyz="2.433359610024003e-06 -0.030798661952304622 -0.006185682669140018" rpy="-1.5058931620710894 -0.00019339782873545287 0.00015057457074706037" />
+            <geometry>
+                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/antena-stick.stl" scale="0.001 0.001 0.001" />
+            </geometry>
+        </visual>
+        <collision name="antena-stick_collision">
+            <origin xyz="2.433359610024003e-06 -0.030798661952304622 -0.006185682669140018" rpy="-1.5058931620710894 -0.00019339782873545287 0.00015057457074706037" />
+            <geometry>
+                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/antena-stick.stl" scale="0.001 0.001 0.001" />
+            </geometry>
+        </collision>
+    </link>
+    <joint name="drone_base_Rigid-1" type="fixed">
+        <origin xyz="-0.08741136368379873 -0.009500001275705983 -0.002500000000000517" rpy="-5.552470375841605e-17 -1.6098369382336299e-15 1.570796326794898" />
+        <parent link="drone_base" />
+        <child link="back_holder" />
+    </joint>
+    <joint name="drone_base_Rigid-2" type="fixed">
+        <origin xyz="-0.09690226368379888 0.11071519872429374 -0.007500000000000313" rpy="-5.552470375841605e-17 -1.6098369382336299e-15 1.570796326794898" />
+        <parent link="drone_base" />
+        <child link="motor_stator_1" />
+    </joint>
+    <joint name="motor_stator_1_Rigid-3" type="fixed">
+        <origin xyz="0.0 0.0 -0.012574860000000002" rpy="1.5707963267948966 -5.551115123126263e-17 8.72082143860978e-31" />
+        <parent link="motor_stator_1" />
+        <child link="motor_rotor_1" />
+        <axis xyz="-5.551115123126263e-17 -1.0 -9.860761315262648e-32" />
+    </joint>
+    <joint name="drone_base_Rigid-4" type="fixed">
+        <origin xyz="0.09690226631620126 -0.11071520127570551 -0.00750000000000066" rpy="-5.552470375841605e-17 -1.6098369382336299e-15 1.570796326794898" />
+        <parent link="drone_base" />
+        <child link="motor_stator_2" />
+    </joint>
+    <joint name="drone_base_Rigid-5" type="fixed">
+        <origin xyz="0.09690226631620098 0.11071519872429399 -0.007500000000000303" rpy="-5.552470375841605e-17 -1.6098369382336299e-15 1.570796326794898" />
+        <parent link="drone_base" />
+        <child link="motor_stator_3" />
+    </joint>
+    <joint name="drone_base_Rigid-6" type="fixed">
+        <origin xyz="-0.09690226368379859 -0.11071520127570576 -0.007500000000000669" rpy="-5.552470375841605e-17 -1.6098369382336299e-15 1.570796326794898" />
+        <parent link="drone_base" />
+        <child link="motor_stator_4" />
+    </joint>
+    <joint name="motor_stator_2_Rigid-7" type="fixed">
+        <origin xyz="0.0 0.0 -0.012574860000000002" rpy="1.5707963267948966 -5.551115123125499e-17 8.322123863996606e-32" />
+        <parent link="motor_stator_2" />
+        <child link="motor_rotor_2" />
+        <axis xyz="-5.551115123125499e-17 -1.0 9.860761315262648e-32" />
+    </joint>
+    <joint name="motor_stator_3_Rigid-8" type="fixed">
+        <origin xyz="0.0 0.0 -0.012574860000000002" rpy="1.5707963267948966 5.551115123126252e-17 -7.0563966658104575e-31" />
+        <parent link="motor_stator_3" />
+        <child link="motor_rotor_3" />
+        <axis xyz="5.551115123126252e-17 -1.0 1.9721522630525295e-31" />
+    </joint>
+    <joint name="motor_stator_4_Rigid-9" type="fixed">
+        <origin xyz="0.0 0.0 -0.012574860000000002" rpy="1.5707963267948966 -5.551115123126076e-17 4.77651691250472e-31" />
+        <parent link="motor_stator_4" />
+        <child link="motor_rotor_4" />
+        <axis xyz="-5.551115123126076e-17 -1.0 1.9721522630525295e-31" />
+    </joint>
+    <joint name="drone_base_Rigid-10" type="fixed">
+        <origin xyz="0.06899999631620114 0.01569999872429419 -0.03000000000000041" rpy="-5.552470375841605e-17 -1.6098369382336299e-15 1.570796326794898" />
+        <parent link="drone_base" />
+        <child link="lidar_mount_30deg" />
+    </joint>
+    <joint name="lidar_mount_30deg_Rigid-11" type="fixed">
+        <origin xyz="-0.007099999999999999 -0.023765 -0.01751688" rpy="-2.6179938779914984 -2.0735956533169185e-62 1.0514379098231357e-31" />
+        <parent link="lidar_mount_30deg" />
+        <child link="damper_1" />
+    </joint>
+    <joint name="lidar_mount_30deg_Rigid-12" type="fixed">
+        <origin xyz="-0.03902 -0.0035000000000000053 -0.029216879999999997" rpy="-2.6179938779914984 -2.0735956533169185e-62 1.0514379098231357e-31" />
+        <parent link="lidar_mount_30deg" />
+        <child link="damper_2" />
+    </joint>
+    <joint name="lidar_mount_30deg_Rigid-13" type="fixed">
+        <origin xyz="-0.007099999999999999 0.016764989999999997 -0.04091688" rpy="-2.6179938779914984 -2.0735956533169185e-62 1.0514379098231357e-31" />
+        <parent link="lidar_mount_30deg" />
+        <child link="damper_3" />
+    </joint>
+    <joint name="damper_3_Rigid-14" type="fixed">
+        <origin xyz="0.0 0.004763139860407204 0.002750000241781825" rpy="2.6179938779914984 1.324508655883073e-31 -1.6501882390508204e-31" />
+        <parent link="damper_3" />
+        <child link="ldlidar_base" />
+    </joint>
+    <joint name="drone_base_Rigid-15" type="fixed">
+        <origin xyz="0.06899999631620117 -0.015700001275705776 -0.0025000000000005187" rpy="-5.552470375841605e-17 -1.6098369382336299e-15 1.570796326794898" />
+        <parent link="drone_base" />
+        <child link="left_cover" />
+    </joint>
+    <joint name="drone_base_Rigid-16" type="fixed">
+        <origin xyz="0.06899999631620114 0.015699998724294152 -0.0025000000000004676" rpy="-5.552470375841605e-17 -1.6098369382336299e-15 1.570796326794898" />
+        <parent link="drone_base" />
+        <child link="right_cover" />
+    </joint>
+    <joint name="drone_base_Rigid-17" type="fixed">
+        <origin xyz="0.042999996316201175 -1.2757058028836036e-09 -0.030000000000000436" rpy="-1.6098369382336295e-15 5.552470375841598e-17 -3.1415926535897922" />
+        <parent link="drone_base" />
+        <child link="raspbox" />
+    </joint>
+    <joint name="raspbox_Rigid-18" type="fixed">
+        <origin xyz="0.012999990000000001 -0.01899988 -0.005299999999999998" rpy="-3.141592653589793 5.82938621305951e-64 -1.5707963267948966" />
+        <parent link="raspbox" />
+        <child link="orangepi" />
+    </joint>
+    <joint name="raspbox_Rigid-19" type="fixed">
+        <origin xyz="-0.01500718 0.0 -0.014800000000000004" rpy="-3.141592653589793 5.82938621305951e-64 -1.5707963267948966" />
+        <parent link="raspbox" />
+        <child link="raspbox_top" />
+    </joint>
+    <joint name="drone_base_Rigid-20" type="fixed">
+        <origin xyz="0.07563701631620116 -0.009450001275705762 -0.01763891000000048" rpy="1.5707963267948966 -1.6098369382336299e-15 1.570796326794898" />
+        <parent link="drone_base" />
+        <child link="camera_1800TVL" />
+    </joint>
+    <joint name="raspbox_top_Rigid-21" type="fixed">
+        <origin xyz="0.0 -0.06115694 0.0014999999999999946" rpy="0.0 -0.0 -3.689660421169335e-32" />
+        <parent link="raspbox_top" />
+        <child link="CNHL_5S_2200MAH_LIPO" />
+    </joint>
+    <joint name="back_holder_Rigid-22" type="fixed">
+        <origin xyz="0.0095 0.03197260999999999 -0.025" rpy="-0.7853981633974483 -3.283760281271351e-62 1.665064276623699e-31" />
+        <parent link="back_holder" />
+        <child link="antena-stick" />
+    </joint>
+
+    <!-- ldlidar_link -->
+    <joint name="ldlidar_link_joint" type="fixed">
+        <parent link="ldlidar_base"/>
+        <child link="ldlidar_link"/>
+        <origin xyz="-0.0085 -0.033 -0.012" rpy="0 3.6652 1.5708" />
+    </joint>
+    <link name="ldlidar_link" />
+</robot>

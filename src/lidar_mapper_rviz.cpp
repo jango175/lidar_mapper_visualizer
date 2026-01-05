@@ -4,6 +4,9 @@
 #include <chrono>
 #include <boost/qvm/quat.hpp>
 #include <boost/qvm/quat_operations.hpp>
+#include <boost/qvm/vec.hpp>
+#include <boost/qvm/vec_operations.hpp>
+#include <boost/qvm/all.hpp>
 
 #include "rclcpp/rclcpp.hpp"
 #include "message_filters/subscriber.h"
@@ -181,7 +184,7 @@ private:
     };
 
     // interpolate pose to scan timestamp
-    q = interpolate_pose(scan_msg, orientation_msg, gps_msg);
+    interpolate_pose(scan_msg, orientation_msg, gps_msg, coord_x, coord_y, alt, q);
 
     // drone data is in NED frame, but ROS2 uses ENU frame
     if (use_ned_)
@@ -221,9 +224,11 @@ private:
   }
 
 
-  boost::qvm::quat<double> interpolate_pose(const sensor_msgs::msg::LaserScan::ConstSharedPtr& scan_msg,
-                                            const geometry_msgs::msg::QuaternionStamped::ConstSharedPtr& orientation_msg,
-                                            const sensor_msgs::msg::NavSatFix::ConstSharedPtr& gps_msg)
+  void interpolate_pose(const sensor_msgs::msg::LaserScan::ConstSharedPtr& scan_msg,
+                        const geometry_msgs::msg::QuaternionStamped::ConstSharedPtr& orientation_msg,
+                        const sensor_msgs::msg::NavSatFix::ConstSharedPtr& gps_msg,
+                        double& coord_x, double& coord_y, double& alt,
+                        boost::qvm::quat<double>& q)
   {
     double scan_timestamp = static_cast<double>(scan_msg->header.stamp.sec) +
                             static_cast<double>(scan_msg->header.stamp.nanosec) * 1e-9;
@@ -253,12 +258,70 @@ private:
       orientation_msg->quaternion.z
     };
 
-    double t = (scan_timestamp - prev_orientation_timestamp) /
-               (orientation_timestamp - prev_orientation_timestamp);
+    boost::qvm::quat<double> q_interp = q_curr;
+    if (orientation_timestamp != prev_orientation_timestamp)
+    {
+      double dt = (orientation_timestamp - prev_orientation_timestamp);
 
-    boost::qvm::quat<double> q_interp = boost::qvm::slerp180(q_prev, q_curr, t);
+      boost::qvm::quat<double> q_delta = boost::qvm::inverse(q_curr) * q_prev;
 
-    return q_interp;
+      if (q_delta.a[0] < 0.0)
+        q_delta = -q_delta;
+
+      double w = q_delta.a[0];
+      boost::qvm::vec<double, 3> v_delta = boost::qvm::V(q_delta);
+      double v_norm = boost::qvm::mag(v_delta);
+      double theta = 2.0 * std::atan2(v_norm, w);
+      boost::qvm::vec<double, 3> omega;
+      if (v_norm < 1e-6)
+      {
+        omega = v_delta * (2.0 / dt); 
+      }
+      else
+      {
+        omega = v_delta * (theta / (v_norm * dt)); 
+      }
+      double omega_mag = boost::qvm::mag(omega);
+      double dt_scan = scan_timestamp - prev_orientation_timestamp;
+      double theta_scan = omega_mag * dt_scan;
+      boost::qvm::quat<double> q_delta_scan;
+      if (omega_mag < 1e-6)
+      {
+        q_delta_scan = boost::qvm::identity_quat<double>();
+      }
+      else
+      {
+        boost::qvm::vec<double, 3> axis = omega / omega_mag;
+        q_delta_scan = boost::qvm::rot_quat(axis, theta_scan);
+      }
+      q_interp = q_delta_scan * q_prev;
+      boost::qvm::normalize(q_interp);
+    }
+    else
+    {
+      RCLCPP_WARN(this->get_logger(), "Orientation timestamps are identical, cannot interpolate.");
+    }
+
+    q = q_interp;
+
+    // linear interpolation for GPS
+    latlon_to_xy(gps_msg->latitude, gps_msg->longitude, coord_x, coord_y);
+    alt = gps_msg->altitude; // - origin_alt_;
+
+    if (gps_timestamp != prev_gps_timestamp)
+    {
+      double prev_coord_x = 0.0;
+      double prev_coord_y = 0.0;
+      latlon_to_xy(previous_gps_msg_->latitude, previous_gps_msg_->longitude, prev_coord_x, prev_coord_y);
+      double prev_alt = previous_gps_msg_->altitude; // - origin_alt_;
+
+      double t = (scan_timestamp - prev_gps_timestamp) /
+                 (gps_timestamp - prev_gps_timestamp);
+
+      coord_x = prev_coord_x + t * (coord_x - prev_coord_x);
+      coord_y = prev_coord_y + t * (coord_y - prev_coord_y);
+      alt = prev_alt + t * (alt - prev_alt);
+    }
   }
 
 
@@ -299,6 +362,7 @@ private:
     boost::qvm::quat<double> q_z = boost::qvm::rotz_quat(yaw);
 
     boost::qvm::quat<double> q = q_z * q_y * q_x;
+    boost::qvm::normalize(q);
 
     return q;
   }
@@ -313,6 +377,7 @@ private:
 
     boost::qvm::quat<double> q_rot = euler_deg_to_quaternion(180.0, 0.0, 90.0);
     q = q_rot * q;
+    boost::qvm::normalize(q);
   }
 };
 

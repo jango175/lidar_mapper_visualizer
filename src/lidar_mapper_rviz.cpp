@@ -28,9 +28,15 @@ public:
     timestamp_param_desc.description = "Threshold for timestamp difference in approximate sync (seconds)";
     this->declare_parameter("timestamp_diff_threshold", 0.025, timestamp_param_desc);
 
+    auto interpolation_param_desc = rcl_interfaces::msg::ParameterDescriptor{};
+    interpolation_param_desc.description = "Threshold for interpolation timestamp difference (seconds)";
+    this->declare_parameter("interpolation_timestamp_threshold", 0.25, interpolation_param_desc);
+
     auto use_ned_param_desc = rcl_interfaces::msg::ParameterDescriptor{};
     use_ned_param_desc.description = "Use NED frame for orientation data (true) or ENU frame (false)";
     this->declare_parameter("use_ned", true, use_ned_param_desc);
+
+    interpolation_timestamp_threshold_ = this->get_parameter("interpolation_timestamp_threshold").as_double();
 
     use_ned_ = this->get_parameter("use_ned").as_bool();
     if (use_ned_)
@@ -61,18 +67,6 @@ public:
                                       std::placeholders::_2,
                                       std::placeholders::_3));
 
-    orientation_sub_ = this->create_subscription<geometry_msgs::msg::QuaternionStamped>(
-      orientation_topic_,
-      qos,
-      std::bind(&LidarMapperVisualiser::orientation_callback, this, std::placeholders::_1)
-    );
-
-    gps_sub_ = this->create_subscription<sensor_msgs::msg::NavSatFix>(
-      gps_topic_,
-      qos,
-      std::bind(&LidarMapperVisualiser::gps_callback, this, std::placeholders::_1)
-    );
-
     // tf broadcaster
     tf_broadcaster_ = std::make_shared<tf2_ros::TransformBroadcaster>(this);
 
@@ -95,6 +89,7 @@ private:
   std::string gps_topic_ = "/msp/gps";
 
   bool use_ned_ = true;
+  double interpolation_timestamp_threshold_ = 0.25;
 
   message_filters::Subscriber<sensor_msgs::msg::LaserScan> mf_scan_sub_;
   message_filters::Subscriber<geometry_msgs::msg::QuaternionStamped> mf_orientation_sub_;
@@ -106,13 +101,10 @@ private:
     sensor_msgs::msg::NavSatFix> ApproximateSyncPolicy;
   std::shared_ptr<message_filters::Synchronizer<ApproximateSyncPolicy>> sync_;
 
-  rclcpp::Subscription<geometry_msgs::msg::QuaternionStamped>::SharedPtr orientation_sub_;
-  rclcpp::Subscription<sensor_msgs::msg::NavSatFix>::SharedPtr gps_sub_;
-
-  geometry_msgs::msg::QuaternionStamped::SharedPtr latest_orientation_msg_;
-  geometry_msgs::msg::QuaternionStamped::SharedPtr previous_orientation_msg_;
-  sensor_msgs::msg::NavSatFix::SharedPtr latest_gps_msg_;
-  sensor_msgs::msg::NavSatFix::SharedPtr previous_gps_msg_;
+  geometry_msgs::msg::QuaternionStamped::ConstSharedPtr latest_orientation_msg_;
+  geometry_msgs::msg::QuaternionStamped::ConstSharedPtr previous_orientation_msg_;
+  sensor_msgs::msg::NavSatFix::ConstSharedPtr latest_gps_msg_;
+  sensor_msgs::msg::NavSatFix::ConstSharedPtr previous_gps_msg_;
 
   std::shared_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster_;
   std::string world_link_ = "map";
@@ -127,7 +119,8 @@ private:
   double origin_alt_ = 0.0;
 
 
-  void orientation_callback(const geometry_msgs::msg::QuaternionStamped::SharedPtr orientation_msg)
+  void update_latest_messages(const geometry_msgs::msg::QuaternionStamped::ConstSharedPtr& orientation_msg,
+                              const sensor_msgs::msg::NavSatFix::ConstSharedPtr& gps_msg)
   {
     if (latest_orientation_msg_ != nullptr)
     {
@@ -138,11 +131,7 @@ private:
     }
 
     latest_orientation_msg_ = orientation_msg;
-  }
 
-
-  void gps_callback(const sensor_msgs::msg::NavSatFix::SharedPtr gps_msg)
-  {
     if (latest_gps_msg_ != nullptr)
     {
       rclcpp::Time prev_timestamp(latest_gps_msg_->header.stamp);
@@ -162,6 +151,7 @@ private:
     if (previous_orientation_msg_ == nullptr || previous_gps_msg_ == nullptr)
     {
       RCLCPP_WARN(this->get_logger(), "Waiting for previous messages to be available for synchronization.");
+      update_latest_messages(orientation_msg, gps_msg);
       return;
     }
 
@@ -169,6 +159,7 @@ private:
         previous_gps_msg_->status.status == sensor_msgs::msg::NavSatStatus::STATUS_NO_FIX)
     {
       RCLCPP_WARN(this->get_logger(), "No GPS fix available.");
+      update_latest_messages(orientation_msg, gps_msg);
       return;
     }
 
@@ -231,6 +222,8 @@ private:
     pose_msg.pose.orientation.z = q.a[3];
 
     pose_pub_->publish(pose_msg);
+
+    update_latest_messages(orientation_msg, gps_msg);
   }
 
 
@@ -269,7 +262,8 @@ private:
     };
 
     q = q_curr;
-    if (orientation_timestamp != prev_orientation_timestamp)
+    if (orientation_timestamp > prev_orientation_timestamp &&
+        orientation_timestamp - prev_orientation_timestamp < 0.25)
     {
       double dt = (orientation_timestamp - prev_orientation_timestamp);
 
@@ -327,7 +321,8 @@ private:
     latlon_to_xy(gps_msg->latitude, gps_msg->longitude, coord_x, coord_y);
     alt = gps_msg->altitude - origin_alt_;
 
-    if (gps_timestamp != prev_gps_timestamp)
+    if (gps_timestamp > prev_gps_timestamp &&
+        gps_timestamp - prev_gps_timestamp < 0.25)
     {
       double prev_coord_x = 0.0;
       double prev_coord_y = 0.0;

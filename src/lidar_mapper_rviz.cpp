@@ -67,6 +67,12 @@ public:
                                       std::placeholders::_2,
                                       std::placeholders::_3));
 
+    orientation_sub_ = this->create_subscription<geometry_msgs::msg::QuaternionStamped>(
+      orientation_topic_,
+      qos,
+      std::bind(&LidarMapperVisualiser::orientation_callback, this, std::placeholders::_1)
+    );
+
     // tf broadcaster
     tf_broadcaster_ = std::make_shared<tf2_ros::TransformBroadcaster>(this);
 
@@ -113,10 +119,43 @@ private:
   rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr pose_pub_;
   std::string pose_topic_ = "/drone_pose";
 
+  rclcpp::Subscription<geometry_msgs::msg::QuaternionStamped>::SharedPtr orientation_sub_;
+
   bool got_first_fix_ = false;
   double origin_lat_ = 0.0;
   double origin_lon_ = 0.0;
   double origin_alt_ = 0.0;
+
+
+  void orientation_callback(const geometry_msgs::msg::QuaternionStamped::SharedPtr orientation_msg)
+  {
+    boost::qvm::quat<double> q = {
+      orientation_msg->quaternion.w,
+      orientation_msg->quaternion.x,
+      orientation_msg->quaternion.y,
+      orientation_msg->quaternion.z
+    };
+
+    if (use_ned_)
+    {
+      double x = 0.0, y = 0.0, z = 0.0;
+      ned_to_enu(x, y, z, q);
+    }
+
+    geometry_msgs::msg::TransformStamped orientation_tf;
+    orientation_tf.header.stamp = orientation_msg->header.stamp;
+    orientation_tf.header.frame_id = world_link_;
+    orientation_tf.child_frame_id = "drone_test_link";
+    orientation_tf.transform.translation.x = 0.0;
+    orientation_tf.transform.translation.y = 0.0;
+    orientation_tf.transform.translation.z = 0.0;
+    orientation_tf.transform.rotation.w = q.a[0];
+    orientation_tf.transform.rotation.x = q.a[1];
+    orientation_tf.transform.rotation.y = q.a[2];
+    orientation_tf.transform.rotation.z = q.a[3];
+
+    tf_broadcaster_->sendTransform(orientation_tf);
+  }
 
 
   void update_latest_messages(const geometry_msgs::msg::QuaternionStamped::ConstSharedPtr& orientation_msg,

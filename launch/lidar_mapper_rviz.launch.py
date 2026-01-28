@@ -13,8 +13,7 @@ def generate_launch_description():
     output = 'screen',
     parameters = [
       {'timestamp_diff_threshold': 0.05},
-      {'interpolation_timestamp_threshold': 0.25},
-      {'use_ned': True}
+      {'interpolation_timestamp_threshold': 0.04}
     ]
   )
 
@@ -31,14 +30,6 @@ def generate_launch_description():
     name='robot_state_publisher',
     output='screen',
     parameters=[{'robot_description': robot_desc}]
-  )
-
-  # initialize static transform publisher from 'map' to 'drone_base'
-  static_tf_node = Node(
-    package='tf2_ros',
-    executable='static_transform_publisher',
-    name='static_transform_publisher',
-    arguments=['0', '0', '0', '0', '0', '3.1416', 'map', 'drone_base']
   )
 
   rviz_config_file = PathJoinSubstitution([
@@ -58,7 +49,6 @@ def generate_launch_description():
   ld = LaunchDescription()
   ld.add_action(lidar_mapper_rviz_node)
   ld.add_action(rsp_node)
-  ld.add_action(static_tf_node)
   ld.add_action(rviz_node)
 
   return ld

@@ -32,6 +32,14 @@ def generate_launch_description():
     parameters=[{'robot_description': robot_desc}]
   )
 
+  # initialize static transform publisher from 'map' to 'drone_base_link'
+  static_tf_node = Node(
+    package='tf2_ros',
+    executable='static_transform_publisher',
+    name='static_transform_publisher',
+    arguments=['0.0', '0.0', '0.0', '0.0', '0.0', '0.0', 'map', 'drone_base_link']
+  )
+
   rviz_config_file = PathJoinSubstitution([
     FindPackageShare('lidar_mapper_visualiser'),
     'config',
@@ -49,6 +57,7 @@ def generate_launch_description():
   ld = LaunchDescription()
   ld.add_action(lidar_mapper_rviz_node)
   ld.add_action(rsp_node)
+  ld.add_action(static_tf_node)
   ld.add_action(rviz_node)
 
   return ld

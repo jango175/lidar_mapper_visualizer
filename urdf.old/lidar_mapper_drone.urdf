@@ -29,9 +29,9 @@
     </joint>
     <link name="drone_base">
         <inertial>
-            <origin xyz="0.0017742381260655315 -2.33661621804359e-08 -0.008687057428001287" rpy="0.0 0.0 0.0" />
+            <origin xyz="0.0017742381260655315 -2.336616218858151e-08 -0.008687057428001287" rpy="0.0 0.0 0.0" />
             <mass value="0.5477973103340136" />
-            <inertia ixx="0.0019094178065128522" iyy="0.002322518439748747" izz="0.0041337813643271635" ixy="-4.139932616105023e-08" iyz="-3.7303496428844476e-09" ixz="2.617173307753408e-06" />
+            <inertia ixx="0.0019094178065128518" iyy="0.002322518439748747" izz="0.004133781364327163" ixy="-4.139932616070117e-08" iyz="-3.73034964297955e-09" ixz="2.617173307753408e-06" />
         </inertial>
         <visual name="drone_base_visual">
             <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
@@ -47,23 +47,23 @@
             </geometry>
         </collision>
     </link>
-    <link name="back_holder_optical_flow">
+    <link name="back_holder">
         <inertial>
-            <origin xyz="-0.0095015622736484 0.02667695200907467 -0.01298232808400881" rpy="0.0 -0.0 0.0" />
-            <mass value="0.0878096751327429" />
-            <inertia ixx="3.818768449912694e-05" iyy="1.5209991273868582e-05" izz="3.552275071336437e-05" ixy="1.868327342473098e-09" iyz="3.5956577469593376e-06" ixz="1.4860708785679508e-09" />
+            <origin xyz="0.009500064137675485 0.021979667667242176 -0.013046132751156988" rpy="0.0 -0.0 0.0" />
+            <mass value="0.07190673375826725" />
+            <inertia ixx="2.4383112407844968e-05" iyy="1.2052941641213041e-05" izz="2.2270631039077453e-05" ixy="8.677666593359814e-11" iyz="2.4523372972841612e-06" ixz="-6.462134644457356e-11" />
         </inertial>
-        <visual name="back_holder_optical_flow_visual">
-            <origin xyz="-0.009499998724294068 -0.08741136368379873 0.0025000000000004975" rpy="3.141592653589793 -2.9976292715422312e-15 3.141592653589792" />
+        <visual name="back_holder_visual">
+            <origin xyz="0.009500001275705907 -0.08741136368379884 0.0025000000000005014" rpy="-3.141592653589793 -1.4988688458797391e-15 3.1415926535897922" />
             <geometry>
-                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/back_holder_optical_flow.stl" scale="0.001 0.001 0.001" />
+                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/back_holder.stl" scale="0.001 0.001 0.001" />
             </geometry>
             <material name="yellow_plastic"/>
         </visual>
-        <collision name="back_holder_optical_flow_collision">
-            <origin xyz="-0.009499998724294068 -0.08741136368379873 0.0025000000000004975" rpy="3.141592653589793 -2.9976292715422312e-15 3.141592653589792" />
+        <collision name="back_holder_collision">
+            <origin xyz="0.009500001275705907 -0.08741136368379884 0.0025000000000005014" rpy="-3.141592653589793 -1.4988688458797391e-15 3.1415926535897922" />
             <geometry>
-                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/back_holder_optical_flow.stl" scale="0.001 0.001 0.001" />
+                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/back_holder.stl" scale="0.001 0.001 0.001" />
             </geometry>
         </collision>
     </link>
@@ -327,43 +327,43 @@
             </geometry>
         </collision>
     </link>
-    <link name="right_cover_H7">
+    <link name="right_cover">
         <inertial>
-            <origin xyz="0.003031342312367107 0.0688834610319074 -0.015240865446024496" rpy="0.0 -0.0 0.0" />
-            <mass value="0.09341169301733705" />
-            <inertia ixx="0.0002294236470160278" iyy="1.0786958710436628e-05" izz="0.00022314590898953317" ixy="3.212010532771831e-06" iyz="1.5191181152211454e-06" ixz="-5.22824426790954e-07" />
+            <origin xyz="0.0029559522811767104 0.06893797273739984 -0.015250844907846015" rpy="0.0 -0.0 0.0" />
+            <mass value="0.09251921869007904" />
+            <inertia ixx="0.00022938338857835368" iyy="1.0727044677094809e-05" izz="0.00022305515405984704" ixy="3.1722601885953804e-06" iyz="1.513891919705409e-06" ixz="-5.15537414246318e-07" />
         </inertial>
-        <visual name="right_cover_H7_visual">
-            <origin xyz="-0.015699998724294076 0.06899999631620124 0.0025000000000005153" rpy="3.141592653589793 -2.9421181203109734e-15 3.1415926535897913" />
+        <visual name="right_cover_visual">
+            <origin xyz="-0.015699998724294093 0.06899999631620128 0.0025000000000004984" rpy="-3.141592653589793 -2.4161580939111007e-15 3.1415926535897922" />
             <geometry>
-                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/right_cover_H7.stl" scale="0.001 0.001 0.001" />
+                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/right_cover.stl" scale="0.001 0.001 0.001" />
             </geometry>
             <material name="yellow_plastic"/>
         </visual>
-        <collision name="right_cover_H7_collision">
-            <origin xyz="-0.015699998724294076 0.06899999631620124 0.0025000000000005153" rpy="3.141592653589793 -2.9421181203109734e-15 3.1415926535897913" />
+        <collision name="right_cover_collision">
+            <origin xyz="-0.015699998724294093 0.06899999631620128 0.0025000000000004984" rpy="-3.141592653589793 -2.4161580939111007e-15 3.1415926535897922" />
             <geometry>
-                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/right_cover_H7.stl" scale="0.001 0.001 0.001" />
+                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/right_cover.stl" scale="0.001 0.001 0.001" />
             </geometry>
         </collision>
     </link>
-    <link name="left_cover_H7">
+    <link name="left_cover">
         <inertial>
-            <origin xyz="-0.0029411895843797775 0.06888212155313556 -0.015289607288757922" rpy="0.0 -0.0 0.0" />
-            <mass value="0.09235027638883513" />
-            <inertia ixx="0.00022938536619485588" iyy="1.0697132248660749e-05" izz="0.0002230649524201519" ixy="-3.212991870020058e-06" iyz="1.5196489145662905e-06" ixz="4.871117561126654e-07" />
+            <origin xyz="-0.003031339774133253 0.06888346093905601 -0.015240865391362912" rpy="0.0 -0.0 0.0" />
+            <mass value="0.09341169364233115" />
+            <inertia ixx="0.00022942364830407294" iyy="1.0786958805358339e-05" izz="0.00022314591019308172" ixy="-3.2120105160639213e-06" iyz="1.5191183216306565e-06" ixz="5.228244309298281e-07" />
         </inertial>
-        <visual name="left_cover_H7_visual">
-            <origin xyz="0.015700001275705863 0.0689999963162013 0.0025000000000004797" rpy="3.141592653589793 -2.8866069690797156e-15 3.1415926535897922" />
+        <visual name="left_cover_visual">
+            <origin xyz="0.015700001275705845 0.06899999631620132 0.0025000000000004697" rpy="-3.141592653589793 -2.4161580939111007e-15 3.1415926535897922" />
             <geometry>
-                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/left_cover_H7.stl" scale="0.001 0.001 0.001" />
+                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/left_cover.stl" scale="0.001 0.001 0.001" />
             </geometry>
             <material name="yellow_plastic"/>
         </visual>
-        <collision name="left_cover_H7_collision">
-            <origin xyz="0.015700001275705863 0.0689999963162013 0.0025000000000004797" rpy="3.141592653589793 -2.8866069690797156e-15 3.1415926535897922" />
+        <collision name="left_cover_collision">
+            <origin xyz="0.015700001275705845 0.06899999631620132 0.0025000000000004697" rpy="-3.141592653589793 -2.4161580939111007e-15 3.1415926535897922" />
             <geometry>
-                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/left_cover_H7.stl" scale="0.001 0.001 0.001" />
+                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/left_cover.stl" scale="0.001 0.001 0.001" />
             </geometry>
         </collision>
     </link>
@@ -467,26 +467,31 @@
             </geometry>
         </collision>
     </link>
-    <link name="antenna_stick">
+    <link name="antena-stick">
         <inertial>
-            <origin xyz="-4.803046413769509e-07 0.022457867616705852 -0.0073502006474492985" rpy="0.0 -0.0 0.0" />
+            <origin xyz="-3.92406455094074e-06 0.011196700641789441 -0.003519826607605454" rpy="0.0 -0.0 0.0" />
             <mass value="0.03440631866056707" />
-            <inertia ixx="2.0663158696314636e-05" iyy="5.468417216018191e-06" izz="1.5505404211969073e-05" ixy="1.0534153030036078e-10" iyz="8.859775258047474e-06" ixz="-7.826424578814028e-11" />
+            <inertia ixx="2.06631581999169e-05" iyy="4.0137578912156917e-07" izz="2.057244613526371e-05" ixy="3.1927581714866263e-09" iyz="-1.4010245244295823e-06" ixz="2.0497115579613305e-10" />
         </inertial>
-        <visual name="antenna_stick_visual">
-            <origin xyz="1.2757133133233563e-09 -0.014016084181098485 0.013634749873974714" rpy="2.094395102393194 -6.513107630761974e-15 3.1415926535897913" />
+        <visual name="antena-stick_visual">
+            <origin xyz="2.433359610024003e-06 -0.030798661952304622 -0.006185682669140018" rpy="-1.5058931620710894 -0.00019339782873545287 0.00015057457074706037" />
             <geometry>
-                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/antenna_stick.stl" scale="0.001 0.001 0.001" />
+                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/antena-stick.stl" scale="0.001 0.001 0.001" />
             </geometry>
             <material name="black_plastic"/>
         </visual>
-        <collision name="antenna_stick_collision">
-            <origin xyz="1.2757133133233563e-09 -0.014016084181098485 0.013634749873974714" rpy="2.094395102393194 -6.513107630761974e-15 3.1415926535897913" />
+        <collision name="antena-stick_collision">
+            <origin xyz="2.433359610024003e-06 -0.030798661952304622 -0.006185682669140018" rpy="-1.5058931620710894 -0.00019339782873545287 0.00015057457074706037" />
             <geometry>
-                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/antenna_stick.stl" scale="0.001 0.001 0.001" />
+                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/antena-stick.stl" scale="0.001 0.001 0.001" />
             </geometry>
         </collision>
     </link>
+    <joint name="drone_base_Rigid-1" type="fixed">
+        <origin xyz="-0.08741136368379873 -0.009500001275705983 -0.002500000000000517" rpy="-5.552470375841605e-17 -1.6098369382336299e-15 1.570796326794898" />
+        <parent link="drone_base" />
+        <child link="back_holder" />
+    </joint>
     <joint name="drone_base_Rigid-2" type="fixed">
         <origin xyz="-0.09690226368379888 0.11071519872429374 -0.007500000000000313" rpy="-5.552470375841605e-17 -1.6098369382336299e-15 1.570796326794898" />
         <parent link="drone_base" />
@@ -556,6 +561,16 @@
         <parent link="damper_3" />
         <child link="ldlidar_base" />
     </joint>
+    <joint name="drone_base_Rigid-15" type="fixed">
+        <origin xyz="0.06899999631620117 -0.015700001275705776 -0.0025000000000005187" rpy="-5.552470375841605e-17 -1.6098369382336299e-15 1.570796326794898" />
+        <parent link="drone_base" />
+        <child link="left_cover" />
+    </joint>
+    <joint name="drone_base_Rigid-16" type="fixed">
+        <origin xyz="0.06899999631620114 0.015699998724294152 -0.0025000000000004676" rpy="-5.552470375841605e-17 -1.6098369382336299e-15 1.570796326794898" />
+        <parent link="drone_base" />
+        <child link="right_cover" />
+    </joint>
     <joint name="drone_base_Rigid-17" type="fixed">
         <origin xyz="0.042999996316201175 -1.2757058028836036e-09 -0.030000000000000436" rpy="-1.6098369382336295e-15 5.552470375841598e-17 -3.1415926535897922" />
         <parent link="drone_base" />
@@ -581,25 +596,10 @@
         <parent link="raspbox_top" />
         <child link="CNHL_5S_2200MAH_LIPO" />
     </joint>
-    <joint name="drone_base_Rigid-23" type="fixed">
-        <origin xyz="0.06899999631620114 0.015699998724294152 -0.0025000000000004676" rpy="-5.552470375841605e-17 -1.6098369382336299e-15 1.570796326794898" />
-        <parent link="drone_base" />
-        <child link="right_cover_H7" />
-    </joint>
-    <joint name="drone_base_Rigid-24" type="fixed">
-        <origin xyz="0.06899999631620117 -0.015700001275705776 -0.0025000000000005187" rpy="-5.552470375841605e-17 -1.6098369382336299e-15 1.570796326794898" />
-        <parent link="drone_base" />
-        <child link="left_cover_H7" />
-    </joint>
-    <joint name="drone_base_Rigid-25" type="fixed">
-        <origin xyz="-0.08741136368379877 0.009499998724293976 -0.002500000000000486" rpy="-5.552470375841605e-17 -1.6098369382336299e-15 1.570796326794898" />
-        <parent link="drone_base" />
-        <child link="back_holder_optical_flow" />
-    </joint>
-    <joint name="back_holder_optical_flow_Rigid-26" type="fixed">
-        <origin xyz="-0.009500000000000001 0.021173009999999996 -0.02625" rpy="-0.5235987755982986 -2.252140986350246e-62 1.1419711492581944e-31" />
-        <parent link="back_holder_optical_flow" />
-        <child link="antenna_stick" />
+    <joint name="back_holder_Rigid-22" type="fixed">
+        <origin xyz="0.0095 0.03197260999999999 -0.025" rpy="-0.7853981633974483 -3.283760281271351e-62 1.665064276623699e-31" />
+        <parent link="back_holder" />
+        <child link="antena-stick" />
     </joint>
 
     <!-- ldlidar_link -->

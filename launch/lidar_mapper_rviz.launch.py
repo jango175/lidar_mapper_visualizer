@@ -38,7 +38,7 @@ def generate_launch_description():
     package='tf2_ros',
     executable='static_transform_publisher',
     name='static_transform_publisher',
-    arguments=['0', '0', '0', '0', '0', '3.1416', 'map', 'drone_base']
+    arguments=['0', '0', '0', '0', '0', '0', 'map', 'drone_base_link']
   )
 
   rviz_config_file = PathJoinSubstitution([

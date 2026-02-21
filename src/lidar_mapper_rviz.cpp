@@ -50,7 +50,6 @@ public:
     mf_scan_sub_.subscribe(this, scan_topic_, qos.get_rmw_qos_profile());
     mf_orientation_sub_.subscribe(this, orientation_topic_, qos.get_rmw_qos_profile());
     mf_gps_sub_.subscribe(this, gps_topic_, qos.get_rmw_qos_profile());
-
     sync_ = std::make_shared<message_filters::Synchronizer<ApproximateSyncPolicy>>(
       ApproximateSyncPolicy(10),
       mf_scan_sub_,
@@ -76,8 +75,9 @@ public:
     // tf broadcaster
     tf_broadcaster_ = std::make_shared<tf2_ros::TransformBroadcaster>(this);
 
-    // publisher
-    pose_pub_ = this->create_publisher<geometry_msgs::msg::PoseStamped>(pose_topic_, qos);
+    // publishers
+    sync_pose_pub_ = this->create_publisher<geometry_msgs::msg::PoseStamped>(sync_pose_topic_, qos);
+    sync_scan_pub_ = this->create_publisher<sensor_msgs::msg::LaserScan>(sync_scan_topic_, qos);
 
     RCLCPP_INFO(this->get_logger(), "LIDAR mapper visualiser node has been started!");
   }
@@ -93,6 +93,9 @@ private:
   std::string scan_topic_ = "/ldlidar_node/scan";
   std::string orientation_topic_ = "/msp/orientation_ned";
   std::string gps_topic_ = "/msp/gps";
+
+  std::string sync_pose_topic_ = "/drone/sync_pose";
+  std::string sync_scan_topic_ = "/drone/sync_scan";
 
   bool use_ned_ = true;
   double interpolation_timestamp_threshold_ = 0.25;
@@ -114,10 +117,10 @@ private:
 
   std::shared_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster_;
   std::string world_link_ = "map";
-  std::string drone_base_link_ = "drone_base";
+  std::string drone_base_link_ = "drone_base_link";
 
-  rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr pose_pub_;
-  std::string pose_topic_ = "/drone_pose";
+  rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr sync_pose_pub_;
+  rclcpp::Publisher<sensor_msgs::msg::LaserScan>::SharedPtr sync_scan_pub_;
 
   rclcpp::Subscription<geometry_msgs::msg::QuaternionStamped>::SharedPtr orientation_sub_;
 
@@ -249,18 +252,19 @@ private:
 
     tf_broadcaster_->sendTransform(world_drone_tf);
 
-    geometry_msgs::msg::PoseStamped pose_msg;
-    pose_msg.header.stamp = timestamp;
-    pose_msg.header.frame_id = world_link_;
-    pose_msg.pose.position.x = coord_x;
-    pose_msg.pose.position.y = coord_y;
-    pose_msg.pose.position.z = alt;
-    pose_msg.pose.orientation.w = q.a[0];
-    pose_msg.pose.orientation.x = q.a[1];
-    pose_msg.pose.orientation.y = q.a[2];
-    pose_msg.pose.orientation.z = q.a[3];
+    geometry_msgs::msg::PoseStamped sync_pose_msg;
+    sync_pose_msg.header.stamp = timestamp;
+    sync_pose_msg.header.frame_id = world_link_;
+    sync_pose_msg.pose.position.x = coord_x;
+    sync_pose_msg.pose.position.y = coord_y;
+    sync_pose_msg.pose.position.z = alt;
+    sync_pose_msg.pose.orientation.w = q.a[0];
+    sync_pose_msg.pose.orientation.x = q.a[1];
+    sync_pose_msg.pose.orientation.y = q.a[2];
+    sync_pose_msg.pose.orientation.z = q.a[3];
 
-    pose_pub_->publish(pose_msg);
+    sync_pose_pub_->publish(sync_pose_msg);
+    sync_scan_pub_->publish(*scan_msg);
 
     update_latest_messages(orientation_msg, gps_msg);
   }

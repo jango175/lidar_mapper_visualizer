@@ -21,11 +21,29 @@
     <material name="glossy_black">
         <color rgba="0.05 0.05 0.05 1.0"/>
     </material>
+    <material name="translucent_black_plastic">
+        <color rgba="0.1 0.1 0.1 0.5"/>
+    </material>
+    <link name="drone_base_link">
+        <inertial>
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+            <mass value="0.001"/>
+            <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/>
+        </inertial>
+    </link>
+    <joint name="base_to_body_joint" type="fixed">
+        <parent link="drone_base_link"/>
+        <child link="drone_base"/>
+        <origin xyz="0 0 0" rpy="3.14159 0 0"/>
+    </joint>
+    <gazebo reference="base_to_body_joint">
+        <preserveFixedJoint>true</preserveFixedJoint>
+    </gazebo>
     <link name="drone_base">
         <inertial>
-            <origin xyz="0.0017742381260655315 -2.336616218858151e-08 -0.008687057428001287" rpy="0.0 0.0 0.0" />
+            <origin xyz="0.0017742381260655315 -2.33661621804359e-08 -0.008687057428001287" rpy="0.0 0.0 0.0" />
             <mass value="0.5477973103340136" />
-            <inertia ixx="0.0019094178065128518" iyy="0.002322518439748747" izz="0.004133781364327163" ixy="-4.139932616070117e-08" iyz="-3.73034964297955e-09" ixz="2.617173307753408e-06" />
+            <inertia ixx="0.0019094178065128522" iyy="0.002322518439748747" izz="0.0041337813643271635" ixy="-4.139932616105023e-08" iyz="-3.7303496428844476e-09" ixz="2.617173307753408e-06" />
         </inertial>
         <visual name="drone_base_visual">
             <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
@@ -41,23 +59,23 @@
             </geometry>
         </collision>
     </link>
-    <link name="back_holder">
+    <link name="back_holder_optical_flow">
         <inertial>
-            <origin xyz="0.009500064137675485 0.021979667667242176 -0.013046132751156988" rpy="0.0 -0.0 0.0" />
-            <mass value="0.07190673375826725" />
-            <inertia ixx="2.4383112407844968e-05" iyy="1.2052941641213041e-05" izz="2.2270631039077453e-05" ixy="8.677666593359814e-11" iyz="2.4523372972841612e-06" ixz="-6.462134644457356e-11" />
+            <origin xyz="-0.0095015622736484 0.02667695200907467 -0.01298232808400881" rpy="0.0 -0.0 0.0" />
+            <mass value="0.0878096751327429" />
+            <inertia ixx="3.818768449912694e-05" iyy="1.5209991273868582e-05" izz="3.552275071336437e-05" ixy="1.868327342473098e-09" iyz="3.5956577469593376e-06" ixz="1.4860708785679508e-09" />
         </inertial>
-        <visual name="back_holder_visual">
-            <origin xyz="0.009500001275705907 -0.08741136368379884 0.0025000000000005014" rpy="-3.141592653589793 -1.4988688458797391e-15 3.1415926535897922" />
+        <visual name="back_holder_optical_flow_visual">
+            <origin xyz="-0.009499998724294068 -0.08741136368379873 0.0025000000000004975" rpy="3.141592653589793 -2.9976292715422312e-15 3.141592653589792" />
             <geometry>
-                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/back_holder.stl" scale="0.001 0.001 0.001" />
+                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/back_holder_optical_flow.stl" scale="0.001 0.001 0.001" />
             </geometry>
             <material name="yellow_plastic"/>
         </visual>
-        <collision name="back_holder_collision">
-            <origin xyz="0.009500001275705907 -0.08741136368379884 0.0025000000000005014" rpy="-3.141592653589793 -1.4988688458797391e-15 3.1415926535897922" />
+        <collision name="back_holder_optical_flow_collision">
+            <origin xyz="-0.009499998724294068 -0.08741136368379873 0.0025000000000004975" rpy="3.141592653589793 -2.9976292715422312e-15 3.141592653589792" />
             <geometry>
-                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/back_holder.stl" scale="0.001 0.001 0.001" />
+                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/back_holder_optical_flow.stl" scale="0.001 0.001 0.001" />
             </geometry>
         </collision>
     </link>
@@ -182,7 +200,9 @@
         </collision>
     </link>
     <link name="motor_stator_4">
-        <inertial>
+        <inertial>    <gazebo reference="motor_stator_2_Rigid-7">
+        <preserveFixedJoint>true</preserveFixedJoint>
+    </gazebo>
             <origin xyz="0.00024746131236822675 -0.00017327002382527823 -0.007159919460084039" rpy="0.0 -0.0 0.0" />
             <mass value="0.02742038806759487" />
             <inertia ixx="1.434704219392788e-06" iyy="1.483333806859635e-06" izz="2.268260708053276e-06" ixy="6.680458477874816e-08" iyz="2.4731603621527712e-08" ixz="-3.532033351486333e-08" />
@@ -321,43 +341,43 @@
             </geometry>
         </collision>
     </link>
-    <link name="right_cover">
+    <link name="right_cover_H7">
         <inertial>
-            <origin xyz="0.0029559522811767104 0.06893797273739984 -0.015250844907846015" rpy="0.0 -0.0 0.0" />
-            <mass value="0.09251921869007904" />
-            <inertia ixx="0.00022938338857835368" iyy="1.0727044677094809e-05" izz="0.00022305515405984704" ixy="3.1722601885953804e-06" iyz="1.513891919705409e-06" ixz="-5.15537414246318e-07" />
+            <origin xyz="0.003031342312367107 0.0688834610319074 -0.015240865446024496" rpy="0.0 -0.0 0.0" />
+            <mass value="0.09341169301733705" />
+            <inertia ixx="0.0002294236470160278" iyy="1.0786958710436628e-05" izz="0.00022314590898953317" ixy="3.212010532771831e-06" iyz="1.5191181152211454e-06" ixz="-5.22824426790954e-07" />
         </inertial>
-        <visual name="right_cover_visual">
-            <origin xyz="-0.015699998724294093 0.06899999631620128 0.0025000000000004984" rpy="-3.141592653589793 -2.4161580939111007e-15 3.1415926535897922" />
+        <visual name="right_cover_H7_visual">
+            <origin xyz="-0.015699998724294076 0.06899999631620124 0.0025000000000005153" rpy="3.141592653589793 -2.9421181203109734e-15 3.1415926535897913" />
             <geometry>
-                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/right_cover.stl" scale="0.001 0.001 0.001" />
+                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/right_cover_H7.stl" scale="0.001 0.001 0.001" />
             </geometry>
             <material name="yellow_plastic"/>
         </visual>
-        <collision name="right_cover_collision">
-            <origin xyz="-0.015699998724294093 0.06899999631620128 0.0025000000000004984" rpy="-3.141592653589793 -2.4161580939111007e-15 3.1415926535897922" />
+        <collision name="right_cover_H7_collision">
+            <origin xyz="-0.015699998724294076 0.06899999631620124 0.0025000000000005153" rpy="3.141592653589793 -2.9421181203109734e-15 3.1415926535897913" />
             <geometry>
-                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/right_cover.stl" scale="0.001 0.001 0.001" />
+                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/right_cover_H7.stl" scale="0.001 0.001 0.001" />
             </geometry>
         </collision>
     </link>
-    <link name="left_cover">
+    <link name="left_cover_H7">
         <inertial>
-            <origin xyz="-0.003031339774133253 0.06888346093905601 -0.015240865391362912" rpy="0.0 -0.0 0.0" />
-            <mass value="0.09341169364233115" />
-            <inertia ixx="0.00022942364830407294" iyy="1.0786958805358339e-05" izz="0.00022314591019308172" ixy="-3.2120105160639213e-06" iyz="1.5191183216306565e-06" ixz="5.228244309298281e-07" />
+            <origin xyz="-0.0029411895843797775 0.06888212155313556 -0.015289607288757922" rpy="0.0 -0.0 0.0" />
+            <mass value="0.09235027638883513" />
+            <inertia ixx="0.00022938536619485588" iyy="1.0697132248660749e-05" izz="0.0002230649524201519" ixy="-3.212991870020058e-06" iyz="1.5196489145662905e-06" ixz="4.871117561126654e-07" />
         </inertial>
-        <visual name="left_cover_visual">
-            <origin xyz="0.015700001275705845 0.06899999631620132 0.0025000000000004697" rpy="-3.141592653589793 -2.4161580939111007e-15 3.1415926535897922" />
+        <visual name="left_cover_H7_visual">
+            <origin xyz="0.015700001275705863 0.0689999963162013 0.0025000000000004797" rpy="3.141592653589793 -2.8866069690797156e-15 3.1415926535897922" />
             <geometry>
-                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/left_cover.stl" scale="0.001 0.001 0.001" />
+                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/left_cover_H7.stl" scale="0.001 0.001 0.001" />
             </geometry>
             <material name="yellow_plastic"/>
         </visual>
-        <collision name="left_cover_collision">
-            <origin xyz="0.015700001275705845 0.06899999631620132 0.0025000000000004697" rpy="-3.141592653589793 -2.4161580939111007e-15 3.1415926535897922" />
+        <collision name="left_cover_H7_collision">
+            <origin xyz="0.015700001275705863 0.0689999963162013 0.0025000000000004797" rpy="3.141592653589793 -2.8866069690797156e-15 3.1415926535897922" />
             <geometry>
-                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/left_cover.stl" scale="0.001 0.001 0.001" />
+                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/left_cover_H7.stl" scale="0.001 0.001 0.001" />
             </geometry>
         </collision>
     </link>
@@ -461,146 +481,333 @@
             </geometry>
         </collision>
     </link>
-    <link name="antena-stick">
+    <link name="antenna_stick">
         <inertial>
-            <origin xyz="-3.92406455094074e-06 0.011196700641789441 -0.003519826607605454" rpy="0.0 -0.0 0.0" />
+            <origin xyz="-4.803046413769509e-07 0.022457867616705852 -0.0073502006474492985" rpy="0.0 -0.0 0.0" />
             <mass value="0.03440631866056707" />
-            <inertia ixx="2.06631581999169e-05" iyy="4.0137578912156917e-07" izz="2.057244613526371e-05" ixy="3.1927581714866263e-09" iyz="-1.4010245244295823e-06" ixz="2.0497115579613305e-10" />
+            <inertia ixx="2.0663158696314636e-05" iyy="5.468417216018191e-06" izz="1.5505404211969073e-05" ixy="1.0534153030036078e-10" iyz="8.859775258047474e-06" ixz="-7.826424578814028e-11" />
         </inertial>
-        <visual name="antena-stick_visual">
-            <origin xyz="2.433359610024003e-06 -0.030798661952304622 -0.006185682669140018" rpy="-1.5058931620710894 -0.00019339782873545287 0.00015057457074706037" />
+        <visual name="antenna_stick_visual">
+            <origin xyz="1.2757133133233563e-09 -0.014016084181098485 0.013634749873974714" rpy="2.094395102393194 -6.513107630761974e-15 3.1415926535897913" />
             <geometry>
-                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/antena-stick.stl" scale="0.001 0.001 0.001" />
+                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/antenna_stick.stl" scale="0.001 0.001 0.001" />
             </geometry>
             <material name="black_plastic"/>
         </visual>
-        <collision name="antena-stick_collision">
-            <origin xyz="2.433359610024003e-06 -0.030798661952304622 -0.006185682669140018" rpy="-1.5058931620710894 -0.00019339782873545287 0.00015057457074706037" />
+        <collision name="antenna_stick_collision">
+            <origin xyz="1.2757133133233563e-09 -0.014016084181098485 0.013634749873974714" rpy="2.094395102393194 -6.513107630761974e-15 3.1415926535897913" />
             <geometry>
-                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/antena-stick.stl" scale="0.001 0.001 0.001" />
+                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/antenna_stick.stl" scale="0.001 0.001 0.001" />
             </geometry>
         </collision>
     </link>
-    <joint name="drone_base_Rigid-1" type="fixed">
-        <origin xyz="-0.08741136368379873 -0.009500001275705983 -0.002500000000000517" rpy="-5.552470375841605e-17 -1.6098369382336299e-15 1.570796326794898" />
-        <parent link="drone_base" />
-        <child link="back_holder" />
-    </joint>
+    <link name="7_inch_CCW_1">
+        <inertial>
+            <origin xyz="4.490603152724759e-06 -0.004670708095201959 9.485809500393571e-06" rpy="0.0 -0.0 0.0" />
+            <mass value="0.004466869702984176" />
+            <inertia ixx="3.2064047652066656e-06" iyy="6.395638269350251e-06" izz="3.205130297852898e-06" ixy="3.9249650380925464e-12" iyz="8.981509868379858e-12" ixz="-7.765892434192156e-10" />
+        </inertial>
+        <visual name="7_inch_CCW_1_visual">
+            <origin xyz="-4.7076220255348746e-09 -0.004024996537573893 4.16520945734078e-09" rpy="-1.5707963267948941 0.9599310885968843 -5.086312881550999e-16" />
+            <geometry>
+                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/7_inch_CCW_1.stl" scale="0.001 0.001 0.001" />
+            </geometry>
+            <material name="translucent_black_plastic"/>
+        </visual>
+        <collision name="7_inch_CCW_1_collision">
+            <origin xyz="-4.7076220255348746e-09 -0.004024996537573893 4.16520945734078e-09" rpy="-1.5707963267948941 0.9599310885968843 -5.086312881550999e-16" />
+            <geometry>
+                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/7_inch_CCW_1.stl" scale="0.001 0.001 0.001" />
+            </geometry>
+        </collision>
+    </link>
+    <link name="7_inch_CCW_2">
+        <inertial>
+            <origin xyz="4.497987092975109e-06 -0.004670708095201924 9.4862900792414e-06" rpy="0.0 -0.0 0.0" />
+            <mass value="0.004466869702984176" />
+            <inertia ixx="3.206404765206679e-06" iyy="6.395638269350264e-06" izz="3.2051302978528505e-06" ixy="3.924965041480678e-12" iyz="8.98150987176799e-12" ixz="-7.765892434192156e-10" />
+        </inertial>
+        <visual name="7_inch_CCW_2_visual">
+            <origin xyz="2.676318224814622e-09 -0.004024996537573857 4.645788305168708e-09" rpy="-1.5707963267948941 0.9599310885968888 -6.218223845239212e-16" />
+            <geometry>
+                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/7_inch_CCW_2.stl" scale="0.001 0.001 0.001" />
+            </geometry>
+            <material name="translucent_black_plastic"/>
+        </visual>
+        <collision name="7_inch_CCW_2_collision">
+            <origin xyz="2.676318224814622e-09 -0.004024996537573857 4.645788305168708e-09" rpy="-1.5707963267948941 0.9599310885968888 -6.218223845239212e-16" />
+            <geometry>
+                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/7_inch_CCW_2.stl" scale="0.001 0.001 0.001" />
+            </geometry>
+        </collision>
+    </link>
+    <link name="7_inch_CW_1">
+        <inertial>
+            <origin xyz="9.478175528112586e-06 -0.004670708095174891 4.4922282085124725e-06" rpy="8.758115402030107e-47 -0.0 0.0" />
+            <mass value="0.004466869703094844" />
+            <inertia ixx="3.2051302979475683e-06" iyy="6.395638269457233e-06" izz="3.2064047654813076e-06" ixy="8.981508565643182e-12" iyz="3.924962182252477e-12" ixz="-7.765892822743109e-10" />
+        </inertial>
+        <visual name="7_inch_CW_1_visual">
+            <origin xyz="-3.468952716190188e-09 -0.0040249965375738755 -3.083173432116837e-09" rpy="-1.570796326794896 0.610865238198011 -2.2972089585120473e-15" />
+            <geometry>
+                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/7_inch_CW_1.stl" scale="0.001 0.001 0.001" />
+            </geometry>
+            <material name="translucent_black_plastic"/>
+        </visual>
+        <collision name="7_inch_CW_1_collision">
+            <origin xyz="-3.468952716190188e-09 -0.0040249965375738755 -3.083173432116837e-09" rpy="-1.570796326794896 0.610865238198011 -2.2972089585120473e-15" />
+            <geometry>
+                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/7_inch_CW_1.stl" scale="0.001 0.001 0.001" />
+            </geometry>
+        </collision>
+    </link>
+    <link name="7_inch_CW_2">
+        <inertial>
+            <origin xyz="9.47922821655567e-06 -0.004670708095175034 4.494235469838514e-06" rpy="0.0 -3.2763629898449603e-60 1.401298464324817e-45" />
+            <mass value="0.004466869703094844" />
+            <inertia ixx="3.205130297947608e-06" iyy="6.395638269457217e-06" izz="3.206404765481301e-06" ixy="8.981508567337248e-12" iyz="3.9249621873346745e-12" ixz="-7.765892822743108e-10" />
+        </inertial>
+        <visual name="7_inch_CW_2_visual">
+            <origin xyz="-2.4162642731084818e-09 -0.004024996537574017 -1.0759121060743838e-09" rpy="-1.5707963267948948 0.6108652381980118 -1.6980702535846234e-15" />
+            <geometry>
+                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/7_inch_CW_2.stl" scale="0.001 0.001 0.001" />
+            </geometry>
+            <material name="translucent_black_plastic"/>
+        </visual>
+        <collision name="7_inch_CW_2_collision">
+            <origin xyz="-2.4162642731084818e-09 -0.004024996537574017 -1.0759121060743838e-09" rpy="-1.5707963267948948 0.6108652381980118 -1.6980702535846234e-15" />
+            <geometry>
+                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/7_inch_CW_2.stl" scale="0.001 0.001 0.001" />
+            </geometry>
+        </collision>
+    </link>
     <joint name="drone_base_Rigid-2" type="fixed">
         <origin xyz="-0.09690226368379888 0.11071519872429374 -0.007500000000000313" rpy="-5.552470375841605e-17 -1.6098369382336299e-15 1.570796326794898" />
         <parent link="drone_base" />
         <child link="motor_stator_1" />
     </joint>
+    <gazebo reference="drone_base_Rigid-2">
+        <preserveFixedJoint>true</preserveFixedJoint>
+    </gazebo>
     <joint name="motor_stator_1_Rigid-3" type="fixed">
         <origin xyz="0.0 0.0 -0.012574860000000002" rpy="1.5707963267948966 -5.551115123126263e-17 8.72082143860978e-31" />
         <parent link="motor_stator_1" />
         <child link="motor_rotor_1" />
         <axis xyz="-5.551115123126263e-17 -1.0 -9.860761315262648e-32" />
     </joint>
+    <gazebo reference="motor_stator_1_Rigid-3">
+        <preserveFixedJoint>true</preserveFixedJoint>
+    </gazebo>
     <joint name="drone_base_Rigid-4" type="fixed">
         <origin xyz="0.09690226631620126 -0.11071520127570551 -0.00750000000000066" rpy="-5.552470375841605e-17 -1.6098369382336299e-15 1.570796326794898" />
         <parent link="drone_base" />
         <child link="motor_stator_2" />
     </joint>
+    <gazebo reference="drone_base_Rigid-4">
+        <preserveFixedJoint>true</preserveFixedJoint>
+    </gazebo>
     <joint name="drone_base_Rigid-5" type="fixed">
         <origin xyz="0.09690226631620098 0.11071519872429399 -0.007500000000000303" rpy="-5.552470375841605e-17 -1.6098369382336299e-15 1.570796326794898" />
         <parent link="drone_base" />
         <child link="motor_stator_3" />
     </joint>
+    <gazebo reference="drone_base_Rigid-5">
+        <preserveFixedJoint>true</preserveFixedJoint>
+    </gazebo>
     <joint name="drone_base_Rigid-6" type="fixed">
         <origin xyz="-0.09690226368379859 -0.11071520127570576 -0.007500000000000669" rpy="-5.552470375841605e-17 -1.6098369382336299e-15 1.570796326794898" />
         <parent link="drone_base" />
         <child link="motor_stator_4" />
     </joint>
+    <gazebo reference="drone_base_Rigid-6">
+        <preserveFixedJoint>true</preserveFixedJoint>
+    </gazebo>
     <joint name="motor_stator_2_Rigid-7" type="fixed">
         <origin xyz="0.0 0.0 -0.012574860000000002" rpy="1.5707963267948966 -5.551115123125499e-17 8.322123863996606e-32" />
         <parent link="motor_stator_2" />
         <child link="motor_rotor_2" />
         <axis xyz="-5.551115123125499e-17 -1.0 9.860761315262648e-32" />
     </joint>
+    <gazebo reference="motor_stator_2_Rigid-7">
+        <preserveFixedJoint>true</preserveFixedJoint>
+    </gazebo>
     <joint name="motor_stator_3_Rigid-8" type="fixed">
         <origin xyz="0.0 0.0 -0.012574860000000002" rpy="1.5707963267948966 5.551115123126252e-17 -7.0563966658104575e-31" />
         <parent link="motor_stator_3" />
         <child link="motor_rotor_3" />
         <axis xyz="5.551115123126252e-17 -1.0 1.9721522630525295e-31" />
     </joint>
+    <gazebo reference="motor_stator_3_Rigid-8">
+        <preserveFixedJoint>true</preserveFixedJoint>
+    </gazebo>
     <joint name="motor_stator_4_Rigid-9" type="fixed">
         <origin xyz="0.0 0.0 -0.012574860000000002" rpy="1.5707963267948966 -5.551115123126076e-17 4.77651691250472e-31" />
         <parent link="motor_stator_4" />
         <child link="motor_rotor_4" />
         <axis xyz="-5.551115123126076e-17 -1.0 1.9721522630525295e-31" />
     </joint>
+    <gazebo reference="motor_stator_4_Rigid-9">
+        <preserveFixedJoint>true</preserveFixedJoint>
+    </gazebo>
     <joint name="drone_base_Rigid-10" type="fixed">
         <origin xyz="0.06899999631620114 0.01569999872429419 -0.03000000000000041" rpy="-5.552470375841605e-17 -1.6098369382336299e-15 1.570796326794898" />
         <parent link="drone_base" />
         <child link="lidar_mount_30deg" />
     </joint>
+    <gazebo reference="drone_base_Rigid-10">
+        <preserveFixedJoint>true</preserveFixedJoint>
+    </gazebo>
     <joint name="lidar_mount_30deg_Rigid-11" type="fixed">
         <origin xyz="-0.007099999999999999 -0.023765 -0.01751688" rpy="-2.6179938779914984 -2.0735956533169185e-62 1.0514379098231357e-31" />
         <parent link="lidar_mount_30deg" />
         <child link="damper_1" />
     </joint>
+    <gazebo reference="lidar_mount_30deg_Rigid-11">
+        <preserveFixedJoint>true</preserveFixedJoint>
+    </gazebo>
     <joint name="lidar_mount_30deg_Rigid-12" type="fixed">
         <origin xyz="-0.03902 -0.0035000000000000053 -0.029216879999999997" rpy="-2.6179938779914984 -2.0735956533169185e-62 1.0514379098231357e-31" />
         <parent link="lidar_mount_30deg" />
         <child link="damper_2" />
     </joint>
+    <gazebo reference="lidar_mount_30deg_Rigid-12">
+        <preserveFixedJoint>true</preserveFixedJoint>
+    </gazebo>
     <joint name="lidar_mount_30deg_Rigid-13" type="fixed">
         <origin xyz="-0.007099999999999999 0.016764989999999997 -0.04091688" rpy="-2.6179938779914984 -2.0735956533169185e-62 1.0514379098231357e-31" />
         <parent link="lidar_mount_30deg" />
         <child link="damper_3" />
     </joint>
+    <gazebo reference="lidar_mount_30deg_Rigid-13">
+        <preserveFixedJoint>true</preserveFixedJoint>
+    </gazebo>
     <joint name="damper_3_Rigid-14" type="fixed">
         <origin xyz="0.0 0.004763139860407204 0.002750000241781825" rpy="2.6179938779914984 1.324508655883073e-31 -1.6501882390508204e-31" />
         <parent link="damper_3" />
         <child link="ldlidar_base" />
     </joint>
-    <joint name="drone_base_Rigid-15" type="fixed">
-        <origin xyz="0.06899999631620117 -0.015700001275705776 -0.0025000000000005187" rpy="-5.552470375841605e-17 -1.6098369382336299e-15 1.570796326794898" />
-        <parent link="drone_base" />
-        <child link="left_cover" />
-    </joint>
-    <joint name="drone_base_Rigid-16" type="fixed">
-        <origin xyz="0.06899999631620114 0.015699998724294152 -0.0025000000000004676" rpy="-5.552470375841605e-17 -1.6098369382336299e-15 1.570796326794898" />
-        <parent link="drone_base" />
-        <child link="right_cover" />
-    </joint>
+    <gazebo reference="damper_3_Rigid-14">
+        <preserveFixedJoint>true</preserveFixedJoint>
+    </gazebo>
     <joint name="drone_base_Rigid-17" type="fixed">
         <origin xyz="0.042999996316201175 -1.2757058028836036e-09 -0.030000000000000436" rpy="-1.6098369382336295e-15 5.552470375841598e-17 -3.1415926535897922" />
         <parent link="drone_base" />
         <child link="raspbox" />
     </joint>
+    <gazebo reference="drone_base_Rigid-17">
+        <preserveFixedJoint>true</preserveFixedJoint>
+    </gazebo>
     <joint name="raspbox_Rigid-18" type="fixed">
         <origin xyz="0.012999990000000001 -0.01899988 -0.005299999999999998" rpy="-3.141592653589793 5.82938621305951e-64 -1.5707963267948966" />
         <parent link="raspbox" />
         <child link="orangepi" />
     </joint>
+    <gazebo reference="raspbox_Rigid-18">
+        <preserveFixedJoint>true</preserveFixedJoint>
+    </gazebo>
     <joint name="raspbox_Rigid-19" type="fixed">
         <origin xyz="-0.01500718 0.0 -0.014800000000000004" rpy="-3.141592653589793 5.82938621305951e-64 -1.5707963267948966" />
         <parent link="raspbox" />
         <child link="raspbox_top" />
     </joint>
+    <gazebo reference="raspbox_Rigid-19">
+        <preserveFixedJoint>true</preserveFixedJoint>
+    </gazebo>
     <joint name="drone_base_Rigid-20" type="fixed">
         <origin xyz="0.07563701631620116 -0.009450001275705762 -0.01763891000000048" rpy="1.5707963267948966 -1.6098369382336299e-15 1.570796326794898" />
         <parent link="drone_base" />
         <child link="camera_1800TVL" />
     </joint>
+    <gazebo reference="drone_base_Rigid-20">
+        <preserveFixedJoint>true</preserveFixedJoint>
+    </gazebo>
     <joint name="raspbox_top_Rigid-21" type="fixed">
         <origin xyz="0.0 -0.06115694 0.0014999999999999946" rpy="0.0 -0.0 -3.689660421169335e-32" />
         <parent link="raspbox_top" />
         <child link="CNHL_5S_2200MAH_LIPO" />
     </joint>
-    <joint name="back_holder_Rigid-22" type="fixed">
-        <origin xyz="0.0095 0.03197260999999999 -0.025" rpy="-0.7853981633974483 -3.283760281271351e-62 1.665064276623699e-31" />
-        <parent link="back_holder" />
-        <child link="antena-stick" />
+    <gazebo reference="raspbox_top_Rigid-21">
+        <preserveFixedJoint>true</preserveFixedJoint>
+    </gazebo>
+    <joint name="drone_base_Rigid-23" type="fixed">
+        <origin xyz="0.06899999631620114 0.015699998724294152 -0.0025000000000004676" rpy="-5.552470375841605e-17 -1.6098369382336299e-15 1.570796326794898" />
+        <parent link="drone_base" />
+        <child link="right_cover_H7" />
     </joint>
+    <gazebo reference="drone_base_Rigid-23">
+        <preserveFixedJoint>true</preserveFixedJoint>
+    </gazebo>
+    <joint name="drone_base_Rigid-24" type="fixed">
+        <origin xyz="0.06899999631620117 -0.015700001275705776 -0.0025000000000005187" rpy="-5.552470375841605e-17 -1.6098369382336299e-15 1.570796326794898" />
+        <parent link="drone_base" />
+        <child link="left_cover_H7" />
+    </joint>
+    <gazebo reference="drone_base_Rigid-24">
+        <preserveFixedJoint>true</preserveFixedJoint>
+    </gazebo>
+    <joint name="drone_base_Rigid-25" type="fixed">
+        <origin xyz="-0.08741136368379877 0.009499998724293976 -0.002500000000000486" rpy="-5.552470375841605e-17 -1.6098369382336299e-15 1.570796326794898" />
+        <parent link="drone_base" />
+        <child link="back_holder_optical_flow" />
+    </joint>
+    <gazebo reference="drone_base_Rigid-25">
+        <preserveFixedJoint>true</preserveFixedJoint>
+    </gazebo>
+    <joint name="back_holder_optical_flow_Rigid-26" type="fixed">
+        <origin xyz="-0.009500000000000001 0.021173009999999996 -0.02625" rpy="-0.5235987755982986 -2.252140986350246e-62 1.1419711492581944e-31" />
+        <parent link="back_holder_optical_flow" />
+        <child link="antenna_stick" />
+    </joint>
+    <gazebo reference="back_holder_optical_flow_Rigid-26">
+        <preserveFixedJoint>true</preserveFixedJoint>
+    </gazebo>
+    <joint name="motor_rotor_4_Rigid-29" type="fixed">
+        <origin xyz="-1.5400000000020952e-06 -0.006106199999999999 1.9799999999925432e-06" rpy="-9.860761315262645e-32 -3.94430452610506e-31 -1.1102230246252798e-16" />
+        <parent link="motor_rotor_4" />
+        <child link="7_inch_CCW_2" />
+    </joint>
+    <gazebo reference="motor_rotor_4_Rigid-29">
+        <preserveFixedJoint>true</preserveFixedJoint>
+    </gazebo>
+    <joint name="motor_rotor_2_Rigid-30" type="fixed">
+        <origin xyz="-2.120000000012112e-06 -0.006106199999999999 1.3400000000096669e-06" rpy="1.1832913578315177e-30 2.189528850507736e-47 -5.551115123126314e-17" />
+        <parent link="motor_rotor_2" />
+        <child link="7_inch_CW_1" />
+    </joint>
+    <gazebo reference="motor_rotor_2_Rigid-30">
+        <preserveFixedJoint>true</preserveFixedJoint>
+    </gazebo>
+    <joint name="motor_rotor_1_Rigid-31" type="fixed">
+        <origin xyz="0.0 -0.006106199999999999 0.0" rpy="-1.9721522630525278e-31 1.7516230804059725e-46 -5.551115123127094e-17" />
+        <parent link="motor_rotor_1" />
+        <child link="7_inch_CW_2" />
+    </joint>
+    <gazebo reference="motor_rotor_1_Rigid-31">
+        <preserveFixedJoint>true</preserveFixedJoint>
+    </gazebo>
+    <joint name="motor_rotor_3_Rigid-32" type="fixed">
+        <origin xyz="-1.5400000000020952e-06 -0.006106199999999999 1.980000000010307e-06" rpy="-1.972152263052529e-31 7.888609052210118e-31 -5.263181352021438e-30" />
+        <parent link="motor_rotor_3" />
+        <child link="7_inch_CCW_1" />
+    </joint>
+    <gazebo reference="motor_rotor_3_Rigid-32">
+        <preserveFixedJoint>true</preserveFixedJoint>
+    </gazebo>
 
     <!-- ldlidar_link -->
     <joint name="ldlidar_link_joint" type="fixed">
         <parent link="ldlidar_base"/>
         <child link="ldlidar_link"/>
-        <origin xyz="-0.0085 -0.033 -0.012" rpy="0 3.6652 1.5708" />
+        <origin xyz="-0.0085 -0.033 -0.012" rpy="0.0 3.6652 1.5708" />
     </joint>
-    <link name="ldlidar_link" />
+    <gazebo reference="ldlidar_link_joint">
+        <preserveFixedJoint>true</preserveFixedJoint>
+    </gazebo>
+    <link name="ldlidar_link">
+        <inertial>
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+            <mass value="0.001"/>
+            <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/>
+        </inertial>
+    </link>
 </robot>

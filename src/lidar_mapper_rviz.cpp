@@ -38,14 +38,12 @@ public:
     auto qos = rclcpp::SensorDataQoS();
 
     mf_scan_sub_.subscribe(this, scan_topic_, qos.get_rmw_qos_profile());
-    mf_gps_sub_.subscribe(this, gps_topic_, qos.get_rmw_qos_profile());
-    mf_position_sub_.subscribe(this, position_topic_, qos.get_rmw_qos_profile());
+    mf_pose_sub_.subscribe(this, pose_topic_, qos.get_rmw_qos_profile());
 
     sync_ = std::make_shared<message_filters::Synchronizer<ApproximateSyncPolicy>>(
       ApproximateSyncPolicy(10),
       mf_scan_sub_,
-      mf_gps_sub_,
-      mf_position_sub_
+      mf_pose_sub_
     );
 
     double timestamp_diff_threshold = this->get_parameter("timestamp_diff_threshold").as_double();
@@ -54,8 +52,7 @@ public:
     sync_->setMaxIntervalDuration(rclcpp::Duration::from_seconds(timestamp_diff_threshold));
     sync_->registerCallback(std::bind(&LidarMapperVisualiser::approximate_sync_callback, this,
                                       std::placeholders::_1,
-                                      std::placeholders::_2,
-                                      std::placeholders::_3));
+                                      std::placeholders::_2));
 
     orientation_sub_ = this->create_subscription<sensor_msgs::msg::Imu>(
       orientation_topic_,
@@ -63,11 +60,18 @@ public:
       std::bind(&LidarMapperVisualiser::orientation_callback, this, std::placeholders::_1)
     );
 
+    gps_sub_ = this->create_subscription<sensor_msgs::msg::NavSatFix>(
+      gps_topic_,
+      qos,
+      std::bind(&LidarMapperVisualiser::gps_callback, this, std::placeholders::_1)
+    );
+
     // tf broadcaster
     tf_broadcaster_ = std::make_shared<tf2_ros::TransformBroadcaster>(this);
 
-    // publisher
-    pose_pub_ = this->create_publisher<geometry_msgs::msg::PoseStamped>(pose_topic_, qos);
+    // publishers
+    sync_pose_pub_ = this->create_publisher<geometry_msgs::msg::PoseStamped>(sync_pose_topic_, qos);
+    sync_scan_pub_ = this->create_publisher<sensor_msgs::msg::LaserScan>(sync_scan_topic_, qos);
 
     RCLCPP_INFO(this->get_logger(), "LIDAR mapper visualiser node has been started!");
   }
@@ -83,17 +87,16 @@ private:
   std::string scan_topic_ = "/ldlidar_node/scan";
   std::string orientation_topic_ = "/mavros/imu/data";
   std::string gps_topic_ = "/mavros/global_position/global";
-  std::string position_topic_ = "mavros/local_position/pose";
+  std::string pose_topic_ = "/mavros/local_position/pose";
 
-  double interpolation_timestamp_threshold_ = 0.25;
+  std::string sync_pose_topic_ = "/drone/sync_pose";
+  std::string sync_scan_topic_ = "/drone/sync_scan";
 
   message_filters::Subscriber<sensor_msgs::msg::LaserScan> mf_scan_sub_;
-  message_filters::Subscriber<sensor_msgs::msg::NavSatFix> mf_gps_sub_;
-  message_filters::Subscriber<geometry_msgs::msg::PoseStamped> mf_position_sub_;
+  message_filters::Subscriber<geometry_msgs::msg::PoseStamped> mf_pose_sub_;
 
   typedef message_filters::sync_policies::ApproximateTime<
     sensor_msgs::msg::LaserScan,
-    sensor_msgs::msg::NavSatFix,
     geometry_msgs::msg::PoseStamped> ApproximateSyncPolicy;
   std::shared_ptr<message_filters::Synchronizer<ApproximateSyncPolicy>> sync_;
 
@@ -101,17 +104,20 @@ private:
   sensor_msgs::msg::Imu::ConstSharedPtr previous_orientation_msg_;
   sensor_msgs::msg::NavSatFix::ConstSharedPtr latest_gps_msg_;
   sensor_msgs::msg::NavSatFix::ConstSharedPtr previous_gps_msg_;
-  geometry_msgs::msg::PoseStamped::ConstSharedPtr latest_position_msg_;
-  geometry_msgs::msg::PoseStamped::ConstSharedPtr previous_position_msg_;
+  geometry_msgs::msg::PoseStamped::ConstSharedPtr latest_pose_msg_;
+  geometry_msgs::msg::PoseStamped::ConstSharedPtr previous_pose_msg_;
 
   std::shared_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster_;
   std::string world_link_ = "map";
   std::string drone_base_link_ = "drone_base_link";
 
-  rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr pose_pub_;
-  std::string pose_topic_ = "/drone_pose";
+  rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr sync_pose_pub_;
+  rclcpp::Publisher<sensor_msgs::msg::LaserScan>::SharedPtr sync_scan_pub_;
 
   rclcpp::Subscription<sensor_msgs::msg::Imu>::SharedPtr orientation_sub_;
+  rclcpp::Subscription<sensor_msgs::msg::NavSatFix>::SharedPtr gps_sub_;
+
+  double interpolation_timestamp_threshold_ = 0.25;
 
   bool got_first_fix_ = false;
   double origin_x_ = 0.0;
@@ -130,6 +136,8 @@ private:
     }
 
     latest_orientation_msg_ = orientation_msg;
+
+    // for debug purposes
 
     boost::qvm::quat<double> q = {
       orientation_msg->orientation.w,
@@ -154,8 +162,7 @@ private:
   }
 
 
-  void update_latest_messages(const sensor_msgs::msg::NavSatFix::ConstSharedPtr& gps_msg,
-                              const geometry_msgs::msg::PoseStamped::ConstSharedPtr& position_msg)
+  void gps_callback(const sensor_msgs::msg::NavSatFix::ConstSharedPtr gps_msg)
   {
     if (latest_gps_msg_ != nullptr)
     {
@@ -166,61 +173,59 @@ private:
     }
 
     latest_gps_msg_ = gps_msg;
-
-    if (latest_position_msg_ != nullptr)
-    {
-      rclcpp::Time prev_timestamp(latest_position_msg_->header.stamp);
-      rclcpp::Time new_timestamp(position_msg->header.stamp);
-      if (new_timestamp > prev_timestamp)
-        previous_position_msg_ = latest_position_msg_;
-    }
-
-    latest_position_msg_ = position_msg;
   }
 
 
   void approximate_sync_callback(const sensor_msgs::msg::LaserScan::ConstSharedPtr& scan_msg,
-                                 const sensor_msgs::msg::NavSatFix::ConstSharedPtr& gps_msg,
-                                 const geometry_msgs::msg::PoseStamped::ConstSharedPtr& position_msg)
+                                 const geometry_msgs::msg::PoseStamped::ConstSharedPtr& pose_msg)
   {
-    if (previous_gps_msg_ == nullptr ||
-        previous_position_msg_ == nullptr)
+    if (latest_pose_msg_ != nullptr)
+    {
+      rclcpp::Time prev_timestamp(latest_pose_msg_->header.stamp);
+      rclcpp::Time new_timestamp(pose_msg->header.stamp);
+      if (new_timestamp > prev_timestamp)
+        previous_pose_msg_ = latest_pose_msg_;
+    }
+
+    latest_pose_msg_ = pose_msg;
+
+    if (previous_pose_msg_ == nullptr ||
+        previous_gps_msg_ == nullptr ||
+        latest_gps_msg_ == nullptr)
     {
       RCLCPP_WARN(this->get_logger(), "Waiting for previous messages to be available for synchronization.");
-      update_latest_messages(gps_msg, position_msg);
       return;
     }
 
-    if (gps_msg->status.status == sensor_msgs::msg::NavSatStatus::STATUS_NO_FIX ||
+    if (latest_gps_msg_->status.status == sensor_msgs::msg::NavSatStatus::STATUS_NO_FIX ||
         previous_gps_msg_->status.status == sensor_msgs::msg::NavSatStatus::STATUS_NO_FIX)
     {
       RCLCPP_WARN(this->get_logger(), "No GPS fix available.");
-      update_latest_messages(gps_msg, position_msg);
       return;
     }
 
     if (got_first_fix_ == false)
     {
-      origin_x_ = previous_position_msg_->pose.position.x;
-      origin_y_ = previous_position_msg_->pose.position.y;
-      // origin_alt_ = previous_position_msg_->pose.position.z;
+      origin_x_ = previous_pose_msg_->pose.position.x;
+      origin_y_ = previous_pose_msg_->pose.position.y;
+      // origin_alt_ = previous_pose_msg_->pose.position.z;
       got_first_fix_ = true;
       RCLCPP_INFO(this->get_logger(), "Set origin to:  %f, %f, %f", origin_x_, origin_y_, origin_alt_);
     }
 
-    double coord_x = position_msg->pose.position.x - origin_x_;
-    double coord_y = position_msg->pose.position.y - origin_y_;
-    double alt = position_msg->pose.position.z - origin_alt_;
+    double coord_x = pose_msg->pose.position.x - origin_x_;
+    double coord_y = pose_msg->pose.position.y - origin_y_;
+    double alt = pose_msg->pose.position.z - origin_alt_;
 
     boost::qvm::quat<double> q = {
-      position_msg->pose.orientation.w,
-      position_msg->pose.orientation.x,
-      position_msg->pose.orientation.y,
-      position_msg->pose.orientation.z
+      pose_msg->pose.orientation.w,
+      pose_msg->pose.orientation.x,
+      pose_msg->pose.orientation.y,
+      pose_msg->pose.orientation.z
     };
 
     // interpolate pose to scan timestamp
-    interpolate_pose(scan_msg, position_msg, coord_x, coord_y, alt, q);
+    interpolate_pose(scan_msg, pose_msg, coord_x, coord_y, alt, q);
 
     auto timestamp = scan_msg->header.stamp;
 
@@ -238,52 +243,55 @@ private:
 
     tf_broadcaster_->sendTransform(world_drone_tf);
 
-    geometry_msgs::msg::PoseStamped pose_msg;
-    pose_msg.header.stamp = timestamp;
-    pose_msg.header.frame_id = world_link_;
-    pose_msg.pose.position.x = coord_x;
-    pose_msg.pose.position.y = coord_y;
-    pose_msg.pose.position.z = alt;
-    pose_msg.pose.orientation.w = q.a[0];
-    pose_msg.pose.orientation.x = q.a[1];
-    pose_msg.pose.orientation.y = q.a[2];
-    pose_msg.pose.orientation.z = q.a[3];
+    geometry_msgs::msg::PoseStamped sync_pose_msg;
+    sync_pose_msg.header.stamp = timestamp;
+    sync_pose_msg.header.frame_id = world_link_;
+    sync_pose_msg.pose.position.x = coord_x;
+    sync_pose_msg.pose.position.y = coord_y;
+    sync_pose_msg.pose.position.z = alt;
+    sync_pose_msg.pose.orientation.w = q.a[0];
+    sync_pose_msg.pose.orientation.x = q.a[1];
+    sync_pose_msg.pose.orientation.y = q.a[2];
+    sync_pose_msg.pose.orientation.z = q.a[3];
 
-    pose_pub_->publish(pose_msg);
-
-    update_latest_messages(gps_msg, position_msg);
+    sync_pose_pub_->publish(sync_pose_msg);
+    sync_scan_pub_->publish(*scan_msg);
   }
 
 
   void interpolate_pose(const sensor_msgs::msg::LaserScan::ConstSharedPtr& scan_msg,
-                        const geometry_msgs::msg::PoseStamped::ConstSharedPtr& position_msg,
+                        const geometry_msgs::msg::PoseStamped::ConstSharedPtr& pose_msg,
                         double& coord_x, double& coord_y, double& alt,
                         boost::qvm::quat<double>& q)
   {
     double scan_timestamp = static_cast<double>(scan_msg->header.stamp.sec) +
-                            static_cast<double>(scan_msg->header.stamp.nanosec) * 1e-9;
+                              static_cast<double>(scan_msg->header.stamp.nanosec) * 1e-9;
 
-    double prev_timestamp = static_cast<double>(previous_position_msg_->header.stamp.sec) +
-                                static_cast<double>(previous_position_msg_->header.stamp.nanosec) * 1e-9;
-    double curr_timestamp = static_cast<double>(position_msg->header.stamp.sec) +
-                           static_cast<double>(position_msg->header.stamp.nanosec) * 1e-9;
+    double prev_timestamp = static_cast<double>(previous_pose_msg_->header.stamp.sec) +
+                              static_cast<double>(previous_pose_msg_->header.stamp.nanosec) * 1e-9;
+    double curr_timestamp = static_cast<double>(pose_msg->header.stamp.sec) +
+                              static_cast<double>(pose_msg->header.stamp.nanosec) * 1e-9;
 
     // linear interpolation for orientation
     boost::qvm::quat<double> q_prev = {
-      previous_position_msg_->pose.orientation.w,
-      previous_position_msg_->pose.orientation.x,
-      previous_position_msg_->pose.orientation.y,
-      previous_position_msg_->pose.orientation.z
+      previous_pose_msg_->pose.orientation.w,
+      previous_pose_msg_->pose.orientation.x,
+      previous_pose_msg_->pose.orientation.y,
+      previous_pose_msg_->pose.orientation.z
     };
 
     boost::qvm::quat<double> q_curr = {
-      position_msg->pose.orientation.w,
-      position_msg->pose.orientation.x,
-      position_msg->pose.orientation.y,
-      position_msg->pose.orientation.z
+      pose_msg->pose.orientation.w,
+      pose_msg->pose.orientation.x,
+      pose_msg->pose.orientation.y,
+      pose_msg->pose.orientation.z
     };
 
     q = q_curr;
+    coord_x = pose_msg->pose.position.x - origin_x_;
+    coord_y = pose_msg->pose.position.y - origin_y_;
+    alt = pose_msg->pose.position.z - origin_alt_;
+
     if (curr_timestamp > prev_timestamp &&
         curr_timestamp - prev_timestamp < interpolation_timestamp_threshold_)
     {
@@ -333,23 +341,11 @@ private:
       }
       q = q_delta_interp * q_prev;
       boost::qvm::normalize(q);
-    }
-    else
-    {
-      RCLCPP_WARN(this->get_logger(), "Orientation timestamps are identical, cannot interpolate.");
-    }
 
-    // linear interpolation for GPS
-    coord_x = position_msg->pose.position.x - origin_x_;
-    coord_y = position_msg->pose.position.y - origin_y_;
-    alt = position_msg->pose.position.z - origin_alt_;
-
-    if (curr_timestamp > prev_timestamp &&
-        curr_timestamp - prev_timestamp < interpolation_timestamp_threshold_)
-    {
-      double prev_coord_x = previous_position_msg_->pose.position.x - origin_x_;
-      double prev_coord_y = previous_position_msg_->pose.position.y - origin_y_;
-      double prev_alt = previous_position_msg_->pose.position.z - origin_alt_;
+      // linear interpolation for GPS
+      double prev_coord_x = previous_pose_msg_->pose.position.x - origin_x_;
+      double prev_coord_y = previous_pose_msg_->pose.position.y - origin_y_;
+      double prev_alt = previous_pose_msg_->pose.position.z - origin_alt_;
 
       double t = (scan_timestamp - prev_timestamp) /
                  (curr_timestamp - prev_timestamp);
@@ -358,9 +354,13 @@ private:
       coord_y = prev_coord_y + t * (coord_y - prev_coord_y);
       alt = prev_alt + t * (alt - prev_alt);
     }
+    else if (curr_timestamp == prev_timestamp)
+    {
+      RCLCPP_WARN(this->get_logger(), "Timestamps are identical, cannot interpolate.");
+    }
     else
     {
-      RCLCPP_WARN(this->get_logger(), "GPS timestamps are identical, cannot interpolate.");
+      RCLCPP_WARN(this->get_logger(), "Timestamps too far apart for interpolation.");
     }
   }
 };

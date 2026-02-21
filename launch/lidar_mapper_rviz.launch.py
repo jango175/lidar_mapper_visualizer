@@ -13,7 +13,7 @@ def generate_launch_description():
     output = 'screen',
     parameters = [
       {'timestamp_diff_threshold': 0.05},
-      {'interpolation_timestamp_threshold': 0.04}
+      {'interpolation_timestamp_threshold': 0.25}
     ]
   )
 

@@ -23,16 +23,23 @@ public:
   {
     auto timestamp_param_desc = rcl_interfaces::msg::ParameterDescriptor{};
     timestamp_param_desc.description = "Threshold for timestamp difference in approximate sync (seconds)";
-    this->declare_parameter("timestamp_diff_threshold", 0.025, timestamp_param_desc);
+    this->declare_parameter("timestamp_diff_threshold", 0.15, timestamp_param_desc);
 
     auto interpolation_param_desc = rcl_interfaces::msg::ParameterDescriptor{};
     interpolation_param_desc.description = "Threshold for interpolation timestamp difference (seconds)";
-    this->declare_parameter("interpolation_timestamp_threshold", 0.25, interpolation_param_desc);
-
-    interpolation_timestamp_threshold_ = this->get_parameter("interpolation_timestamp_threshold").as_double();
+    this->declare_parameter("interpolation_timestamp_threshold", 0.11, interpolation_param_desc);
 
     double timestamp_diff_threshold = this->get_parameter("timestamp_diff_threshold").as_double();
     RCLCPP_INFO(this->get_logger(), "Using timestamp difference threshold: %f seconds", timestamp_diff_threshold);
+
+    interpolation_timestamp_threshold_ = this->get_parameter("interpolation_timestamp_threshold").as_double();
+    RCLCPP_INFO(this->get_logger(), "Using interpolation timestamp difference threshold: %f seconds", interpolation_timestamp_threshold_);
+
+    if (interpolation_timestamp_threshold_ >= timestamp_diff_threshold)
+    {
+      RCLCPP_ERROR(this->get_logger(), "timestamp_diff_threshold is smaller than interpolation_timestamp_threshold! Exiting...");
+      return;
+    }
 
     auto qos = rclcpp::SensorDataQoS();
 
@@ -60,6 +67,7 @@ public:
       this->get_node_clock_interface(),
       tf2::durationFromSec(timestamp_diff_threshold)
     );
+    mf_tf2_->setTolerance(rclcpp::Duration::from_seconds(interpolation_timestamp_threshold_));
     mf_tf2_->registerCallback(&LidarMapperVisualiser::sync_scan_callback, this);
 
     orientation_sub_ = this->create_subscription<sensor_msgs::msg::Imu>(
@@ -97,20 +105,20 @@ public:
 
 
 private:
-  std::string scan_topic_ = "/ldlidar_node/scan";
-  std::string orientation_topic_ = "/mavros/imu/data";
-  std::string gps_topic_ = "/mavros/global_position/global";
-  std::string pose_topic_ = "/mavros/local_position/pose";
+  const std::string scan_topic_ = "/ldlidar_node/scan";
+  const std::string orientation_topic_ = "/mavros/imu/data";
+  const std::string gps_topic_ = "/mavros/global_position/global";
+  const std::string pose_topic_ = "/mavros/local_position/pose";
 
-  std::string sync_scan_topic_ = "/drone/sync_scan";
-  std::string point_cloud_topic_ = "/drone/point_cloud";
-  std::string sync_point_cloud_topic_ = "/drone/sync_point_cloud";
+  const std::string sync_scan_topic_ = "/drone/sync_scan";
+  const std::string point_cloud_topic_ = "/drone/point_cloud";
+  const std::string sync_point_cloud_topic_ = "/drone/sync_point_cloud";
 
   std::unique_ptr<tf2_ros::Buffer> tf_buffer_;
   std::shared_ptr<tf2_ros::TransformListener> tf_listener_;
   std::shared_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster_;
-  std::string world_link_ = "map";
-  std::string drone_base_link_ = "drone_base_link";
+  const std::string world_link_ = "map";
+  const std::string drone_base_link_ = "drone_base_link";
 
   rclcpp::Publisher<sensor_msgs::msg::LaserScan>::SharedPtr sync_scan_pub_;
   rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr point_cloud_pub_;
@@ -135,7 +143,7 @@ private:
   geometry_msgs::msg::PoseStamped::ConstSharedPtr latest_pose_msg_;
   geometry_msgs::msg::PoseStamped::ConstSharedPtr previous_pose_msg_;
 
-  double interpolation_timestamp_threshold_ = 0.25;
+  double interpolation_timestamp_threshold_ = 0.11;
 
 
   void orientation_callback(const sensor_msgs::msg::Imu::SharedPtr orientation_msg)

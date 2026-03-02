@@ -18,7 +18,6 @@ Panels:
   - Class: rviz_common/Views
     Expanded:
       - /Current View1
-      - /Current View1/Enable Stereo Rendering1
     Name: Views
     Splitter Ratio: 0.5
   - Class: rviz_common/Time
@@ -396,25 +395,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz_default_plugins/ThirdPersonFollower
-      Distance: 10.824053764343262
+      Distance: 8.333333969116211
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 0
-        Y: 0
+        X: 1.6666665077209473
+        Y: 1.666666030883789
         Z: 0
-      Focal Shape Fixed Size: false
+      Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.6097963452339172
+      Pitch: 0.7853980660438538
       Target Frame: drone_base
       Value: ThirdPersonFollower (rviz_default_plugins)
-      Yaw: 2.709066867828369
+      Yaw: 0.7853981852531433
     Saved: ~
 Window Geometry:
   Displays:

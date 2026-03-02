@@ -7,6 +7,8 @@ import os
 
 
 def generate_launch_description():
+  use_sim_time = True # should be True when using bag files
+
   lidar_mapper_rviz_node = Node(
     package = 'lidar_mapper_visualiser',
     executable = 'lidar_mapper_rviz',
@@ -14,8 +16,9 @@ def generate_launch_description():
     output = 'screen',
     # prefix=['gnome-terminal -- gdb -ex run --args'], # debugger
     parameters = [
-      {'timestamp_diff_threshold': 0.12},
-      {'interpolation_timestamp_threshold': 0.15}
+      {'timestamp_diff_threshold': 0.15},
+      {'interpolation_timestamp_threshold': 0.11}, # should be smaller than timestamp_diff_threshold
+      {'use_sim_time': use_sim_time}
     ]
   )
 
@@ -32,7 +35,8 @@ def generate_launch_description():
     name = 'robot_state_publisher',
     output = 'screen',
     parameters = [
-      {'robot_description': robot_desc}
+      {'robot_description': robot_desc},
+      {'use_sim_time': use_sim_time}
     ]
   )
 
@@ -55,7 +59,10 @@ def generate_launch_description():
     executable = 'rviz2',
     name = 'rviz2',
     output = 'screen',
-    arguments = ['-d', rviz_config_file]
+    arguments = ['-d', rviz_config_file],
+    parameters = [
+      {'use_sim_time': use_sim_time}
+    ]
   )
 
   ld = LaunchDescription()

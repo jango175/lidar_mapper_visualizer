@@ -13,6 +13,7 @@ find_package(rclcpp REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(message_filters REQUIRED)
+find_package(laser_geometry REQUIRED)
 find_package(tf2_ros REQUIRED)
 
 add_executable(${NODE_NAME} src/lidar_mapper_rviz.cpp)
@@ -21,7 +22,9 @@ ament_target_dependencies(${NODE_NAME}
   geometry_msgs
   sensor_msgs
   message_filters
-  tf2_ros)
+  laser_geometry
+  tf2_ros
+)
 
 target_include_directories(${NODE_NAME} PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>

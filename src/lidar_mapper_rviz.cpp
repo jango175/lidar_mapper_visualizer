@@ -1,22 +1,19 @@
-#include <iostream>
+#include <memory>
 #include <string>
-#include <ctime>
-#include <chrono>
-#include <boost/qvm/quat.hpp>
-#include <boost/qvm/quat_operations.hpp>
-#include <boost/qvm/vec.hpp>
-#include <boost/qvm/vec_operations.hpp>
-#include <boost/qvm/all.hpp>
-
-#include "rclcpp/rclcpp.hpp"
-#include "message_filters/subscriber.h"
-#include "message_filters/sync_policies/approximate_time.h"
-#include "message_filters/time_synchronizer.h"
-#include "sensor_msgs/msg/laser_scan.hpp"
-#include "sensor_msgs/msg/nav_sat_fix.hpp"
-#include "sensor_msgs/msg/imu.hpp"
-#include "geometry_msgs/msg/pose_stamped.hpp"
-#include "tf2_ros/transform_broadcaster.h"
+#include <rclcpp/node.hpp>
+#include <laser_geometry/laser_geometry.hpp>
+#include <sensor_msgs/msg/laser_scan.hpp>
+#include <sensor_msgs/msg/point_cloud2.hpp>
+#include <sensor_msgs/msg/nav_sat_fix.hpp>
+#include <sensor_msgs/msg/imu.hpp>
+#include <geometry_msgs/msg/pose_stamped.hpp>
+#include <tf2_ros/message_filter.hpp>
+#include <tf2_ros/create_timer_ros.hpp>
+#include <tf2_ros/transform_broadcaster.hpp>
+#include <tf2_ros/transform_listener.hpp>
+#include <tf2_ros/buffer.hpp>
+#include <message_filters/subscriber.h>
+#include <message_filters/sync_policies/approximate_time.h>
 
 
 class LidarMapperVisualiser : public rclcpp::Node
@@ -34,25 +31,36 @@ public:
 
     interpolation_timestamp_threshold_ = this->get_parameter("interpolation_timestamp_threshold").as_double();
 
-    // subscribers
-    auto qos = rclcpp::SensorDataQoS();
-
-    mf_scan_sub_.subscribe(this, scan_topic_, qos.get_rmw_qos_profile());
-    mf_pose_sub_.subscribe(this, pose_topic_, qos.get_rmw_qos_profile());
-
-    sync_ = std::make_shared<message_filters::Synchronizer<ApproximateSyncPolicy>>(
-      ApproximateSyncPolicy(10),
-      mf_scan_sub_,
-      mf_pose_sub_
-    );
-
     double timestamp_diff_threshold = this->get_parameter("timestamp_diff_threshold").as_double();
     RCLCPP_INFO(this->get_logger(), "Using timestamp difference threshold: %f seconds", timestamp_diff_threshold);
 
-    sync_->setMaxIntervalDuration(rclcpp::Duration::from_seconds(timestamp_diff_threshold));
-    sync_->registerCallback(std::bind(&LidarMapperVisualiser::approximate_sync_callback, this,
-                                      std::placeholders::_1,
-                                      std::placeholders::_2));
+    auto qos = rclcpp::SensorDataQoS();
+
+    // tf
+    auto timer_interface = std::make_shared<tf2_ros::CreateTimerROS>(
+      this->get_node_base_interface(),
+      this->get_node_timers_interface()
+    );
+    tf_buffer_ = std::make_unique<tf2_ros::Buffer>(this->get_clock());
+    tf_buffer_->setCreateTimerInterface(timer_interface);
+    tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
+    tf_broadcaster_ = std::make_shared<tf2_ros::TransformBroadcaster>(this);
+
+    // publishers
+    sync_scan_pub_ = this->create_publisher<sensor_msgs::msg::LaserScan>(sync_scan_topic_, qos);
+    point_cloud_pub_ = this->create_publisher<sensor_msgs::msg::PointCloud2>(point_cloud_topic_, qos);
+    sync_point_cloud_pub_ = this->create_publisher<sensor_msgs::msg::PointCloud2>(sync_point_cloud_topic_, qos);
+
+    // subscribers
+    mf_scan_sub_.subscribe(this, scan_topic_, qos.get_rmw_qos_profile());
+
+    mf_tf2_ = std::make_shared<tf2_ros::MessageFilter<sensor_msgs::msg::LaserScan>>(
+      mf_scan_sub_, *tf_buffer_, world_link_, 10,
+      this->get_node_logging_interface(),
+      this->get_node_clock_interface(),
+      tf2::durationFromSec(timestamp_diff_threshold)
+    );
+    mf_tf2_->registerCallback(&LidarMapperVisualiser::sync_scan_callback, this);
 
     orientation_sub_ = this->create_subscription<sensor_msgs::msg::Imu>(
       orientation_topic_,
@@ -66,12 +74,17 @@ public:
       std::bind(&LidarMapperVisualiser::gps_callback, this, std::placeholders::_1)
     );
 
-    // tf broadcaster
-    tf_broadcaster_ = std::make_shared<tf2_ros::TransformBroadcaster>(this);
+    scan_sub_ = this->create_subscription<sensor_msgs::msg::LaserScan>(
+      scan_topic_,
+      qos,
+      std::bind(&LidarMapperVisualiser::scan_callback, this, std::placeholders::_1)
+    );
 
-    // publishers
-    sync_pose_pub_ = this->create_publisher<geometry_msgs::msg::PoseStamped>(sync_pose_topic_, qos);
-    sync_scan_pub_ = this->create_publisher<sensor_msgs::msg::LaserScan>(sync_scan_topic_, qos);
+    pose_sub_ = this->create_subscription<geometry_msgs::msg::PoseStamped>(
+      pose_topic_,
+      qos,
+      std::bind(&LidarMapperVisualiser::pose_callback, this, std::placeholders::_1)
+    );
 
     RCLCPP_INFO(this->get_logger(), "LIDAR mapper visualiser node has been started!");
   }
@@ -89,40 +102,40 @@ private:
   std::string gps_topic_ = "/mavros/global_position/global";
   std::string pose_topic_ = "/mavros/local_position/pose";
 
-  std::string sync_pose_topic_ = "/drone/sync_pose";
   std::string sync_scan_topic_ = "/drone/sync_scan";
+  std::string point_cloud_topic_ = "/drone/point_cloud";
+  std::string sync_point_cloud_topic_ = "/drone/sync_point_cloud";
+
+  std::unique_ptr<tf2_ros::Buffer> tf_buffer_;
+  std::shared_ptr<tf2_ros::TransformListener> tf_listener_;
+  std::shared_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster_;
+  std::string world_link_ = "map";
+  std::string drone_base_link_ = "drone_base_link";
+
+  rclcpp::Publisher<sensor_msgs::msg::LaserScan>::SharedPtr sync_scan_pub_;
+  rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr point_cloud_pub_;
+  rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr sync_point_cloud_pub_;
 
   message_filters::Subscriber<sensor_msgs::msg::LaserScan> mf_scan_sub_;
-  message_filters::Subscriber<geometry_msgs::msg::PoseStamped> mf_pose_sub_;
+  std::shared_ptr<tf2_ros::MessageFilter<sensor_msgs::msg::LaserScan>> mf_tf2_;
 
-  typedef message_filters::sync_policies::ApproximateTime<
-    sensor_msgs::msg::LaserScan,
-    geometry_msgs::msg::PoseStamped> ApproximateSyncPolicy;
-  std::shared_ptr<message_filters::Synchronizer<ApproximateSyncPolicy>> sync_;
+  rclcpp::Subscription<sensor_msgs::msg::Imu>::SharedPtr orientation_sub_;
+  rclcpp::Subscription<sensor_msgs::msg::NavSatFix>::SharedPtr gps_sub_;
+  rclcpp::Subscription<sensor_msgs::msg::LaserScan>::SharedPtr scan_sub_;
+  rclcpp::Subscription<geometry_msgs::msg::PoseStamped>::SharedPtr pose_sub_;
+
+  laser_geometry::LaserProjection laser_projector_;
 
   sensor_msgs::msg::Imu::ConstSharedPtr latest_orientation_msg_;
   sensor_msgs::msg::Imu::ConstSharedPtr previous_orientation_msg_;
   sensor_msgs::msg::NavSatFix::ConstSharedPtr latest_gps_msg_;
   sensor_msgs::msg::NavSatFix::ConstSharedPtr previous_gps_msg_;
+  sensor_msgs::msg::LaserScan::ConstSharedPtr latest_scan_msg_;
+  sensor_msgs::msg::LaserScan::ConstSharedPtr previous_scan_msg_;
   geometry_msgs::msg::PoseStamped::ConstSharedPtr latest_pose_msg_;
   geometry_msgs::msg::PoseStamped::ConstSharedPtr previous_pose_msg_;
 
-  std::shared_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster_;
-  std::string world_link_ = "map";
-  std::string drone_base_link_ = "drone_base_link";
-
-  rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr sync_pose_pub_;
-  rclcpp::Publisher<sensor_msgs::msg::LaserScan>::SharedPtr sync_scan_pub_;
-
-  rclcpp::Subscription<sensor_msgs::msg::Imu>::SharedPtr orientation_sub_;
-  rclcpp::Subscription<sensor_msgs::msg::NavSatFix>::SharedPtr gps_sub_;
-
   double interpolation_timestamp_threshold_ = 0.25;
-
-  bool got_first_fix_ = false;
-  double origin_x_ = 0.0;
-  double origin_y_ = 0.0;
-  double origin_alt_ = 0.0;
 
 
   void orientation_callback(const sensor_msgs::msg::Imu::SharedPtr orientation_msg)
@@ -139,13 +152,6 @@ private:
 
     // for debug purposes
 
-    boost::qvm::quat<double> q = {
-      orientation_msg->orientation.w,
-      orientation_msg->orientation.x,
-      orientation_msg->orientation.y,
-      orientation_msg->orientation.z
-    };
-
     geometry_msgs::msg::TransformStamped orientation_tf;
     orientation_tf.header.stamp = orientation_msg->header.stamp;
     orientation_tf.header.frame_id = world_link_;
@@ -153,10 +159,10 @@ private:
     orientation_tf.transform.translation.x = 0.0;
     orientation_tf.transform.translation.y = 0.0;
     orientation_tf.transform.translation.z = 0.0;
-    orientation_tf.transform.rotation.w = q.a[0];
-    orientation_tf.transform.rotation.x = q.a[1];
-    orientation_tf.transform.rotation.y = q.a[2];
-    orientation_tf.transform.rotation.z = q.a[3];
+    orientation_tf.transform.rotation.w = orientation_msg->orientation.w;
+    orientation_tf.transform.rotation.x = orientation_msg->orientation.x;
+    orientation_tf.transform.rotation.y = orientation_msg->orientation.y;
+    orientation_tf.transform.rotation.z = orientation_msg->orientation.z;
 
     tf_broadcaster_->sendTransform(orientation_tf);
   }
@@ -176,8 +182,7 @@ private:
   }
 
 
-  void approximate_sync_callback(const sensor_msgs::msg::LaserScan::ConstSharedPtr& scan_msg,
-                                 const geometry_msgs::msg::PoseStamped::ConstSharedPtr& pose_msg)
+  void pose_callback(const geometry_msgs::msg::PoseStamped::ConstSharedPtr pose_msg)
   {
     if (latest_pose_msg_ != nullptr)
     {
@@ -189,179 +194,57 @@ private:
 
     latest_pose_msg_ = pose_msg;
 
-    if (previous_pose_msg_ == nullptr ||
-        previous_gps_msg_ == nullptr ||
-        latest_gps_msg_ == nullptr)
-    {
-      RCLCPP_WARN(this->get_logger(), "Waiting for previous messages to be available for synchronization.");
-      return;
-    }
-
-    if (latest_gps_msg_->status.status == sensor_msgs::msg::NavSatStatus::STATUS_NO_FIX ||
-        previous_gps_msg_->status.status == sensor_msgs::msg::NavSatStatus::STATUS_NO_FIX)
-    {
-      RCLCPP_WARN(this->get_logger(), "No GPS fix available.");
-      return;
-    }
-
-    if (got_first_fix_ == false)
-    {
-      origin_x_ = previous_pose_msg_->pose.position.x;
-      origin_y_ = previous_pose_msg_->pose.position.y;
-      // origin_alt_ = previous_pose_msg_->pose.position.z;
-      got_first_fix_ = true;
-      RCLCPP_INFO(this->get_logger(), "Set origin to:  %f, %f, %f", origin_x_, origin_y_, origin_alt_);
-    }
-
-    double coord_x = pose_msg->pose.position.x - origin_x_;
-    double coord_y = pose_msg->pose.position.y - origin_y_;
-    double alt = pose_msg->pose.position.z - origin_alt_;
-
-    boost::qvm::quat<double> q = {
-      pose_msg->pose.orientation.w,
-      pose_msg->pose.orientation.x,
-      pose_msg->pose.orientation.y,
-      pose_msg->pose.orientation.z
-    };
-
-    // interpolate pose to scan timestamp
-    interpolate_pose(scan_msg, pose_msg, coord_x, coord_y, alt, q);
-
-    auto timestamp = scan_msg->header.stamp;
-
     geometry_msgs::msg::TransformStamped world_drone_tf;
-    world_drone_tf.header.stamp = timestamp;
+    world_drone_tf.header.stamp = pose_msg->header.stamp;
     world_drone_tf.header.frame_id = world_link_;
     world_drone_tf.child_frame_id = drone_base_link_;
-    world_drone_tf.transform.translation.x = coord_x;
-    world_drone_tf.transform.translation.y = coord_y;
-    world_drone_tf.transform.translation.z = alt;
-    world_drone_tf.transform.rotation.w = q.a[0];
-    world_drone_tf.transform.rotation.x = q.a[1];
-    world_drone_tf.transform.rotation.y = q.a[2];
-    world_drone_tf.transform.rotation.z = q.a[3];
+    world_drone_tf.transform.translation.x = pose_msg->pose.position.x;
+    world_drone_tf.transform.translation.y = pose_msg->pose.position.y;
+    world_drone_tf.transform.translation.z = pose_msg->pose.position.z;
+    world_drone_tf.transform.rotation.w = pose_msg->pose.orientation.w;
+    world_drone_tf.transform.rotation.x = pose_msg->pose.orientation.x;
+    world_drone_tf.transform.rotation.y = pose_msg->pose.orientation.y;
+    world_drone_tf.transform.rotation.z = pose_msg->pose.orientation.z;
 
     tf_broadcaster_->sendTransform(world_drone_tf);
-
-    geometry_msgs::msg::PoseStamped sync_pose_msg;
-    sync_pose_msg.header.stamp = timestamp;
-    sync_pose_msg.header.frame_id = world_link_;
-    sync_pose_msg.pose.position.x = coord_x;
-    sync_pose_msg.pose.position.y = coord_y;
-    sync_pose_msg.pose.position.z = alt;
-    sync_pose_msg.pose.orientation.w = q.a[0];
-    sync_pose_msg.pose.orientation.x = q.a[1];
-    sync_pose_msg.pose.orientation.y = q.a[2];
-    sync_pose_msg.pose.orientation.z = q.a[3];
-
-    sync_pose_pub_->publish(sync_pose_msg);
-    sync_scan_pub_->publish(*scan_msg);
   }
 
 
-  void interpolate_pose(const sensor_msgs::msg::LaserScan::ConstSharedPtr& scan_msg,
-                        const geometry_msgs::msg::PoseStamped::ConstSharedPtr& pose_msg,
-                        double& coord_x, double& coord_y, double& alt,
-                        boost::qvm::quat<double>& q)
+  void scan_callback(const sensor_msgs::msg::LaserScan::SharedPtr scan_msg)
   {
-    double scan_timestamp = static_cast<double>(scan_msg->header.stamp.sec) +
-                              static_cast<double>(scan_msg->header.stamp.nanosec) * 1e-9;
-
-    double prev_timestamp = static_cast<double>(previous_pose_msg_->header.stamp.sec) +
-                              static_cast<double>(previous_pose_msg_->header.stamp.nanosec) * 1e-9;
-    double curr_timestamp = static_cast<double>(pose_msg->header.stamp.sec) +
-                              static_cast<double>(pose_msg->header.stamp.nanosec) * 1e-9;
-
-    // linear interpolation for orientation
-    boost::qvm::quat<double> q_prev = {
-      previous_pose_msg_->pose.orientation.w,
-      previous_pose_msg_->pose.orientation.x,
-      previous_pose_msg_->pose.orientation.y,
-      previous_pose_msg_->pose.orientation.z
-    };
-
-    boost::qvm::quat<double> q_curr = {
-      pose_msg->pose.orientation.w,
-      pose_msg->pose.orientation.x,
-      pose_msg->pose.orientation.y,
-      pose_msg->pose.orientation.z
-    };
-
-    q = q_curr;
-    coord_x = pose_msg->pose.position.x - origin_x_;
-    coord_y = pose_msg->pose.position.y - origin_y_;
-    alt = pose_msg->pose.position.z - origin_alt_;
-
-    if (curr_timestamp > prev_timestamp &&
-        curr_timestamp - prev_timestamp < interpolation_timestamp_threshold_)
+    if (latest_scan_msg_ != nullptr)
     {
-      double dt = (curr_timestamp - prev_timestamp);
-
-      // q_curr = q_delta * q_prev
-      boost::qvm::quat<double> q_delta = q_curr * boost::qvm::inverse(q_prev);
-
-      // use the shortest path
-      if (q_delta.a[0] < 0.0)
-        q_delta = -q_delta;
-
-      // get angle from q_delta
-      double w = q_delta.a[0];
-      boost::qvm::vec<double, 3> v_delta = boost::qvm::V(q_delta);
-      double v_delta_norm = boost::qvm::mag(v_delta);
-      double theta = 2.0 * std::atan2(v_delta_norm, w);
-
-      // get angular velocity
-      boost::qvm::vec<double, 3> omega;
-      if (v_delta_norm < 1e-6)
-      {
-        // approximate for small angles
-        omega = v_delta * (2.0 / dt);
-      }
-      else
-      {
-        omega = v_delta * (theta / (v_delta_norm * dt));
-      }
-
-      // interpolate angle
-      double omega_norm = boost::qvm::mag(omega);
-      double dt_interp = scan_timestamp - prev_timestamp;
-      double theta_interp = omega_norm * dt_interp;
-
-      // compute delta quaternion for interpolated angle
-      boost::qvm::quat<double> q_delta_interp;
-      if (omega_norm < 1e-6)
-      {
-        // no rotation
-        q_delta_interp = boost::qvm::identity_quat<double>();
-      }
-      else
-      {
-        boost::qvm::vec<double, 3> axis = omega / omega_norm;
-        q_delta_interp = boost::qvm::rot_quat(axis, theta_interp);
-      }
-      q = q_delta_interp * q_prev;
-      boost::qvm::normalize(q);
-
-      // linear interpolation for GPS
-      double prev_coord_x = previous_pose_msg_->pose.position.x - origin_x_;
-      double prev_coord_y = previous_pose_msg_->pose.position.y - origin_y_;
-      double prev_alt = previous_pose_msg_->pose.position.z - origin_alt_;
-
-      double t = (scan_timestamp - prev_timestamp) /
-                 (curr_timestamp - prev_timestamp);
-
-      coord_x = prev_coord_x + t * (coord_x - prev_coord_x);
-      coord_y = prev_coord_y + t * (coord_y - prev_coord_y);
-      alt = prev_alt + t * (alt - prev_alt);
+      rclcpp::Time prev_timestamp(latest_scan_msg_->header.stamp);
+      rclcpp::Time new_timestamp(scan_msg->header.stamp);
+      if (new_timestamp > prev_timestamp)
+        previous_scan_msg_ = latest_scan_msg_;
     }
-    else if (curr_timestamp == prev_timestamp)
+
+    latest_scan_msg_ = scan_msg;
+
+    sensor_msgs::msg::PointCloud2 point_cloud_msg;
+    laser_projector_.projectLaser(*scan_msg, point_cloud_msg);
+    point_cloud_pub_->publish(point_cloud_msg);
+  }
+
+
+  void sync_scan_callback(const sensor_msgs::msg::LaserScan::SharedPtr scan_msg)
+  {
+    rclcpp::Duration scan_duration = rclcpp::Duration::from_seconds(scan_msg->ranges.size() * scan_msg->time_increment);
+    rclcpp::Time end_of_scan = rclcpp::Time(scan_msg->header.stamp) + scan_duration;
+    if (!tf_buffer_->canTransform(world_link_,
+                                  scan_msg->header.frame_id,
+                                  end_of_scan,
+                                  rclcpp::Duration::from_seconds(interpolation_timestamp_threshold_)))
     {
-      RCLCPP_WARN(this->get_logger(), "Timestamps are identical, cannot interpolate.");
+      RCLCPP_WARN_THROTTLE(this->get_logger(), *this->get_clock(), 1000, "Waiting for TF data to cover the entire scan duration...");
+      return;
     }
-    else
-    {
-      RCLCPP_WARN(this->get_logger(), "Timestamps too far apart for interpolation.");
-    }
+
+    sensor_msgs::msg::PointCloud2 sync_point_cloud_msg;
+    laser_projector_.transformLaserScanToPointCloud(world_link_, *scan_msg, sync_point_cloud_msg, *tf_buffer_);
+
+    sync_point_cloud_pub_->publish(sync_point_cloud_msg);
   }
 };
 

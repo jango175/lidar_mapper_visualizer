@@ -1,7 +1,8 @@
 cmake_minimum_required(VERSION 3.8)
 project(lidar_mapper_visualiser)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-SET(NODE_NAME lidar_mapper_rviz)
+set(NODE_NAME lidar_mapper_rviz)
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)

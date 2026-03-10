@@ -1,13 +1,20 @@
 from launch import LaunchDescription
 from launch_ros.actions import Node
-from launch.substitutions import PathJoinSubstitution
+from launch.substitutions import PathJoinSubstitution, LaunchConfiguration
 from launch_ros.substitutions import FindPackageShare
 from ament_index_python.packages import get_package_share_directory
+from launch.actions import DeclareLaunchArgument
 import os
 
 
 def generate_launch_description():
-  use_sim_time = True # should be True when using bag files
+  declare_use_sim_time = DeclareLaunchArgument(
+    'use_sim_time',
+    default_value = 'true',
+    description = 'Use simulation (bag) clock'
+  )
+
+  use_sim_time_param = LaunchConfiguration('use_sim_time')
 
   lidar_mapper_rviz_node = Node(
     package = 'lidar_mapper_visualiser',
@@ -16,9 +23,10 @@ def generate_launch_description():
     output = 'screen',
     # prefix=['gnome-terminal -- gdb -ex run --args'], # debugger
     parameters = [
-      {'timestamp_diff_threshold': 0.15},
-      {'interpolation_timestamp_threshold': 0.11}, # should be smaller than timestamp_diff_threshold
-      {'use_sim_time': use_sim_time}
+      {'lidar_mount_angle_deg': 30.0},
+      {'mf_timeout': 0.5},
+      {'timestamp_tolerance': 0.11}, # should be smaller than mf_timeout
+      {'use_sim_time': use_sim_time_param}
     ]
   )
 
@@ -36,7 +44,7 @@ def generate_launch_description():
     output = 'screen',
     parameters = [
       {'robot_description': robot_desc},
-      {'use_sim_time': use_sim_time}
+      {'use_sim_time': use_sim_time_param}
     ]
   )
 
@@ -45,7 +53,10 @@ def generate_launch_description():
     package = 'tf2_ros',
     executable = 'static_transform_publisher',
     name = 'static_transform_publisher',
-    arguments = ['0.0', '0.0', '0.0', '0.0', '0.0', '0.0', 'map', 'drone_base_link']
+    arguments = ['0.0', '0.0', '0.0', '0.0', '0.0', '0.0', 'map', 'drone_base_link'],
+    parameters=[
+      {'use_sim_time': use_sim_time_param}
+    ]
   )
 
   rviz_config_file = PathJoinSubstitution([
@@ -61,11 +72,12 @@ def generate_launch_description():
     output = 'screen',
     arguments = ['-d', rviz_config_file],
     parameters = [
-      {'use_sim_time': use_sim_time}
+      {'use_sim_time': use_sim_time_param}
     ]
   )
 
   ld = LaunchDescription()
+  ld.add_action(declare_use_sim_time)
   ld.add_action(lidar_mapper_rviz_node)
   ld.add_action(rsp_node)
   ld.add_action(static_tf_node)

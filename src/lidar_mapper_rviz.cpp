@@ -14,6 +14,8 @@
 #include <tf2_ros/buffer.hpp>
 #include <message_filters/subscriber.h>
 #include <message_filters/sync_policies/approximate_time.h>
+#include <boost/qvm/quat.hpp>
+#include <boost/qvm/quat_operations.hpp>
 
 
 class LidarMapperVisualiser : public rclcpp::Node
@@ -21,29 +23,41 @@ class LidarMapperVisualiser : public rclcpp::Node
 public:
   LidarMapperVisualiser() : Node("lidar_mapper_visualiser")
   {
-    auto timestamp_param_desc = rcl_interfaces::msg::ParameterDescriptor{};
-    timestamp_param_desc.description = "Threshold for timestamp difference in approximate sync (seconds)";
-    this->declare_parameter("timestamp_diff_threshold", 0.15, timestamp_param_desc);
+    auto lidar_mount_angle_param_desc = rcl_interfaces::msg::ParameterDescriptor{};
+    lidar_mount_angle_param_desc.description = "LIDAR mount angle in degrees";
+    this->declare_parameter("lidar_mount_angle_deg", 30.0, lidar_mount_angle_param_desc);
 
-    auto interpolation_param_desc = rcl_interfaces::msg::ParameterDescriptor{};
-    interpolation_param_desc.description = "Threshold for interpolation timestamp difference (seconds)";
-    this->declare_parameter("interpolation_timestamp_threshold", 0.11, interpolation_param_desc);
+    auto mf_timeout_param_desc = rcl_interfaces::msg::ParameterDescriptor{};
+    mf_timeout_param_desc.description = "Timeout for message filter tf buffer (seconds)";
+    this->declare_parameter("mf_timeout", 0.5, mf_timeout_param_desc);
 
-    double timestamp_diff_threshold = this->get_parameter("timestamp_diff_threshold").as_double();
-    RCLCPP_INFO(this->get_logger(), "Using timestamp difference threshold: %f seconds", timestamp_diff_threshold);
+    auto timestamp_tolerance_param_desc = rcl_interfaces::msg::ParameterDescriptor{};
+    timestamp_tolerance_param_desc.description = "Timestamp tolerance for laser interpolation (seconds)";
+    this->declare_parameter("timestamp_tolerance", 0.11, timestamp_tolerance_param_desc);
 
-    interpolation_timestamp_threshold_ = this->get_parameter("interpolation_timestamp_threshold").as_double();
-    RCLCPP_INFO(this->get_logger(), "Using interpolation timestamp difference threshold: %f seconds", interpolation_timestamp_threshold_);
+    double mf_timeout = this->get_parameter("mf_timeout").as_double();
+    RCLCPP_INFO(this->get_logger(), "Using message filter timeout: %f seconds", mf_timeout);
 
-    if (interpolation_timestamp_threshold_ >= timestamp_diff_threshold)
+    double timestamp_tolerance = this->get_parameter("timestamp_tolerance").as_double();
+    RCLCPP_INFO(this->get_logger(), "Using timestamp tolerance: %f seconds", timestamp_tolerance);
+
+    if (timestamp_tolerance >= mf_timeout)
     {
-      RCLCPP_ERROR(this->get_logger(), "timestamp_diff_threshold is smaller than interpolation_timestamp_threshold! Exiting...");
+      RCLCPP_ERROR(this->get_logger(), "mf_timeout is smaller than timestamp_tolerance! Exiting...");
       return;
     }
+
+    double lidar_mount_angle_deg = this->get_parameter("lidar_mount_angle_deg").as_double();
 
     auto qos = rclcpp::SensorDataQoS();
 
     // tf
+    boost::qvm::quat<double> q_x = boost::qvm::rotx_quat(0.0);
+    boost::qvm::quat<double> q_y = boost::qvm::roty_quat(lidar_mount_angle_deg * M_PI / 180.0);
+    boost::qvm::quat<double> q_z = boost::qvm::rotz_quat(0.0);
+    q_lidar_ = q_z * q_y * q_x;
+    boost::qvm::normalize(q_lidar_);
+
     auto timer_interface = std::make_shared<tf2_ros::CreateTimerROS>(
       this->get_node_base_interface(),
       this->get_node_timers_interface()
@@ -65,9 +79,9 @@ public:
       mf_scan_sub_, *tf_buffer_, world_link_, 10,
       this->get_node_logging_interface(),
       this->get_node_clock_interface(),
-      tf2::durationFromSec(timestamp_diff_threshold)
+      tf2::durationFromSec(mf_timeout)
     );
-    mf_tf2_->setTolerance(rclcpp::Duration::from_seconds(interpolation_timestamp_threshold_));
+    mf_tf2_->setTolerance(rclcpp::Duration::from_seconds(timestamp_tolerance));
     mf_tf2_->registerCallback(&LidarMapperVisualiser::sync_scan_callback, this);
 
     orientation_sub_ = this->create_subscription<sensor_msgs::msg::Imu>(
@@ -118,7 +132,8 @@ private:
   std::shared_ptr<tf2_ros::TransformListener> tf_listener_;
   std::shared_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster_;
   const std::string world_link_ = "map";
-  const std::string drone_base_link_ = "drone_base_link";
+  const std::string drone_link_ = "drone_base_link";
+  const std::string lidar_link_ = "ldlidar_link";
 
   rclcpp::Publisher<sensor_msgs::msg::LaserScan>::SharedPtr sync_scan_pub_;
   rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr point_cloud_pub_;
@@ -132,8 +147,6 @@ private:
   rclcpp::Subscription<sensor_msgs::msg::LaserScan>::SharedPtr scan_sub_;
   rclcpp::Subscription<geometry_msgs::msg::PoseStamped>::SharedPtr pose_sub_;
 
-  laser_geometry::LaserProjection laser_projector_;
-
   sensor_msgs::msg::Imu::ConstSharedPtr latest_orientation_msg_;
   sensor_msgs::msg::Imu::ConstSharedPtr previous_orientation_msg_;
   sensor_msgs::msg::NavSatFix::ConstSharedPtr latest_gps_msg_;
@@ -143,7 +156,11 @@ private:
   geometry_msgs::msg::PoseStamped::ConstSharedPtr latest_pose_msg_;
   geometry_msgs::msg::PoseStamped::ConstSharedPtr previous_pose_msg_;
 
-  double interpolation_timestamp_threshold_ = 0.11;
+  laser_geometry::LaserProjection laser_projector_;
+  boost::qvm::quat<double> q_lidar_;
+  const double lidar_offset_x_ = 0.088;
+  const double lidar_offset_y_ = 0.0;
+  const double lidar_offset_z_ = 0.088;
 
 
   void orientation_callback(const sensor_msgs::msg::Imu::SharedPtr orientation_msg)
@@ -205,7 +222,7 @@ private:
     geometry_msgs::msg::TransformStamped world_drone_tf;
     world_drone_tf.header.stamp = pose_msg->header.stamp;
     world_drone_tf.header.frame_id = world_link_;
-    world_drone_tf.child_frame_id = drone_base_link_;
+    world_drone_tf.child_frame_id = drone_link_;
     world_drone_tf.transform.translation.x = pose_msg->pose.position.x;
     world_drone_tf.transform.translation.y = pose_msg->pose.position.y;
     world_drone_tf.transform.translation.z = pose_msg->pose.position.z;
@@ -214,7 +231,20 @@ private:
     world_drone_tf.transform.rotation.y = pose_msg->pose.orientation.y;
     world_drone_tf.transform.rotation.z = pose_msg->pose.orientation.z;
 
+    geometry_msgs::msg::TransformStamped drone_lidar_tf;
+    drone_lidar_tf.header.stamp = pose_msg->header.stamp;
+    drone_lidar_tf.header.frame_id = drone_link_;
+    drone_lidar_tf.child_frame_id = lidar_link_;
+    drone_lidar_tf.transform.translation.x = lidar_offset_x_;
+    drone_lidar_tf.transform.translation.y = lidar_offset_y_;
+    drone_lidar_tf.transform.translation.z = lidar_offset_z_;
+    drone_lidar_tf.transform.rotation.w = q_lidar_.a[0];
+    drone_lidar_tf.transform.rotation.x = q_lidar_.a[1];
+    drone_lidar_tf.transform.rotation.y = q_lidar_.a[2];
+    drone_lidar_tf.transform.rotation.z = q_lidar_.a[3];
+
     tf_broadcaster_->sendTransform(world_drone_tf);
+    tf_broadcaster_->sendTransform(drone_lidar_tf);
   }
 
 
@@ -243,7 +273,7 @@ private:
     if (!tf_buffer_->canTransform(world_link_,
                                   scan_msg->header.frame_id,
                                   end_of_scan,
-                                  rclcpp::Duration::from_seconds(interpolation_timestamp_threshold_)))
+                                  rclcpp::Duration::from_seconds(0.0)))
     {
       RCLCPP_WARN_THROTTLE(this->get_logger(), *this->get_clock(), 1000, "Waiting for TF data to cover the entire scan duration...");
       return;

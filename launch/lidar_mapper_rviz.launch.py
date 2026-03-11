@@ -48,12 +48,12 @@ def generate_launch_description():
     ]
   )
 
-  # initialize static transform publisher from 'map' to 'drone_base_link'
+  # initialize static transform publisher from 'map' to 'base_link'
   static_tf_node = Node(
     package = 'tf2_ros',
     executable = 'static_transform_publisher',
     name = 'static_transform_publisher',
-    arguments = ['0.0', '0.0', '0.0', '0.0', '0.0', '0.0', 'map', 'drone_base_link'],
+    arguments = ['0.0', '0.0', '0.0', '0.0', '0.0', '0.0', 'map', 'base_link'],
     parameters=[
       {'use_sim_time': use_sim_time_param}
     ]
@@ -76,11 +76,29 @@ def generate_launch_description():
     ]
   )
 
+  octomap_node = Node(
+    package = 'octomap_server',
+    executable = 'octomap_server_node',
+    name = 'octomap_server',
+    output = 'screen',
+    parameters = [
+      {'resolution': 0.15},
+      {'frame_id': 'map'},
+      {'base_frame_id': 'base_link'},
+      {'sensor_model.max_range': 12.0},
+      {'latch': True}
+    ],
+    remappings = [
+        ('cloud_in', '/drone/sync_point_cloud')
+    ]
+  )
+
   ld = LaunchDescription()
   ld.add_action(declare_use_sim_time)
   ld.add_action(lidar_mapper_rviz_node)
   ld.add_action(rsp_node)
   ld.add_action(static_tf_node)
   ld.add_action(rviz_node)
+  ld.add_action(octomap_node)
 
   return ld

@@ -55,8 +55,18 @@ public:
     boost::qvm::quat<double> q_x = boost::qvm::rotx_quat(0.0);
     boost::qvm::quat<double> q_y = boost::qvm::roty_quat(lidar_mount_angle_deg * M_PI / 180.0);
     boost::qvm::quat<double> q_z = boost::qvm::rotz_quat(0.0);
-    q_lidar_ = q_z * q_y * q_x;
-    boost::qvm::normalize(q_lidar_);
+    boost::qvm::quat<double> q_lidar = q_z * q_y * q_x;
+    boost::qvm::normalize(q_lidar);
+
+    drone_lidar_tf_.header.frame_id = drone_link_;
+    drone_lidar_tf_.child_frame_id = lidar_link_;
+    drone_lidar_tf_.transform.translation.x = lidar_offset_x_;
+    drone_lidar_tf_.transform.translation.y = lidar_offset_y_;
+    drone_lidar_tf_.transform.translation.z = lidar_offset_z_;
+    drone_lidar_tf_.transform.rotation.w = q_lidar.a[0];
+    drone_lidar_tf_.transform.rotation.x = q_lidar.a[1];
+    drone_lidar_tf_.transform.rotation.y = q_lidar.a[2];
+    drone_lidar_tf_.transform.rotation.z = q_lidar.a[3];
 
     auto timer_interface = std::make_shared<tf2_ros::CreateTimerROS>(
       this->get_node_base_interface(),
@@ -132,7 +142,7 @@ private:
   std::shared_ptr<tf2_ros::TransformListener> tf_listener_;
   std::shared_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster_;
   const std::string world_link_ = "map";
-  const std::string drone_link_ = "drone_base_link";
+  const std::string drone_link_ = "base_link";
   const std::string lidar_link_ = "ldlidar_link";
 
   rclcpp::Publisher<sensor_msgs::msg::LaserScan>::SharedPtr sync_scan_pub_;
@@ -157,7 +167,7 @@ private:
   geometry_msgs::msg::PoseStamped::ConstSharedPtr previous_pose_msg_;
 
   laser_geometry::LaserProjection laser_projector_;
-  boost::qvm::quat<double> q_lidar_;
+  geometry_msgs::msg::TransformStamped drone_lidar_tf_;
   const double lidar_offset_x_ = 0.088;
   const double lidar_offset_y_ = 0.0;
   const double lidar_offset_z_ = 0.088;
@@ -231,20 +241,11 @@ private:
     world_drone_tf.transform.rotation.y = pose_msg->pose.orientation.y;
     world_drone_tf.transform.rotation.z = pose_msg->pose.orientation.z;
 
-    geometry_msgs::msg::TransformStamped drone_lidar_tf;
-    drone_lidar_tf.header.stamp = pose_msg->header.stamp;
-    drone_lidar_tf.header.frame_id = drone_link_;
-    drone_lidar_tf.child_frame_id = lidar_link_;
-    drone_lidar_tf.transform.translation.x = lidar_offset_x_;
-    drone_lidar_tf.transform.translation.y = lidar_offset_y_;
-    drone_lidar_tf.transform.translation.z = lidar_offset_z_;
-    drone_lidar_tf.transform.rotation.w = q_lidar_.a[0];
-    drone_lidar_tf.transform.rotation.x = q_lidar_.a[1];
-    drone_lidar_tf.transform.rotation.y = q_lidar_.a[2];
-    drone_lidar_tf.transform.rotation.z = q_lidar_.a[3];
+    // update just timestamp
+    drone_lidar_tf_.header.stamp = pose_msg->header.stamp;
 
     tf_broadcaster_->sendTransform(world_drone_tf);
-    tf_broadcaster_->sendTransform(drone_lidar_tf);
+    tf_broadcaster_->sendTransform(drone_lidar_tf_);
   }
 
 

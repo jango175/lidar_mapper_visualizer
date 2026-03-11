@@ -155,6 +155,10 @@ Visualization Manager:
           Show Axes: false
           Show Trail: false
           Value: true
+        base_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
         camera_1800TVL:
           Alpha: 1
           Show Axes: false
@@ -180,10 +184,6 @@ Visualization Manager:
           Show Axes: false
           Show Trail: false
           Value: true
-        drone_base_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
         ldlidar_base:
           Alpha: 1
           Show Axes: false
@@ -381,120 +381,38 @@ Visualization Manager:
       Use rainbow: true
       Value: false
     - Class: rviz_default_plugins/TF
-      Enabled: true
+      Enabled: false
       Filter (blacklist): ""
       Filter (whitelist): ""
       Frame Timeout: 1500
       Frames:
-        7_inch_CCW_1:
-          Value: false
-        7_inch_CCW_2:
-          Value: false
-        7_inch_CW_1:
-          Value: false
-        7_inch_CW_2:
-          Value: false
         All Enabled: false
-        CNHL_5S_2200MAH_LIPO:
-          Value: false
-        antenna_stick:
-          Value: false
-        back_holder_optical_flow:
-          Value: false
-        camera_1800TVL:
-          Value: false
-        damper_1:
-          Value: false
-        damper_2:
-          Value: false
-        damper_3:
-          Value: false
-        drone_base:
-          Value: false
-        drone_base_link:
-          Value: false
-        ldlidar_base:
-          Value: false
-        left_cover_H7:
-          Value: false
-        lidar_mount_30deg:
-          Value: false
-        map:
-          Value: false
-        motor_rotor_1:
-          Value: false
-        motor_rotor_2:
-          Value: false
-        motor_rotor_3:
-          Value: false
-        motor_rotor_4:
-          Value: false
-        motor_stator_1:
-          Value: false
-        motor_stator_2:
-          Value: false
-        motor_stator_3:
-          Value: false
-        motor_stator_4:
-          Value: false
-        orangepi:
-          Value: false
-        raspbox:
-          Value: false
-        raspbox_top:
-          Value: false
-        right_cover_H7:
-          Value: false
       Marker Scale: 0.25
       Name: TF
       Show Arrows: true
       Show Axes: true
       Show Names: false
       Tree:
-        map:
-          drone_base_link:
-            drone_base:
-              back_holder_optical_flow:
-                antenna_stick:
-                  {}
-              camera_1800TVL:
-                {}
-              left_cover_H7:
-                {}
-              lidar_mount_30deg:
-                damper_1:
-                  {}
-                damper_2:
-                  {}
-                damper_3:
-                  ldlidar_base:
-                    {}
-              motor_stator_1:
-                motor_rotor_1:
-                  7_inch_CW_2:
-                    {}
-              motor_stator_2:
-                motor_rotor_2:
-                  7_inch_CW_1:
-                    {}
-              motor_stator_3:
-                motor_rotor_3:
-                  7_inch_CCW_1:
-                    {}
-              motor_stator_4:
-                motor_rotor_4:
-                  7_inch_CCW_2:
-                    {}
-              raspbox:
-                orangepi:
-                  {}
-                raspbox_top:
-                  CNHL_5S_2200MAH_LIPO:
-                    {}
-              right_cover_H7:
-                {}
+        {}
       Update Interval: 0
+      Value: false
+    - Class: octomap_rviz_plugins/OccupancyGrid
+      Enabled: true
+      Max. Height Display: 3.4028234663852886e+38
+      Max. Octree Depth: 16
+      Min. Height Display: -3.4028234663852886e+38
+      Name: OccupancyGrid
+      Topic:
+        Depth: 10
+        Durability Policy: Volatile
+        Filter size: 10
+        History Policy: Keep Last
+        Reliability Policy: Best Effort
+        Value: /octomap_full
       Value: true
+      Voxel Alpha: 1
+      Voxel Coloring: Cell Probability
+      Voxel Rendering: Occupied Voxels
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48

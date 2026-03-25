@@ -24,7 +24,7 @@ def generate_launch_description():
     # prefix=['gnome-terminal -- gdb -ex run --args'], # debugger
     parameters = [
       {'lidar_mount_angle_deg': 30.0},
-      {'mf_timeout': 0.5},
+      {'mf_timeout': 0.25},
       {'timestamp_tolerance': 0.11}, # should be smaller than mf_timeout
       {'use_sim_time': use_sim_time_param}
     ]
@@ -86,10 +86,11 @@ def generate_launch_description():
       {'frame_id': 'map'},
       {'base_frame_id': 'base_link'},
       {'sensor_model.max_range': 12.0},
-      {'latch': True}
+      {'latch': True},
+      {'use_sim_time': use_sim_time_param}
     ],
     remappings = [
-        ('cloud_in', '/drone/sync_point_cloud')
+      ('cloud_in', '/drone/sync_slice_point_cloud')
     ]
   )
 

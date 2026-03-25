@@ -1,5 +1,8 @@
+#include <filesystem>
 #include <memory>
 #include <string>
+#include <boost/qvm/quat.hpp>
+#include <boost/qvm/quat_operations.hpp>
 #include <rclcpp/node.hpp>
 #include <laser_geometry/laser_geometry.hpp>
 #include <sensor_msgs/msg/laser_scan.hpp>
@@ -14,8 +17,8 @@
 #include <tf2_ros/buffer.hpp>
 #include <message_filters/subscriber.h>
 #include <message_filters/sync_policies/approximate_time.h>
-#include <boost/qvm/quat.hpp>
-#include <boost/qvm/quat_operations.hpp>
+#include <pcl/point_cloud.h>
+#include <pcl_conversions/pcl_conversions.h>
 
 
 class LidarMapperVisualiser : public rclcpp::Node
@@ -49,6 +52,9 @@ public:
 
     double lidar_mount_angle_deg = this->get_parameter("lidar_mount_angle_deg").as_double();
 
+    if (!std::filesystem::exists(global_map_dir_))
+      std::filesystem::create_directory(global_map_dir_);
+
     auto qos = rclcpp::SensorDataQoS();
 
     // tf
@@ -78,21 +84,30 @@ public:
     tf_broadcaster_ = std::make_shared<tf2_ros::TransformBroadcaster>(this);
 
     // publishers
-    sync_scan_pub_ = this->create_publisher<sensor_msgs::msg::LaserScan>(sync_scan_topic_, qos);
-    point_cloud_pub_ = this->create_publisher<sensor_msgs::msg::PointCloud2>(point_cloud_topic_, qos);
-    sync_point_cloud_pub_ = this->create_publisher<sensor_msgs::msg::PointCloud2>(sync_point_cloud_topic_, qos);
+    slice_point_cloud_pub_ = this->create_publisher<sensor_msgs::msg::PointCloud2>(slice_point_cloud_topic_, qos);
+    sync_slice_point_cloud_pub_ = this->create_publisher<sensor_msgs::msg::PointCloud2>(sync_slice_point_cloud_topic_, qos);
+    global_map_pub_ = this->create_publisher<sensor_msgs::msg::PointCloud2>(global_map_topic_, qos);
 
     // subscribers
     mf_scan_sub_.subscribe(this, scan_topic_, qos.get_rmw_qos_profile());
 
-    mf_tf2_ = std::make_shared<tf2_ros::MessageFilter<sensor_msgs::msg::LaserScan>>(
+    mf_tf2_slice_ = std::make_shared<tf2_ros::MessageFilter<sensor_msgs::msg::LaserScan>>(
+      mf_scan_sub_, *tf_buffer_, drone_link_, 10,
+      this->get_node_logging_interface(),
+      this->get_node_clock_interface(),
+      tf2::durationFromSec(mf_timeout)
+    );
+    mf_tf2_slice_->setTolerance(rclcpp::Duration::from_seconds(timestamp_tolerance));
+    mf_tf2_slice_->registerCallback(&LidarMapperVisualiser::sync_scan_callback, this);
+
+    mf_tf2_global_map_ = std::make_shared<tf2_ros::MessageFilter<sensor_msgs::msg::LaserScan>>(
       mf_scan_sub_, *tf_buffer_, world_link_, 10,
       this->get_node_logging_interface(),
       this->get_node_clock_interface(),
       tf2::durationFromSec(mf_timeout)
     );
-    mf_tf2_->setTolerance(rclcpp::Duration::from_seconds(timestamp_tolerance));
-    mf_tf2_->registerCallback(&LidarMapperVisualiser::sync_scan_callback, this);
+    mf_tf2_global_map_->setTolerance(rclcpp::Duration::from_seconds(timestamp_tolerance));
+    mf_tf2_global_map_->registerCallback(&LidarMapperVisualiser::global_map_callback, this);
 
     orientation_sub_ = this->create_subscription<sensor_msgs::msg::Imu>(
       orientation_topic_,
@@ -134,9 +149,9 @@ private:
   const std::string gps_topic_ = "/mavros/global_position/global";
   const std::string pose_topic_ = "/mavros/local_position/pose";
 
-  const std::string sync_scan_topic_ = "/drone/sync_scan";
-  const std::string point_cloud_topic_ = "/drone/point_cloud";
-  const std::string sync_point_cloud_topic_ = "/drone/sync_point_cloud";
+  const std::string slice_point_cloud_topic_ = "/drone/slice_point_cloud";
+  const std::string sync_slice_point_cloud_topic_ = "/drone/sync_slice_point_cloud";
+  const std::string global_map_topic_ = "/drone/global_map";
 
   std::unique_ptr<tf2_ros::Buffer> tf_buffer_;
   std::shared_ptr<tf2_ros::TransformListener> tf_listener_;
@@ -145,12 +160,13 @@ private:
   const std::string drone_link_ = "base_link";
   const std::string lidar_link_ = "ldlidar_link";
 
-  rclcpp::Publisher<sensor_msgs::msg::LaserScan>::SharedPtr sync_scan_pub_;
-  rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr point_cloud_pub_;
-  rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr sync_point_cloud_pub_;
+  rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr slice_point_cloud_pub_;
+  rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr sync_slice_point_cloud_pub_;
+  rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr global_map_pub_;
 
   message_filters::Subscriber<sensor_msgs::msg::LaserScan> mf_scan_sub_;
-  std::shared_ptr<tf2_ros::MessageFilter<sensor_msgs::msg::LaserScan>> mf_tf2_;
+  std::shared_ptr<tf2_ros::MessageFilter<sensor_msgs::msg::LaserScan>> mf_tf2_slice_;
+  std::shared_ptr<tf2_ros::MessageFilter<sensor_msgs::msg::LaserScan>> mf_tf2_global_map_;
 
   rclcpp::Subscription<sensor_msgs::msg::Imu>::SharedPtr orientation_sub_;
   rclcpp::Subscription<sensor_msgs::msg::NavSatFix>::SharedPtr gps_sub_;
@@ -171,6 +187,14 @@ private:
   const double lidar_offset_x_ = 0.088;
   const double lidar_offset_y_ = 0.0;
   const double lidar_offset_z_ = 0.088;
+
+  pcl::PointCloud<pcl::PointXYZI> global_point_cloud_;
+  const char* home_ = std::getenv("HOME");
+  const std::string home_dir_ = home_ ? std::string(home_) : std::string(".");
+  const std::string global_map_dir_ = home_dir_ + "/ros2_ws/src/lidar_mapper_visualiser/maps/";
+  const std::string global_map_path_ = global_map_dir_ + "global_map.pcd";
+  const int global_map_pub_div_ = 10;
+  int global_map_pub_cnt_ = 0;
 
 
   void orientation_callback(const sensor_msgs::msg::Imu::SharedPtr orientation_msg)
@@ -261,13 +285,33 @@ private:
 
     latest_scan_msg_ = scan_msg;
 
-    sensor_msgs::msg::PointCloud2 point_cloud_msg;
-    laser_projector_.projectLaser(*scan_msg, point_cloud_msg);
-    point_cloud_pub_->publish(point_cloud_msg);
+    sensor_msgs::msg::PointCloud2 slice_point_cloud_msg;
+    laser_projector_.projectLaser(*scan_msg, slice_point_cloud_msg);
+    slice_point_cloud_pub_->publish(slice_point_cloud_msg);
   }
 
 
   void sync_scan_callback(const sensor_msgs::msg::LaserScan::SharedPtr scan_msg)
+  {
+    rclcpp::Duration scan_duration = rclcpp::Duration::from_seconds(scan_msg->ranges.size() * scan_msg->time_increment);
+    rclcpp::Time end_of_scan = rclcpp::Time(scan_msg->header.stamp) + scan_duration;
+    if (!tf_buffer_->canTransform(drone_link_,
+                                  scan_msg->header.frame_id,
+                                  end_of_scan,
+                                  rclcpp::Duration::from_seconds(0.0)))
+    {
+      RCLCPP_WARN_THROTTLE(this->get_logger(), *this->get_clock(), 1000, "Waiting for TF data to cover the entire scan duration...");
+      return;
+    }
+
+    sensor_msgs::msg::PointCloud2 sync_slice_point_cloud_msg;
+    laser_projector_.transformLaserScanToPointCloud(drone_link_, *scan_msg, sync_slice_point_cloud_msg, *tf_buffer_);
+
+    sync_slice_point_cloud_pub_->publish(sync_slice_point_cloud_msg);
+  }
+
+
+  void global_map_callback(const sensor_msgs::msg::LaserScan::SharedPtr scan_msg)
   {
     rclcpp::Duration scan_duration = rclcpp::Duration::from_seconds(scan_msg->ranges.size() * scan_msg->time_increment);
     rclcpp::Time end_of_scan = rclcpp::Time(scan_msg->header.stamp) + scan_duration;
@@ -280,10 +324,28 @@ private:
       return;
     }
 
-    sensor_msgs::msg::PointCloud2 sync_point_cloud_msg;
-    laser_projector_.transformLaserScanToPointCloud(world_link_, *scan_msg, sync_point_cloud_msg, *tf_buffer_);
+    sensor_msgs::msg::PointCloud2 sync_slice_point_cloud_msg;
+    laser_projector_.transformLaserScanToPointCloud(world_link_, *scan_msg, sync_slice_point_cloud_msg, *tf_buffer_);
 
-    sync_point_cloud_pub_->publish(sync_point_cloud_msg);
+    // accumulate point clouds
+    pcl::PointCloud<pcl::PointXYZI> pcl_slice;
+    pcl::fromROSMsg(sync_slice_point_cloud_msg, pcl_slice);
+    global_point_cloud_ += pcl_slice;
+
+    if (global_map_pub_cnt_ >= global_map_pub_div_)
+    {
+      sensor_msgs::msg::PointCloud2 sync_point_cloud_msg;
+      pcl::toROSMsg(global_point_cloud_, sync_point_cloud_msg);
+      sync_point_cloud_msg.header.frame_id = world_link_;
+      sync_point_cloud_msg.header.stamp = scan_msg->header.stamp;
+      // global_map_pub_->publish(sync_point_cloud_msg);
+
+      // save point cloud to file
+      pcl::io::savePCDFileBinary(global_map_path_, global_point_cloud_);
+
+      global_map_pub_cnt_ = 0;
+    }
+    global_map_pub_cnt_++;
   }
 };
 

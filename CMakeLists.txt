@@ -16,6 +16,7 @@ find_package(sensor_msgs REQUIRED)
 find_package(message_filters REQUIRED)
 find_package(laser_geometry REQUIRED)
 find_package(tf2_ros REQUIRED)
+find_package(pcl_conversions REQUIRED)
 
 add_executable(${NODE_NAME} src/lidar_mapper_rviz.cpp)
 ament_target_dependencies(${NODE_NAME}
@@ -25,6 +26,7 @@ ament_target_dependencies(${NODE_NAME}
   message_filters
   laser_geometry
   tf2_ros
+  pcl_conversions
 )
 
 target_include_directories(${NODE_NAME} PUBLIC

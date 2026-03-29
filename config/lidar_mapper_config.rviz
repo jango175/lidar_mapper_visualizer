@@ -380,6 +380,39 @@ Visualization Manager:
       Use Fixed Frame: true
       Use rainbow: true
       Value: false
+    - Alpha: 1
+      Autocompute Intensity Bounds: false
+      Autocompute Value Bounds:
+        Max Value: 10
+        Min Value: -10
+        Value: true
+      Axis: Z
+      Channel Name: intensity
+      Class: rviz_default_plugins/PointCloud2
+      Color: 255; 255; 255
+      Color Transformer: Intensity
+      Decay Time: 3000
+      Enabled: false
+      Invert Rainbow: true
+      Max Color: 255; 255; 255
+      Max Intensity: 255
+      Min Color: 0; 0; 0
+      Min Intensity: 0
+      Name: PointCloud2
+      Position Transformer: XYZ
+      Selectable: false
+      Size (Pixels): 3
+      Size (m): 0.009999999776482582
+      Style: Points
+      Topic:
+        Depth: 10
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Best Effort
+        Value: /drone/fake_3d_lidar_point_cloud
+      Use Fixed Frame: true
+      Use rainbow: true
+      Value: false
     - Class: rviz_default_plugins/TF
       Enabled: false
       Filter (blacklist): ""
@@ -496,4 +529,4 @@ Window Geometry:
     collapsed: true
   Width: 1854
   X: 66
-  Y: 688
+  Y: 40

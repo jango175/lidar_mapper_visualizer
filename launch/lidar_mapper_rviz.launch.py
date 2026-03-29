@@ -21,11 +21,14 @@ def generate_launch_description():
     executable = 'lidar_mapper_rviz',
     name = 'lidar_mapper_rviz',
     output = 'screen',
-    # prefix=['gnome-terminal -- gdb -ex run --args'], # debugger
+    # prefix = ['gnome-terminal -- gdb -ex run --args'], # debugger
     parameters = [
       {'lidar_mount_angle_deg': 30.0},
       {'mf_timeout': 0.25},
       {'timestamp_tolerance': 0.11}, # should be smaller than mf_timeout
+      {'fake_3d_lidar_scan_num': 20},
+      {'fake_3d_lidar_overlap_scan_num': 10}, # should be smaller than fake_3d_lidar_scan_num
+      {'simulate_noise': False},
       {'use_sim_time': use_sim_time_param}
     ]
   )

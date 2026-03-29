@@ -17,6 +17,7 @@ find_package(message_filters REQUIRED)
 find_package(laser_geometry REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(pcl_conversions REQUIRED)
+find_package(pcl_ros REQUIRED)
 
 add_executable(${NODE_NAME} src/lidar_mapper_rviz.cpp)
 ament_target_dependencies(${NODE_NAME}
@@ -27,15 +28,17 @@ ament_target_dependencies(${NODE_NAME}
   laser_geometry
   tf2_ros
   pcl_conversions
+  pcl_ros
 )
 
 target_include_directories(${NODE_NAME} PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-  $<INSTALL_INTERFACE:include/${PROJECT_NAME}>)
-target_compile_features(${NODE_NAME} PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17
+  $<INSTALL_INTERFACE:include/${PROJECT_NAME}>
+)
 
 install(TARGETS ${NODE_NAME}
-  DESTINATION lib/${PROJECT_NAME})
+  DESTINATION lib/${PROJECT_NAME}
+)
 
 # install launch files
 install(DIRECTORY

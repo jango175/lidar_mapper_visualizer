@@ -16,6 +16,7 @@ find_package(sensor_msgs REQUIRED)
 find_package(message_filters REQUIRED)
 find_package(laser_geometry REQUIRED)
 find_package(tf2_ros REQUIRED)
+find_package(tf2_eigen REQUIRED)
 find_package(pcl_conversions REQUIRED)
 find_package(pcl_ros REQUIRED)
 
@@ -27,6 +28,7 @@ ament_target_dependencies(${NODE_NAME}
   message_filters
   laser_geometry
   tf2_ros
+  tf2_eigen
   pcl_conversions
   pcl_ros
 )

@@ -7,11 +7,12 @@
  * 
  */
 
-#include "sensor_msgs/msg/point_cloud2.hpp"
 #include <filesystem>
 #include <rclcpp/logging.hpp>
 #include <string>
 #include <random>
+#include <fstream>
+#include <limits>
 #include <boost/qvm/quat.hpp>
 #include <boost/qvm/quat_operations.hpp>
 #include <rclcpp/node.hpp>
@@ -28,6 +29,7 @@
 #include <tf2_ros/transform_broadcaster.hpp>
 #include <tf2_ros/transform_listener.hpp>
 #include <tf2_ros/buffer.hpp>
+#include <tf2_eigen/tf2_eigen.hpp>
 #include <pcl_ros/transforms.hpp>
 #include <pcl/impl/point_types.hpp>
 #include <pcl/io/pcd_io.h>
@@ -105,6 +107,7 @@ public:
     if (std::filesystem::exists(local_map_dir_))
       std::filesystem::remove_all(local_map_dir_);
     std::filesystem::create_directory(local_map_dir_);
+    std::filesystem::create_directory(local_map_tf_dir_);
 
     auto qos = rclcpp::SensorDataQoS();
 
@@ -255,9 +258,11 @@ private:
   const std::string map_dir_ = home_dir_ + "/ros2_ws/src/lidar_mapper_visualiser/maps/";
   const std::string global_map_path_ = map_dir_ + "global_map.pcd";
   const std::string local_map_dir_ = map_dir_ + "local_map/";
+  const std::string local_map_tf_dir_ = local_map_dir_ + "tf/";
   unsigned long int fake_3d_lidar_scan_num_ = 20;
   unsigned long int fake_3d_lidar_overlap_scan_num_ = 10;
   unsigned long int map_pub_cnt_ = 0;
+  Eigen::Isometry3d prev_tf_ = Eigen::Isometry3d::Identity();
 
   bool simulate_noise_ = false;
   std::random_device rd_;
@@ -492,15 +497,34 @@ private:
       fake_3d_lidar_point_cloud_pub_->publish(fake_3d_lidar_point_cloud_msg);
 
       // save point cloud to file
-      pcl::io::savePCDFileBinary(local_map_dir_ +
-                                  "local_map_" +
-                                  std::to_string((map_pub_cnt_ - 1) / fake_3d_lidar_scan_num_) +
-                                  ".pcd", local_point_cloud_);
+      std::string local_point_cloud_num = std::to_string((map_pub_cnt_ - 1) / fake_3d_lidar_scan_num_);
+      pcl::io::savePCDFileBinary(local_map_dir_ + "local_map_" + local_point_cloud_num + ".pcd",
+                                 local_point_cloud_);
 
       local_point_cloud_.clear();
       prev_overlapping_point_cloud_.clear();
       prev_overlapping_point_cloud_ = next_overlapping_point_cloud_;
       next_overlapping_point_cloud_.clear();
+
+      // local tf for ICP
+      Eigen::Isometry3d curr_tf = tf2::transformToEigen(tf);
+      Eigen::Isometry3d delta_tf = prev_tf_ * curr_tf.inverse();
+      Eigen::Matrix4d delta_matrix = delta_tf.matrix();
+
+      std::string file_name = local_map_tf_dir_ + "/tf_" + local_point_cloud_num + ".txt";
+      std::ofstream file(file_name);
+      if (file.is_open())
+      {
+        file << std::fixed << std::setprecision(std::numeric_limits<double>::max_digits10);
+        file << delta_matrix << "\n";
+        file.close();
+      }
+      else
+      {
+        RCLCPP_ERROR(this->get_logger(), "Failed to open file for writing...");
+      }
+
+      prev_tf_ = curr_tf;
 
       // global map
       sensor_msgs::msg::PointCloud2 sync_point_cloud_msg;

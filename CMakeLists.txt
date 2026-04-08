@@ -13,6 +13,7 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
+find_package(nav_msgs REQUIRED)
 find_package(message_filters REQUIRED)
 find_package(laser_geometry REQUIRED)
 find_package(tf2_ros REQUIRED)
@@ -26,6 +27,7 @@ ament_target_dependencies(${NODE_NAME}
   rclcpp
   geometry_msgs
   sensor_msgs
+  nav_msgs
   message_filters
   laser_geometry
   tf2_ros

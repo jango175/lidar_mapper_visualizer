@@ -19,9 +19,9 @@
 #include <rclcpp/executors.hpp>
 #include <rclcpp/logger.hpp>
 #include <laser_geometry/laser_geometry.hpp>
+#include <nav_msgs/msg/odometry.hpp>
 #include <sensor_msgs/msg/laser_scan.hpp>
 #include <sensor_msgs/msg/point_cloud2.hpp>
-#include <sensor_msgs/msg/nav_sat_fix.hpp>
 #include <sensor_msgs/msg/imu.hpp>
 #include <geometry_msgs/msg/pose_stamped.hpp>
 #include <tf2_ros/message_filter.hpp>
@@ -33,12 +33,12 @@
 #include <pcl_ros/transforms.hpp>
 #include <pcl/impl/point_types.hpp>
 #include <pcl/io/pcd_io.h>
-#include <message_filters/subscriber.h>
-#include <message_filters/sync_policies/approximate_time.h>
 #include <pcl/point_cloud.h>
 #include <pcl_conversions/pcl_conversions.h>
 #include <pcl/filters/statistical_outlier_removal.h>
-
+#include <pcl/filters/voxel_grid.h>
+#include <message_filters/subscriber.h>
+#include <message_filters/sync_policies/approximate_time.h>
 
 // LidarMapperVisualiser node class
 class LidarMapperVisualiser : public rclcpp::Node
@@ -51,9 +51,29 @@ public:
   LidarMapperVisualiser() : Node("lidar_mapper_visualiser")
   {
     // parameters
-    auto lidar_mount_angle_param_desc = rcl_interfaces::msg::ParameterDescriptor{};
-    lidar_mount_angle_param_desc.description = "LIDAR mount angle in degrees";
-    this->declare_parameter("lidar_mount_angle_deg", 30.0, lidar_mount_angle_param_desc);
+    auto lidar_mount_roll_param_desc = rcl_interfaces::msg::ParameterDescriptor{};
+    lidar_mount_roll_param_desc.description = "LIDAR mount roll angle in degrees";
+    this->declare_parameter("lidar_mount_roll_deg", 0.0, lidar_mount_roll_param_desc);
+
+    auto lidar_mount_pitch_param_desc = rcl_interfaces::msg::ParameterDescriptor{};
+    lidar_mount_pitch_param_desc.description = "LIDAR mount pitch angle in degrees";
+    this->declare_parameter("lidar_mount_pitch_deg", 30.0, lidar_mount_pitch_param_desc);
+
+    auto lidar_mount_yaw_param_desc = rcl_interfaces::msg::ParameterDescriptor{};
+    lidar_mount_yaw_param_desc.description = "LIDAR mount yaw angle in degrees";
+    this->declare_parameter("lidar_mount_yaw_deg", 0.0, lidar_mount_yaw_param_desc);
+
+    auto lidar_mount_offset_x_param_desc = rcl_interfaces::msg::ParameterDescriptor{};
+    lidar_mount_offset_x_param_desc.description = "LIDAR mount offset in X axis in meters";
+    this->declare_parameter("lidar_mount_offset_x", 0.088, lidar_mount_offset_x_param_desc);
+
+    auto lidar_mount_offset_y_param_desc = rcl_interfaces::msg::ParameterDescriptor{};
+    lidar_mount_offset_y_param_desc.description = "LIDAR mount offset in Y axis in meters";
+    this->declare_parameter("lidar_mount_offset_y", 0.0, lidar_mount_offset_y_param_desc);
+
+    auto lidar_mount_offset_z_param_desc = rcl_interfaces::msg::ParameterDescriptor{};
+    lidar_mount_offset_z_param_desc.description = "LIDAR mount offset in Z axis in meters";
+    this->declare_parameter("lidar_mount_offset_z", 0.088, lidar_mount_offset_z_param_desc);
 
     auto mf_timeout_param_desc = rcl_interfaces::msg::ParameterDescriptor{};
     mf_timeout_param_desc.description = "Timeout for message filter tf buffer (seconds)";
@@ -79,12 +99,26 @@ public:
     fake_3d_lidar_overlap_scan_num_param_desc.description = "Number of overlapping scans for fake 3D LIDAR point cloud";
     this->declare_parameter("fake_3d_lidar_overlap_scan_num", 10, fake_3d_lidar_overlap_scan_num_param_desc);
 
+    auto voxel_leaf_size_param_desc = rcl_interfaces::msg::ParameterDescriptor{};
+    voxel_leaf_size_param_desc.description = "Leaf size for voxel filter";
+    this->declare_parameter("voxel_leaf_size", 0.1, voxel_leaf_size_param_desc);
+
     auto simulate_noise_param_desc = rcl_interfaces::msg::ParameterDescriptor{};
     simulate_noise_param_desc.description = "Set to true to add a noise to pose for simulation";
     this->declare_parameter("simulate_noise", false, simulate_noise_param_desc);
 
-    double lidar_mount_angle_deg = this->get_parameter("lidar_mount_angle_deg").as_double();
-    RCLCPP_INFO(this->get_logger(), "LIDAR mounting angle: %f degrees", lidar_mount_angle_deg);
+    const double lidar_mount_roll_deg = this->get_parameter("lidar_mount_roll_deg").as_double();
+    const double lidar_mount_pitch_deg = this->get_parameter("lidar_mount_pitch_deg").as_double();
+    const double lidar_mount_yaw_deg = this->get_parameter("lidar_mount_yaw_deg").as_double();
+    const double lidar_mount_offset_x = this->get_parameter("lidar_mount_offset_x").as_double();
+    const double lidar_mount_offset_y = this->get_parameter("lidar_mount_offset_y").as_double();
+    const double lidar_mount_offset_z = this->get_parameter("lidar_mount_offset_z").as_double();
+    RCLCPP_INFO(this->get_logger(), "LIDAR mounting roll: %f degrees", lidar_mount_roll_deg);
+    RCLCPP_INFO(this->get_logger(), "LIDAR mounting pitch: %f degrees", lidar_mount_pitch_deg);
+    RCLCPP_INFO(this->get_logger(), "LIDAR mounting yaw: %f degrees", lidar_mount_yaw_deg);
+    RCLCPP_INFO(this->get_logger(), "LIDAR mounting offset X: %f meters", lidar_mount_offset_x);
+    RCLCPP_INFO(this->get_logger(), "LIDAR mounting offset Y: %f meters", lidar_mount_offset_y);
+    RCLCPP_INFO(this->get_logger(), "LIDAR mounting offset Z: %f meters", lidar_mount_offset_z);
 
     double mf_timeout = this->get_parameter("mf_timeout").as_double();
     double timestamp_tolerance = this->get_parameter("timestamp_tolerance").as_double();
@@ -99,8 +133,10 @@ public:
 
     sor_mean_k_ = this->get_parameter("sor_mean_k").as_int();
     sor_std_dev_mult_ = this->get_parameter("sor_std_dev_mult").as_double();
+    voxel_leaf_size_ = static_cast<float>(this->get_parameter("voxel_leaf_size").as_double());
     RCLCPP_INFO(this->get_logger(), "Using SOR filter mean k parameter: %d", sor_mean_k_);
     RCLCPP_INFO(this->get_logger(), "Using SOR filter std dev mult parameter: %f", sor_std_dev_mult_);
+    RCLCPP_INFO(this->get_logger(), "Using voxel filter size parameter: %f", voxel_leaf_size_);
 
     if (sor_mean_k_ < 0 || sor_std_dev_mult_ < 0.0)
     {
@@ -121,7 +157,7 @@ public:
 
     simulate_noise_ = this->get_parameter("simulate_noise").as_bool();
 
-    global_point_cloud_.header.frame_id = world_link_;
+    global_map_point_cloud_->header.frame_id = world_link_;
 
     // create directories
     if (!std::filesystem::exists(map_dir_))
@@ -135,17 +171,17 @@ public:
     auto qos = rclcpp::SensorDataQoS();
 
     // tf
-    boost::qvm::quat<double> q_x = boost::qvm::rotx_quat(0.0);
-    boost::qvm::quat<double> q_y = boost::qvm::roty_quat(lidar_mount_angle_deg * M_PI / 180.0);
-    boost::qvm::quat<double> q_z = boost::qvm::rotz_quat(0.0);
+    boost::qvm::quat<double> q_x = boost::qvm::rotx_quat(lidar_mount_roll_deg * M_PI / 180.0);
+    boost::qvm::quat<double> q_y = boost::qvm::roty_quat(lidar_mount_pitch_deg * M_PI / 180.0);
+    boost::qvm::quat<double> q_z = boost::qvm::rotz_quat(lidar_mount_yaw_deg * M_PI / 180.0);
     boost::qvm::quat<double> q_lidar = q_z * q_y * q_x;
     boost::qvm::normalize(q_lidar);
 
     drone_lidar_tf_.header.frame_id = drone_link_;
     drone_lidar_tf_.child_frame_id = lidar_link_;
-    drone_lidar_tf_.transform.translation.x = lidar_offset_x_;
-    drone_lidar_tf_.transform.translation.y = lidar_offset_y_;
-    drone_lidar_tf_.transform.translation.z = lidar_offset_z_;
+    drone_lidar_tf_.transform.translation.x = lidar_mount_offset_x;
+    drone_lidar_tf_.transform.translation.y = lidar_mount_offset_y;
+    drone_lidar_tf_.transform.translation.z = lidar_mount_offset_z;
     drone_lidar_tf_.transform.rotation.w = q_lidar.a[0];
     drone_lidar_tf_.transform.rotation.x = q_lidar.a[1];
     drone_lidar_tf_.transform.rotation.y = q_lidar.a[2];
@@ -184,10 +220,10 @@ public:
       std::bind(&LidarMapperVisualiser::orientation_callback, this, std::placeholders::_1)
     );
 
-    gps_sub_ = this->create_subscription<sensor_msgs::msg::NavSatFix>(
-      gps_topic_,
+    odom_sub_ = this->create_subscription<nav_msgs::msg::Odometry>(
+      odom_topic_,
       qos,
-      std::bind(&LidarMapperVisualiser::gps_callback, this, std::placeholders::_1)
+      std::bind(&LidarMapperVisualiser::odom_callback, this, std::placeholders::_1)
     );
 
     scan_sub_ = this->create_subscription<sensor_msgs::msg::LaserScan>(
@@ -225,13 +261,13 @@ public:
 private:
   const std::string scan_topic_ = "/ldlidar_node/scan";
   const std::string orientation_topic_ = "/mavros/imu/data";
-  const std::string gps_topic_ = "/mavros/global_position/global";
+  const std::string odom_topic_ = "/mavros/local_position/odom";
   const std::string pose_topic_ = "/mavros/local_position/pose";
 
-  const std::string slice_point_cloud_topic_ = "/drone/slice_point_cloud";
-  const std::string sync_slice_point_cloud_topic_ = "/drone/sync_slice_point_cloud";
-  const std::string fake_3d_lidar_point_cloud_topic_ = "/drone/fake_3d_lidar_point_cloud";
-  const std::string global_map_topic_ = "/drone/global_map";
+  const std::string slice_point_cloud_topic_ = "/lidar_mapper_visualiser/slice_point_cloud";
+  const std::string sync_slice_point_cloud_topic_ = "/lidar_mapper_visualiser/sync_slice_point_cloud";
+  const std::string fake_3d_lidar_point_cloud_topic_ = "/lidar_mapper_visualiser/fake_3d_lidar_point_cloud";
+  const std::string global_map_topic_ = "/lidar_mapper_visualiser/global_map";
 
   std::unique_ptr<tf2_ros::Buffer> tf_buffer_;
   std::shared_ptr<tf2_ros::TransformListener> tf_listener_;
@@ -249,29 +285,27 @@ private:
   std::shared_ptr<tf2_ros::MessageFilter<sensor_msgs::msg::LaserScan>> mf_slice_scan_tf2_;
 
   rclcpp::Subscription<sensor_msgs::msg::Imu>::SharedPtr orientation_sub_;
-  rclcpp::Subscription<sensor_msgs::msg::NavSatFix>::SharedPtr gps_sub_;
+  rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr odom_sub_;
   rclcpp::Subscription<sensor_msgs::msg::LaserScan>::SharedPtr scan_sub_;
   rclcpp::Subscription<geometry_msgs::msg::PoseStamped>::SharedPtr pose_sub_;
   rclcpp::Subscription<sensor_msgs::msg::PointCloud2>::SharedPtr point_cloud_sub_;
 
   sensor_msgs::msg::Imu::ConstSharedPtr latest_orientation_msg_;
-  sensor_msgs::msg::NavSatFix::ConstSharedPtr latest_gps_msg_;
+  nav_msgs::msg::Odometry::ConstSharedPtr latest_odom_msg_;
   sensor_msgs::msg::LaserScan::ConstSharedPtr latest_scan_msg_;
   geometry_msgs::msg::PoseStamped::ConstSharedPtr latest_pose_msg_;
 
   laser_geometry::LaserProjection laser_projector_;
   geometry_msgs::msg::TransformStamped drone_lidar_tf_;
-  const double lidar_offset_x_ = 0.088;
-  const double lidar_offset_y_ = 0.0;
-  const double lidar_offset_z_ = 0.088;
 
   int sor_mean_k_ = 50;
   double sor_std_dev_mult_ = 1.0;
+  float voxel_leaf_size_ = 0.1f;
 
-  pcl::PointCloud<pcl::PointXYZI> global_point_cloud_;
-  pcl::PointCloud<pcl::PointXYZI> local_point_cloud_;
-  pcl::PointCloud<pcl::PointXYZI> prev_overlapping_point_cloud_;
-  pcl::PointCloud<pcl::PointXYZI> next_overlapping_point_cloud_;
+  pcl::PointCloud<pcl::PointXYZI>::Ptr global_map_point_cloud_{new pcl::PointCloud<pcl::PointXYZI>()};
+  pcl::PointCloud<pcl::PointXYZI>::Ptr local_point_cloud_{new pcl::PointCloud<pcl::PointXYZI>()};
+  pcl::PointCloud<pcl::PointXYZI>::Ptr prev_overlapping_point_cloud_{new pcl::PointCloud<pcl::PointXYZI>()};
+  pcl::PointCloud<pcl::PointXYZI>::Ptr next_overlapping_point_cloud_{new pcl::PointCloud<pcl::PointXYZI>()};
 
   const char* home_ = std::getenv("HOME");
   const std::string home_dir_ = home_ ? std::string(home_) : std::string(".");
@@ -321,13 +355,13 @@ private:
 
 
   /**
-   * @brief Callback for GPS data
+   * @brief Callback for odometry data
    * 
-   * @param gps_msg GPS message pointer
+   * @param odom_msg Odometry message pointer
    */
-  void gps_callback(const sensor_msgs::msg::NavSatFix::ConstSharedPtr gps_msg)
+  void odom_callback(const nav_msgs::msg::Odometry::ConstSharedPtr odom_msg)
   {
-    latest_gps_msg_ = gps_msg;
+    latest_odom_msg_ = odom_msg;
   }
 
 
@@ -362,16 +396,24 @@ private:
       }
       rand_orient_noise_[3] += unif_orient_(gen_);
 
+      boost::qvm::quat<double> q_drone = {
+        world_drone_tf.transform.rotation.w + rand_orient_noise_[0],
+        world_drone_tf.transform.rotation.x + rand_orient_noise_[1],
+        world_drone_tf.transform.rotation.y + rand_orient_noise_[2],
+        world_drone_tf.transform.rotation.z + rand_orient_noise_[3]
+      };
+      boost::qvm::normalize(q_drone);
+
       world_drone_tf.transform.translation.x += rand_pos_noise_[0];
       world_drone_tf.transform.translation.y += rand_pos_noise_[1];
       world_drone_tf.transform.translation.z += rand_pos_noise_[2];
-      world_drone_tf.transform.rotation.w += rand_orient_noise_[0];
-      world_drone_tf.transform.rotation.x += rand_orient_noise_[1];
-      world_drone_tf.transform.rotation.y += rand_orient_noise_[2];
-      world_drone_tf.transform.rotation.z += rand_orient_noise_[3];
+      world_drone_tf.transform.rotation.w = q_drone.a[0];
+      world_drone_tf.transform.rotation.x = q_drone.a[1];
+      world_drone_tf.transform.rotation.y = q_drone.a[2];
+      world_drone_tf.transform.rotation.z = q_drone.a[3];
     }
 
-    // update just timestamp
+    // update just timestamp (static broadcaster causes mf to trigger all the time)
     drone_lidar_tf_.header.stamp = pose_msg->header.stamp;
 
     tf_broadcaster_->sendTransform(world_drone_tf);
@@ -414,23 +456,27 @@ private:
 
     sensor_msgs::msg::PointCloud2 sync_slice_point_cloud_msg;
     laser_projector_.transformLaserScanToPointCloud(drone_link_, *scan_msg, sync_slice_point_cloud_msg, *tf_buffer_);
-    // sync_slice_point_cloud_pub_->publish(sync_slice_point_cloud_msg); // unfiltered
 
     // point cloud filtering
     pcl::PointCloud<pcl::PointXYZI>::Ptr sync_pcl_slice(new pcl::PointCloud<pcl::PointXYZI>());
     pcl::fromROSMsg(sync_slice_point_cloud_msg, *sync_pcl_slice);
+    if (sync_pcl_slice->empty())
+    {
+      RCLCPP_WARN(this->get_logger(), "PCL slice empty...");
+      return;
+    }
 
-    pcl::PointCloud<pcl::PointXYZI>::Ptr filtered_sync_pcl_slice(new pcl::PointCloud<pcl::PointXYZI>());
     pcl::StatisticalOutlierRemoval<pcl::PointXYZI> sor;
     sor.setInputCloud(sync_pcl_slice);
     sor.setMeanK(sor_mean_k_);
     sor.setStddevMulThresh(sor_std_dev_mult_);
-    sor.filter(*filtered_sync_pcl_slice);
+    sor.filter(*sync_pcl_slice);
 
     sensor_msgs::msg::PointCloud2 filtered_sync_slice_point_cloud_msg;
-    pcl::toROSMsg(*filtered_sync_pcl_slice, filtered_sync_slice_point_cloud_msg);
+    pcl::toROSMsg(*sync_pcl_slice, filtered_sync_slice_point_cloud_msg);
     filtered_sync_slice_point_cloud_msg.header = sync_slice_point_cloud_msg.header;
 
+    // sync_slice_point_cloud_pub_->publish(sync_slice_point_cloud_msg); // unfiltered
     sync_slice_point_cloud_pub_->publish(filtered_sync_slice_point_cloud_msg);
   }
 
@@ -452,7 +498,7 @@ private:
                                   transform_time,
                                   rclcpp::Duration::from_seconds(0.0)))
     {
-      RCLCPP_WARN_THROTTLE(this->get_logger(), *this->get_clock(), 1000, "Transform not available yet, skipping this scan");
+      RCLCPP_WARN_THROTTLE(this->get_logger(), *this->get_clock(), 1000, "Transform not available yet, skipping this scan...");
       return;
     }
 
@@ -467,23 +513,23 @@ private:
     pcl_slice.header.frame_id = world_link_;
 
     // accumulate point clouds
-    global_point_cloud_ += pcl_slice;
-    local_point_cloud_ += pcl_slice;
+    *global_map_point_cloud_ += pcl_slice;
+    *local_point_cloud_ += pcl_slice;
 
     if (map_pub_cnt_ % fake_3d_lidar_scan_num_ >= fake_3d_lidar_scan_num_ - fake_3d_lidar_overlap_scan_num_)
     {
-      next_overlapping_point_cloud_ += pcl_slice;
+      *next_overlapping_point_cloud_ += pcl_slice;
     }
 
     if ((map_pub_cnt_ + 1) % fake_3d_lidar_scan_num_ == 0)
     {
       // local map
-      local_point_cloud_ += prev_overlapping_point_cloud_;
-      local_point_cloud_.header.frame_id = world_link_;
+      *local_point_cloud_ += *prev_overlapping_point_cloud_;
+      local_point_cloud_->header.frame_id = world_link_;
 
       transform_time = sync_slice_point_cloud_msg->header.stamp;
       if (!tf_buffer_->canTransform(drone_link_,
-                                    local_point_cloud_.header.frame_id,
+                                    local_point_cloud_->header.frame_id,
                                     transform_time,
                                     rclcpp::Duration::from_seconds(0.0)))
       {
@@ -494,29 +540,29 @@ private:
       // transform back to drone frame
       tf = tf_buffer_->lookupTransform(
         drone_link_,
-        local_point_cloud_.header.frame_id,
+        local_point_cloud_->header.frame_id,
         sync_slice_point_cloud_msg->header.stamp,
         rclcpp::Duration::from_seconds(0.0)
       );
-      pcl_ros::transformPointCloud(local_point_cloud_, local_point_cloud_, tf);
-      local_point_cloud_.header.frame_id = drone_link_;
+      pcl_ros::transformPointCloud(*local_point_cloud_, *local_point_cloud_, tf);
+      local_point_cloud_->header.frame_id = drone_link_;
 
       // publish fake 3D LIDAR data
       sensor_msgs::msg::PointCloud2 fake_3d_lidar_point_cloud_msg;
-      pcl::toROSMsg(local_point_cloud_, fake_3d_lidar_point_cloud_msg);
-      fake_3d_lidar_point_cloud_msg.header.frame_id = local_point_cloud_.header.frame_id;
+      pcl::toROSMsg(*local_point_cloud_, fake_3d_lidar_point_cloud_msg);
+      fake_3d_lidar_point_cloud_msg.header.frame_id = local_point_cloud_->header.frame_id;
       fake_3d_lidar_point_cloud_msg.header.stamp = sync_slice_point_cloud_msg->header.stamp;
       fake_3d_lidar_point_cloud_pub_->publish(fake_3d_lidar_point_cloud_msg);
 
       // save point cloud to file
       std::string local_point_cloud_num = std::to_string((map_pub_cnt_ - 1) / fake_3d_lidar_scan_num_);
       pcl::io::savePCDFileBinary(local_map_dir_ + "local_map_" + local_point_cloud_num + ".pcd",
-                                 local_point_cloud_);
+                                 *local_point_cloud_);
 
-      local_point_cloud_.clear();
-      prev_overlapping_point_cloud_.clear();
-      prev_overlapping_point_cloud_ = next_overlapping_point_cloud_;
-      next_overlapping_point_cloud_.clear();
+      local_point_cloud_->clear();
+      prev_overlapping_point_cloud_->clear();
+      *prev_overlapping_point_cloud_ = *next_overlapping_point_cloud_;
+      next_overlapping_point_cloud_->clear();
 
       // local tf for ICP
       Eigen::Isometry3d curr_tf = tf2::transformToEigen(tf);
@@ -537,19 +583,24 @@ private:
       }
 
       prev_tf_ = curr_tf;
-
-      // global map
-      sensor_msgs::msg::PointCloud2 global_map_point_cloud_msg;
-      pcl::toROSMsg(global_point_cloud_, global_map_point_cloud_msg);
-      global_map_point_cloud_msg.header.frame_id = global_point_cloud_.header.frame_id;
-      global_map_point_cloud_msg.header.stamp = sync_slice_point_cloud_msg->header.stamp;
-      // global_map_pub_->publish(global_map_point_cloud_msg);
-
-      // save point cloud to file
-      pcl::io::savePCDFileBinary(global_map_path_, global_point_cloud_);
     }
 
     map_pub_cnt_++;
+
+    // global map
+    pcl::VoxelGrid<pcl::PointXYZI> voxel_filter;
+    voxel_filter.setInputCloud(global_map_point_cloud_);
+    voxel_filter.setLeafSize(voxel_leaf_size_, voxel_leaf_size_, voxel_leaf_size_);
+    voxel_filter.filter(*global_map_point_cloud_);
+
+    sensor_msgs::msg::PointCloud2 global_map_point_cloud_msg;
+    pcl::toROSMsg(*global_map_point_cloud_, global_map_point_cloud_msg);
+    global_map_point_cloud_msg.header.frame_id = global_map_point_cloud_->header.frame_id;
+    global_map_point_cloud_msg.header.stamp = sync_slice_point_cloud_msg->header.stamp;
+    global_map_pub_->publish(global_map_point_cloud_msg);
+
+    // save point cloud to file
+    pcl::io::savePCDFileBinary(global_map_path_, *global_map_point_cloud_);
   }
 };
 

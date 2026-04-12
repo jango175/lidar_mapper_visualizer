@@ -8,13 +8,34 @@ import os
 
 
 def generate_launch_description():
-  declare_use_sim_time = DeclareLaunchArgument(
+  use_sim_time_arg = DeclareLaunchArgument(
     'use_sim_time',
     default_value = 'true',
     description = 'Use simulation (bag) clock'
   )
 
+  world_link_arg = DeclareLaunchArgument(
+    'world_link',
+    default_value = 'map',
+    description = 'World link name'
+  )
+
+  drone_link_arg = DeclareLaunchArgument(
+    'drone_link',
+    default_value = 'base_link',
+    description = 'Drone link name'
+  )
+
+  lidar_link_arg = DeclareLaunchArgument(
+    'lidar_link',
+    default_value = 'ldlidar_link',
+    description = 'LIDAR link name'
+  )
+
   use_sim_time_param = LaunchConfiguration('use_sim_time')
+  world_link = LaunchConfiguration('world_link')
+  drone_link = LaunchConfiguration('drone_link')
+  lidar_link = LaunchConfiguration('lidar_link')
 
   lidar_mapper_rviz_node = Node(
     package = 'lidar_mapper_visualiser',
@@ -29,11 +50,14 @@ def generate_launch_description():
       'lidar_mount_offset_x': 0.088,
       'lidar_mount_offset_y': 0.0,
       'lidar_mount_offset_z': 0.088,
+      'world_link': world_link,
+      'drone_link': drone_link,
+      'lidar_link': lidar_link,
       'mf_timeout': 0.25,
       'timestamp_tolerance': 0.11, # should be smaller than mf_timeout
+      'window_size': 20.0,
       'sor_mean_k': 50,
       'sor_std_dev_mult': 1.0,
-      'voxel_leaf_size': 0.1,
       'fake_3d_lidar_scan_num': 25,
       'fake_3d_lidar_overlap_scan_num': 5, # should be smaller than fake_3d_lidar_scan_num
       'simulate_noise': False,
@@ -94,8 +118,8 @@ def generate_launch_description():
     output = 'screen',
     parameters = [{
       'resolution': 0.15,
-      'frame_id': 'map',
-      'base_frame_id': 'base_link',
+      'frame_id': world_link,
+      'base_frame_id': drone_link,
       'sensor_model.max_range': 12.0,
       'latch': True,
       'use_sim_time': use_sim_time_param
@@ -106,7 +130,12 @@ def generate_launch_description():
   )
 
   ld = LaunchDescription()
-  ld.add_action(declare_use_sim_time)
+
+  ld.add_action(use_sim_time_arg)
+  ld.add_action(world_link_arg)
+  ld.add_action(drone_link_arg)
+  ld.add_action(lidar_link_arg)
+
   ld.add_action(lidar_mapper_rviz_node)
   ld.add_action(rsp_node)
   # ld.add_action(static_tf_node) # for static debug

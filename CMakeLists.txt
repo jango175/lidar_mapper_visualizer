@@ -16,6 +16,10 @@ find_package(sensor_msgs REQUIRED)
 find_package(nav_msgs REQUIRED)
 find_package(message_filters REQUIRED)
 find_package(laser_geometry REQUIRED)
+find_package(octomap REQUIRED)
+find_package(octomap_msgs REQUIRED)
+find_package(octomap_server REQUIRED)
+find_package(tf2 REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(tf2_eigen REQUIRED)
 find_package(pcl_conversions REQUIRED)
@@ -30,6 +34,10 @@ ament_target_dependencies(${NODE_NAME}
   nav_msgs
   message_filters
   laser_geometry
+  octomap
+  octomap_msgs
+  octomap_server
+  tf2
   tf2_ros
   tf2_eigen
   pcl_conversions

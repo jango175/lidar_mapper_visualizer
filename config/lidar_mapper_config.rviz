@@ -4,7 +4,6 @@ Panels:
     Name: Displays
     Property Tree Widget:
       Expanded:
-        - /Pose1/Topic1
         - /TF1/Frames1
       Splitter Ratio: 0.5
     Tree Height: 786
@@ -25,7 +24,7 @@ Panels:
     Experimental: false
     Name: Time
     SyncMode: 0
-    SyncSource: PointCloud2
+    SyncSource: ""
 Visualization Manager:
   Class: ""
   Displays:
@@ -47,25 +46,44 @@ Visualization Manager:
       Plane Cell Count: 10
       Reference Frame: <Fixed Frame>
       Value: true
-    - Alpha: 1
-      Axes Length: 0.20000000298023224
-      Axes Radius: 0.019999999552965164
-      Class: rviz_default_plugins/Pose
-      Color: 255; 25; 0
+    - Angle Tolerance: 0.10000000149011612
+      Class: rviz_default_plugins/Odometry
+      Covariance:
+        Orientation:
+          Alpha: 0.5
+          Color: 255; 255; 127
+          Color Style: Unique
+          Frame: Local
+          Offset: 1
+          Scale: 1
+          Value: true
+        Position:
+          Alpha: 0.30000001192092896
+          Color: 204; 51; 204
+          Scale: 1
+          Value: true
+        Value: true
       Enabled: true
-      Head Length: 0.30000001192092896
-      Head Radius: 0.10000000149011612
-      Name: Pose
-      Shaft Length: 1
-      Shaft Radius: 0.05000000074505806
-      Shape: Axes
+      Keep: 1
+      Name: Odometry
+      Position Tolerance: 0.10000000149011612
+      Shape:
+        Alpha: 1
+        Axes Length: 0.20000000298023224
+        Axes Radius: 0.019999999552965164
+        Color: 255; 25; 0
+        Head Length: 0.30000001192092896
+        Head Radius: 0.10000000149011612
+        Shaft Length: 1
+        Shaft Radius: 0.05000000074505806
+        Value: Axes
       Topic:
         Depth: 10
         Durability Policy: Volatile
         Filter size: 10
         History Policy: Keep Last
         Reliability Policy: Best Effort
-        Value: /mavros/local_position/pose
+        Value: /mavros/local_position/odom
       Value: true
     - Alpha: 1
       Autocompute Intensity Bounds: false
@@ -357,7 +375,7 @@ Visualization Manager:
       Class: rviz_default_plugins/PointCloud2
       Color: 255; 255; 255
       Color Transformer: Intensity
-      Decay Time: 3000
+      Decay Time: 0
       Enabled: false
       Invert Rainbow: true
       Max Color: 255; 255; 255
@@ -390,7 +408,7 @@ Visualization Manager:
       Class: rviz_default_plugins/PointCloud2
       Color: 255; 255; 255
       Color Transformer: Intensity
-      Decay Time: 3000
+      Decay Time: 0
       Enabled: false
       Invert Rainbow: true
       Max Color: 255; 255; 255
@@ -445,6 +463,39 @@ Visualization Manager:
       Voxel Alpha: 1
       Voxel Coloring: Cell Probability
       Voxel Rendering: Occupied Voxels
+    - Alpha: 1
+      Autocompute Intensity Bounds: true
+      Autocompute Value Bounds:
+        Max Value: 10
+        Min Value: -10
+        Value: true
+      Axis: Z
+      Channel Name: intensity
+      Class: rviz_default_plugins/PointCloud2
+      Color: 255; 255; 255
+      Color Transformer: Intensity
+      Decay Time: 0
+      Enabled: false
+      Invert Rainbow: false
+      Max Color: 255; 255; 255
+      Max Intensity: 4096
+      Min Color: 0; 0; 0
+      Min Intensity: 0
+      Name: PointCloud2
+      Position Transformer: XYZ
+      Selectable: true
+      Size (Pixels): 3
+      Size (m): 0.009999999776482582
+      Style: Flat Squares
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /drone_0_grid/grid_map/occupancy_inflate
+      Use Fixed Frame: true
+      Use rainbow: true
+      Value: false
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -528,4 +579,4 @@ Window Geometry:
     collapsed: true
   Width: 1854
   X: 66
-  Y: 40
+  Y: 688

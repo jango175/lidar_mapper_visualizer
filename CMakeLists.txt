@@ -74,4 +74,9 @@ install(DIRECTORY
   DESTINATION share/${PROJECT_NAME}
 )
 
+install(PROGRAMS
+  scripts/guided_flight.py
+  DESTINATION lib/${PROJECT_NAME}
+)
+
 ament_package()

@@ -55,7 +55,7 @@ def generate_launch_description():
       'lidar_link': lidar_link,
       'mf_timeout': 0.25,
       'timestamp_tolerance': 0.11, # should be smaller than mf_timeout
-      'window_size': 20.0,
+      'window_size': 10.0,
       'sor_mean_k': 50,
       'sor_std_dev_mult': 1.0,
       'fake_3d_lidar_scan_num': 25,

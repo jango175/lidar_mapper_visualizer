@@ -329,6 +329,7 @@ private:
   const char* home_ = std::getenv("HOME");
   const std::string home_dir_ = home_ ? std::string(home_) : std::string(".");
   const std::string map_dir_ = home_dir_ + "/ros2_ws/src/lidar_mapper_visualiser/maps/";
+  const std::string global_map_path_ = map_dir_ + "/global_map.pcd";
   const std::string local_map_dir_ = map_dir_ + "local_map/";
   const std::string local_map_tf_dir_ = local_map_dir_ + "tf/";
   unsigned long int fake_3d_lidar_scan_num_ = 20;
@@ -654,6 +655,8 @@ private:
     global_map_point_cloud_msg.header.frame_id = global_map_point_cloud->header.frame_id;
     global_map_point_cloud_msg.header.stamp = octomap_msg->header.stamp;
     global_map_pub_->publish(global_map_point_cloud_msg);
+
+    pcl::io::savePCDFileBinary(global_map_path_, *global_map_point_cloud);
   }
 };
 

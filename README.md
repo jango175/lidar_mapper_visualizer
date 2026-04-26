@@ -21,3 +21,4 @@ ros2 bag play lidar_bag_YY-MM-DD_hh:mm:ss/ --clock
 * https://github.com/OctoMap/octomap_rviz_plugins
 * https://github.com/alvinsunyixiao/vrpn_mocap
 * https://github.com/pointcloudlibrary/pcl
+* https://github.com/jango175/mark4_ardupilot_sitl.git

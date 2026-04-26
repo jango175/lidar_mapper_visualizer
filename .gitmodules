@@ -1,0 +1,4 @@
+[submodule "mark4_ardupilot_sitl"]
+	path = mark4_ardupilot_sitl
+	url = git@github.com:jango175/mark4_ardupilot_sitl.git
+	branch = main

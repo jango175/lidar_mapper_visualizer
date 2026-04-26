@@ -5,7 +5,6 @@ Guided flight ROS 2 package.
 """
 
 import math
-from turtle import pos
 import rclpy
 from rclpy.node import Node
 from rclpy.publisher import Publisher
@@ -81,15 +80,15 @@ class GuidedFlight(Node):
     """
 
     init_x: float = 0.0
-    init_y: float = 7.0
-    init_z: float = 5.0
-    R: float = 5.0
-    R_z: float = 4.0
-    div: int = 50
-    div_z: int = 5
+    init_y: float = 0.0
+    init_z: float = 2.5
+    R: float = 3.0
+    R_z: float = 1.5
+    div: int = 10
+    div_z: int = 4
 
     for i in range(div):
-      theta: float = i * 2.0 * math.pi / div
+      theta = i * 2.0 * math.pi / div
 
       for j in range(div_z):
         theta_z = j * 2.0 * math.pi / div_z
@@ -157,7 +156,7 @@ class GuidedFlight(Node):
 
     if (self.position.pose.position.x - self.waypoints[self.waypoint_num].position.x)**2 + \
        (self.position.pose.position.y - self.waypoints[self.waypoint_num].position.y)**2 + \
-       (self.position.pose.position.z - self.waypoints[self.waypoint_num].position.z)**2 > 0.01:
+       (self.position.pose.position.z - self.waypoints[self.waypoint_num].position.z)**2 > 0.025:
 
       waypoint_msg: PoseStamped = PoseStamped()
       waypoint_msg.header.stamp = self.get_clock().now().to_msg()

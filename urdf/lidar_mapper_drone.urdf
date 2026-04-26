@@ -581,6 +581,20 @@
             </geometry>
         </collision>
     </link>
+    <link name="SoloGood_M10">
+        <inertial>
+            <origin xyz="3.9091300716261255e-05 -0.00021090184984128512 -0.008466271233015963" rpy="0.0 -0.0 0.0" />
+            <mass value="0.0119703708" />
+            <inertia ixx="3.327047843247285e-07" iyy="6.20716874593166e-07" izz="3.4040382152942306e-07" ixy="2.1575631147483717e-10" iyz="1.1402074998685847e-08" ixz="1.037795193247014e-09" />
+        </inertial>
+        <visual name="SoloGood_M10_visual">
+            <origin xyz="1.2757073917016564e-09 -0.003000000000000509 -0.008999998031276064" rpy="1.5707963267948961 9.879484617779267e-16 -3.14159265358979" />
+            <geometry>
+                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/SoloGood_M10.stl" scale="0.001 0.001 0.001" />
+            </geometry>
+            <material name="black_plastic"/>
+        </visual>
+    </link>
     <joint name="drone_base_Rigid-2" type="fixed">
         <origin xyz="-0.09690226368379888 0.11071519872429374 -0.007500000000000313" rpy="-5.552470375841605e-17 -1.6098369382336299e-15 1.570796326794898" />
         <parent link="drone_base" />
@@ -791,6 +805,14 @@
         <child link="7_inch_CCW_1" />
     </joint>
     <gazebo reference="motor_rotor_3_Rigid-32">
+        <preserveFixedJoint>true</preserveFixedJoint>
+    </gazebo>
+    <joint name="back_holder_optical_flow_Rigid-33" type="fixed">
+        <origin xyz="-0.009500000000000001 0.06584037000000001 -0.0275" rpy="-1.5707963267948966 1.893646573411915e-46 -9.601928861622976e-16" />
+        <parent link="back_holder_optical_flow" />
+        <child link="SoloGood_M10" />
+    </joint>
+    <gazebo reference="back_holder_optical_flow_Rigid-33">
         <preserveFixedJoint>true</preserveFixedJoint>
     </gazebo>
 

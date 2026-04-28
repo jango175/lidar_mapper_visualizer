@@ -1,4 +1,4 @@
-# LIDAR mapper visualiser
+# LiDAR mapper visualizer
 
 ## Build
 ```bash
@@ -10,7 +10,7 @@ source ./install/local_setup.bash
 
 ## Run
 ```bash
-ros2 launch lidar_mapper_visualiser lidar_mapper_rviz.launch.py
+ros2 launch lidar_mapper_visualizer lidar_mapper_rviz.launch.py
 ros2 bag play lidar_bag_YY-MM-DD_hh:mm:ss/ --clock
 ```
 

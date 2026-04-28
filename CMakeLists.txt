@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
-project(lidar_mapper_visualiser)
+project(lidar_mapper_visualizer)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 set(NODE_NAME lidar_mapper_rviz)

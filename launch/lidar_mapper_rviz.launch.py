@@ -38,7 +38,7 @@ def generate_launch_description():
   lidar_link = LaunchConfiguration('lidar_link')
 
   lidar_mapper_rviz_node = Node(
-    package = 'lidar_mapper_visualiser',
+    package = 'lidar_mapper_visualizer',
     executable = 'lidar_mapper_rviz',
     name = 'lidar_mapper_rviz',
     output = 'screen',
@@ -66,7 +66,7 @@ def generate_launch_description():
   )
 
   # read the URDF file content
-  pkg_share = get_package_share_directory('lidar_mapper_visualiser')
+  pkg_share = get_package_share_directory('lidar_mapper_visualizer')
   urdf_file = os.path.join(pkg_share, 'urdf', 'lidar_mapper_drone.urdf')
 
   with open(urdf_file, 'r') as infp:
@@ -95,7 +95,7 @@ def generate_launch_description():
   )
 
   rviz_config_file = PathJoinSubstitution([
-    FindPackageShare('lidar_mapper_visualiser'),
+    FindPackageShare('lidar_mapper_visualizer'),
     'config',
     'lidar_mapper_config.rviz'
   ])
@@ -125,7 +125,7 @@ def generate_launch_description():
       'use_sim_time': use_sim_time_param
     }],
     remappings = [
-      ('cloud_in', '/lidar_mapper_visualiser/sync_slice_point_cloud')
+      ('cloud_in', '/lidar_mapper_visualizer/sync_slice_point_cloud')
     ]
   )
 

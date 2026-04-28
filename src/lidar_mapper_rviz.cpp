@@ -1,7 +1,7 @@
 /**
  * @file lidar_mapper_rviz.cpp
  * @author jango175
- * @brief LIDAR mapper visualiser ROS2 node
+ * @brief LIDAR mapper visualizer ROS2 node
  * 
  * @copyright Copyright (c) 2026
  * 
@@ -42,15 +42,15 @@
 #include <message_filters/sync_policies/approximate_time.h>
 
 
-// LidarMapperVisualiser node class
-class LidarMapperVisualiser : public rclcpp::Node
+// LidarMappervisualizer node class
+class LidarMappervisualizer : public rclcpp::Node
 {
 public:
   /**
-   * @brief Construct a new Lidar Mapper Visualiser object
+   * @brief Construct a new Lidar Mapper visualizer object
    * 
    */
-  LidarMapperVisualiser() : Node("lidar_mapper_visualiser")
+  LidarMappervisualizer() : Node("lidar_mapper_visualizer")
   {
     // parameters
     auto lidar_mount_roll_param_desc = rcl_interfaces::msg::ParameterDescriptor{};
@@ -231,47 +231,47 @@ public:
       tf2::durationFromSec(mf_timeout)
     );
     mf_slice_scan_tf2_->setTolerance(rclcpp::Duration::from_seconds(timestamp_tolerance));
-    mf_slice_scan_tf2_->registerCallback(&LidarMapperVisualiser::sync_scan_callback, this);
+    mf_slice_scan_tf2_->registerCallback(&LidarMappervisualizer::sync_scan_callback, this);
 
     orientation_sub_ = this->create_subscription<sensor_msgs::msg::Imu>(
       orientation_topic_,
       qos,
-      std::bind(&LidarMapperVisualiser::orientation_callback, this, std::placeholders::_1)
+      std::bind(&LidarMappervisualizer::orientation_callback, this, std::placeholders::_1)
     );
 
     odom_sub_ = this->create_subscription<nav_msgs::msg::Odometry>(
       odom_topic_,
       qos,
-      std::bind(&LidarMapperVisualiser::odom_callback, this, std::placeholders::_1)
+      std::bind(&LidarMappervisualizer::odom_callback, this, std::placeholders::_1)
     );
 
     scan_sub_ = this->create_subscription<sensor_msgs::msg::LaserScan>(
       scan_topic_,
       qos,
-      std::bind(&LidarMapperVisualiser::scan_callback, this, std::placeholders::_1)
+      std::bind(&LidarMappervisualizer::scan_callback, this, std::placeholders::_1)
     );
 
     point_cloud_sub_ = this->create_subscription<sensor_msgs::msg::PointCloud2>(
       sync_slice_point_cloud_topic_,
       qos,
-      std::bind(&LidarMapperVisualiser::point_cloud_callback, this, std::placeholders::_1)
+      std::bind(&LidarMappervisualizer::point_cloud_callback, this, std::placeholders::_1)
     );
 
     octomap_sub_ = this->create_subscription<octomap_msgs::msg::Octomap>(
       octomap_topic_,
       qos,
-      std::bind(&LidarMapperVisualiser::octomap_callback, this, std::placeholders::_1)
+      std::bind(&LidarMappervisualizer::octomap_callback, this, std::placeholders::_1)
     );
 
-    RCLCPP_INFO(this->get_logger(), "LIDAR mapper visualiser node has been started!");
+    RCLCPP_INFO(this->get_logger(), "LIDAR mapper visualizer node has been started!");
   }
 
 
   /**
-   * @brief Destroy the Lidar Mapper Visualiser object
+   * @brief Destroy the Lidar Mapper visualizer object
    * 
    */
-  ~LidarMapperVisualiser()
+  ~LidarMappervisualizer()
   {
 
   }
@@ -283,10 +283,10 @@ private:
   const std::string odom_topic_ = "/mavros/local_position/odom";
   const std::string octomap_topic_ = "/octomap_binary";
 
-  const std::string slice_point_cloud_topic_ = "/lidar_mapper_visualiser/slice_point_cloud";
-  const std::string sync_slice_point_cloud_topic_ = "/lidar_mapper_visualiser/sync_slice_point_cloud";
-  const std::string fake_3d_lidar_point_cloud_topic_ = "/lidar_mapper_visualiser/fake_3d_lidar_point_cloud";
-  const std::string global_map_topic_ = "/lidar_mapper_visualiser/global_map";
+  const std::string slice_point_cloud_topic_ = "/lidar_mapper_visualizer/slice_point_cloud";
+  const std::string sync_slice_point_cloud_topic_ = "/lidar_mapper_visualizer/sync_slice_point_cloud";
+  const std::string fake_3d_lidar_point_cloud_topic_ = "/lidar_mapper_visualizer/fake_3d_lidar_point_cloud";
+  const std::string global_map_topic_ = "/lidar_mapper_visualizer/global_map";
 
   std::unique_ptr<tf2_ros::Buffer> tf_buffer_;
   std::shared_ptr<tf2_ros::TransformListener> tf_listener_;
@@ -328,7 +328,7 @@ private:
 
   const char* home_ = std::getenv("HOME");
   const std::string home_dir_ = home_ ? std::string(home_) : std::string(".");
-  const std::string map_dir_ = home_dir_ + "/ros2_ws/src/lidar_mapper_visualiser/maps/";
+  const std::string map_dir_ = home_dir_ + "/ros2_ws/src/lidar_mapper_visualizer/maps/";
   const std::string global_map_path_ = map_dir_ + "/global_map.pcd";
   const std::string local_map_dir_ = map_dir_ + "local_map/";
   const std::string local_map_tf_dir_ = local_map_dir_ + "tf/";
@@ -673,9 +673,9 @@ int main(int argc, char* argv[])
 {
   rclcpp::init(argc, argv);
 
-  RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Starting LIDAR mapper visualiser node...");
+  RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Starting LIDAR mapper visualizer node...");
 
-  rclcpp::spin(std::make_shared<LidarMapperVisualiser>());
+  rclcpp::spin(std::make_shared<LidarMappervisualizer>());
 
   rclcpp::shutdown();
 

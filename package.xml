@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
-  <name>lidar_mapper_visualiser</name>
+  <name>lidar_mapper_visualizer</name>
   <version>0.0.0</version>
-  <description>RVIZ2 lidar mapper visualiser</description>
+  <description>RVIZ2 lidar mapper visualizer</description>
   <maintainer email="jan.gorski175@gmail.com">jango175</maintainer>
   <license>Apache-2.0</license>
 

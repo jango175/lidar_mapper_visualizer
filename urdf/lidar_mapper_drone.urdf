@@ -48,14 +48,14 @@
         <visual name="drone_base_visual">
             <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
             <geometry>
-                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/drone_base.stl" scale="0.001 0.001 0.001" />
+                <mesh filename="package://lidar_mapper_visualizer/urdf/meshes/drone_base.stl" scale="0.001 0.001 0.001" />
             </geometry>
             <material name="carbon_fiber"/>
         </visual>
         <collision name="drone_base_collision">
             <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
             <geometry>
-                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/drone_base.stl" scale="0.001 0.001 0.001" />
+                <mesh filename="package://lidar_mapper_visualizer/urdf/meshes/drone_base.stl" scale="0.001 0.001 0.001" />
             </geometry>
         </collision>
     </link>
@@ -68,14 +68,14 @@
         <visual name="back_holder_optical_flow_visual">
             <origin xyz="-0.009499998724294068 -0.08741136368379873 0.0025000000000004975" rpy="3.141592653589793 -2.9976292715422312e-15 3.141592653589792" />
             <geometry>
-                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/back_holder_optical_flow.stl" scale="0.001 0.001 0.001" />
+                <mesh filename="package://lidar_mapper_visualizer/urdf/meshes/back_holder_optical_flow.stl" scale="0.001 0.001 0.001" />
             </geometry>
             <material name="yellow_plastic"/>
         </visual>
         <collision name="back_holder_optical_flow_collision">
             <origin xyz="-0.009499998724294068 -0.08741136368379873 0.0025000000000004975" rpy="3.141592653589793 -2.9976292715422312e-15 3.141592653589792" />
             <geometry>
-                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/back_holder_optical_flow.stl" scale="0.001 0.001 0.001" />
+                <mesh filename="package://lidar_mapper_visualizer/urdf/meshes/back_holder_optical_flow.stl" scale="0.001 0.001 0.001" />
             </geometry>
         </collision>
     </link>
@@ -88,14 +88,14 @@
         <visual name="motor_stator_1_visual">
             <origin xyz="-2.416265694193953e-09 1.0759120527836785e-09 -0.019100000000000707" rpy="-1.570796326794897 -5.586170499735508e-15 -2.530727415391781" />
             <geometry>
-                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/motor_stator_1.stl" scale="0.001 0.001 0.001" />
+                <mesh filename="package://lidar_mapper_visualizer/urdf/meshes/motor_stator_1.stl" scale="0.001 0.001 0.001" />
             </geometry>
             <material name="black_anodized"/>
         </visual>
         <collision name="motor_stator_1_collision">
             <origin xyz="-2.416265694193953e-09 1.0759120527836785e-09 -0.019100000000000707" rpy="-1.570796326794897 -5.586170499735508e-15 -2.530727415391781" />
             <geometry>
-                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/motor_stator_1.stl" scale="0.001 0.001 0.001" />
+                <mesh filename="package://lidar_mapper_visualizer/urdf/meshes/motor_stator_1.stl" scale="0.001 0.001 0.001" />
             </geometry>
         </collision>
     </link>
@@ -108,14 +108,14 @@
         <visual name="motor_rotor_1_visual">
             <origin xyz="-2.4162638467828403e-09 -0.006506196537574267 -1.0759121238379522e-09" rpy="-3.1415926535897913 0.610865238198012 4.910554660911456e-15" />
             <geometry>
-                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/motor_rotor_1.stl" scale="0.001 0.001 0.001" />
+                <mesh filename="package://lidar_mapper_visualizer/urdf/meshes/motor_rotor_1.stl" scale="0.001 0.001 0.001" />
             </geometry>
             <material name="black_anodized"/>
         </visual>
         <collision name="motor_rotor_1_collision">
             <origin xyz="-2.4162638467828403e-09 -0.006506196537574267 -1.0759121238379522e-09" rpy="-3.1415926535897913 0.610865238198012 4.910554660911456e-15" />
             <geometry>
-                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/motor_rotor_1.stl" scale="0.001 0.001 0.001" />
+                <mesh filename="package://lidar_mapper_visualizer/urdf/meshes/motor_rotor_1.stl" scale="0.001 0.001 0.001" />
             </geometry>
         </collision>
     </link>
@@ -128,14 +128,14 @@
         <visual name="motor_stator_2_visual">
             <origin xyz="4.967677202927234e-09 1.5564907407394913e-09 -0.019100000000000356" rpy="-1.5707963267948954 -3.2996435709238136e-15 0.6108652381980112" />
             <geometry>
-                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/motor_stator_2.stl" scale="0.001 0.001 0.001" />
+                <mesh filename="package://lidar_mapper_visualizer/urdf/meshes/motor_stator_2.stl" scale="0.001 0.001 0.001" />
             </geometry>
             <material name="black_anodized"/>
         </visual>
         <collision name="motor_stator_2_collision">
             <origin xyz="4.967677202927234e-09 1.5564907407394913e-09 -0.019100000000000356" rpy="-1.5707963267948954 -3.2996435709238136e-15 0.6108652381980112" />
             <geometry>
-                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/motor_stator_2.stl" scale="0.001 0.001 0.001" />
+                <mesh filename="package://lidar_mapper_visualizer/urdf/meshes/motor_stator_2.stl" scale="0.001 0.001 0.001" />
             </geometry>
         </collision>
     </link>
@@ -148,14 +148,14 @@
         <visual name="motor_rotor_2_visual">
             <origin xyz="4.9676762614581096e-09 -0.006506196537574196 -1.5564907940301965e-09" rpy="-3.1415926535897913 0.6108652381980111 4.844262907304531e-15" />
             <geometry>
-                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/motor_rotor_2.stl" scale="0.001 0.001 0.001" />
+                <mesh filename="package://lidar_mapper_visualizer/urdf/meshes/motor_rotor_2.stl" scale="0.001 0.001 0.001" />
             </geometry>
             <material name="black_anodized"/>
         </visual>
         <collision name="motor_rotor_2_collision">
             <origin xyz="4.9676762614581096e-09 -0.006506196537574196 -1.5564907940301965e-09" rpy="-3.1415926535897913 0.6108652381980111 4.844262907304531e-15" />
             <geometry>
-                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/motor_rotor_2.stl" scale="0.001 0.001 0.001" />
+                <mesh filename="package://lidar_mapper_visualizer/urdf/meshes/motor_rotor_2.stl" scale="0.001 0.001 0.001" />
             </geometry>
         </collision>
     </link>
@@ -168,14 +168,14 @@
         <visual name="motor_stator_3_visual">
             <origin xyz="-2.41626473496126e-09 1.5564917354993214e-09 -0.019100000000000686" rpy="-1.5707963267948957 -5.760331053159689e-15 2.5307274153917763" />
             <geometry>
-                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/motor_stator_3.stl" scale="0.001 0.001 0.001" />
+                <mesh filename="package://lidar_mapper_visualizer/urdf/meshes/motor_stator_3.stl" scale="0.001 0.001 0.001" />
             </geometry>
             <material name="black_anodized"/>
         </visual>
         <collision name="motor_stator_3_collision">
             <origin xyz="-2.41626473496126e-09 1.5564917354993214e-09 -0.019100000000000686" rpy="-1.5707963267948957 -5.760331053159689e-15 2.5307274153917763" />
             <geometry>
-                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/motor_stator_3.stl" scale="0.001 0.001 0.001" />
+                <mesh filename="package://lidar_mapper_visualizer/urdf/meshes/motor_stator_3.stl" scale="0.001 0.001 0.001" />
             </geometry>
         </collision>
     </link>
@@ -188,14 +188,14 @@
         <visual name="motor_rotor_3_visual">
             <origin xyz="-2.416263829019272e-09 -0.006506196537574205 -1.5564908295573333e-09" rpy="-3.141592653589791 0.9599310885968841 8.473267269550925e-15" />
             <geometry>
-                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/motor_rotor_3.stl" scale="0.001 0.001 0.001" />
+                <mesh filename="package://lidar_mapper_visualizer/urdf/meshes/motor_rotor_3.stl" scale="0.001 0.001 0.001" />
             </geometry>
             <material name="black_anodized"/>
         </visual>
         <collision name="motor_rotor_3_collision">
             <origin xyz="-2.416263829019272e-09 -0.006506196537574205 -1.5564908295573333e-09" rpy="-3.141592653589791 0.9599310885968841 8.473267269550925e-15" />
             <geometry>
-                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/motor_rotor_3.stl" scale="0.001 0.001 0.001" />
+                <mesh filename="package://lidar_mapper_visualizer/urdf/meshes/motor_rotor_3.stl" scale="0.001 0.001 0.001" />
             </geometry>
         </collision>
     </link>
@@ -210,14 +210,14 @@
         <visual name="motor_stator_4_visual">
             <origin xyz="4.967676421330225e-09 1.0759106672253438e-09 -0.0191000000000003" rpy="-1.570796326794897 -3.408031235196887e-15 -0.6108652381980173" />
             <geometry>
-                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/motor_stator_4.stl" scale="0.001 0.001 0.001" />
+                <mesh filename="package://lidar_mapper_visualizer/urdf/meshes/motor_stator_4.stl" scale="0.001 0.001 0.001" />
             </geometry>
             <material name="black_anodized"/>
         </visual>
         <collision name="motor_stator_4_collision">
             <origin xyz="4.967676421330225e-09 1.0759106672253438e-09 -0.0191000000000003" rpy="-1.570796326794897 -3.408031235196887e-15 -0.6108652381980173" />
             <geometry>
-                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/motor_stator_4.stl" scale="0.001 0.001 0.001" />
+                <mesh filename="package://lidar_mapper_visualizer/urdf/meshes/motor_stator_4.stl" scale="0.001 0.001 0.001" />
             </geometry>
         </collision>
     </link>
@@ -230,14 +230,14 @@
         <visual name="motor_rotor_4_visual">
             <origin xyz="4.967676403566657e-09 -0.0065061965375741646 -1.0759119994929733e-09" rpy="-3.141592653589791 0.9599310885968889 8.328515107319632e-15" />
             <geometry>
-                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/motor_rotor_4.stl" scale="0.001 0.001 0.001" />
+                <mesh filename="package://lidar_mapper_visualizer/urdf/meshes/motor_rotor_4.stl" scale="0.001 0.001 0.001" />
             </geometry>
             <material name="black_anodized"/>
         </visual>
         <collision name="motor_rotor_4_collision">
             <origin xyz="4.967676403566657e-09 -0.0065061965375741646 -1.0759119994929733e-09" rpy="-3.141592653589791 0.9599310885968889 8.328515107319632e-15" />
             <geometry>
-                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/motor_rotor_4.stl" scale="0.001 0.001 0.001" />
+                <mesh filename="package://lidar_mapper_visualizer/urdf/meshes/motor_rotor_4.stl" scale="0.001 0.001 0.001" />
             </geometry>
         </collision>
     </link>
@@ -250,14 +250,14 @@
         <visual name="lidar_mount_30deg_visual">
             <origin xyz="-0.015699998724294003 0.0689999963162012 0.030000000000000315" rpy="-3.1415926535897927 -1.4997768651991965e-15 3.1415926535897922" />
             <geometry>
-                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/lidar_mount_30deg.stl" scale="0.001 0.001 0.001" />
+                <mesh filename="package://lidar_mapper_visualizer/urdf/meshes/lidar_mount_30deg.stl" scale="0.001 0.001 0.001" />
             </geometry>
             <material name="yellow_plastic"/>
         </visual>
         <collision name="lidar_mount_30deg_collision">
             <origin xyz="-0.015699998724294003 0.0689999963162012 0.030000000000000315" rpy="-3.1415926535897927 -1.4997768651991965e-15 3.1415926535897922" />
             <geometry>
-                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/lidar_mount_30deg.stl" scale="0.001 0.001 0.001" />
+                <mesh filename="package://lidar_mapper_visualizer/urdf/meshes/lidar_mount_30deg.stl" scale="0.001 0.001 0.001" />
             </geometry>
         </collision>
     </link>
@@ -270,14 +270,14 @@
         <visual name="damper_1_visual">
             <origin xyz="1.2757057665790938e-09 0.004763137285820527 0.002749999517758868" rpy="2.094395102393206 -8.29236839087377e-16 1.6844058813121968e-15" />
             <geometry>
-                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/damper_1.stl" scale="0.001 0.001 0.001" />
+                <mesh filename="package://lidar_mapper_visualizer/urdf/meshes/damper_1.stl" scale="0.001 0.001 0.001" />
             </geometry>
             <material name="red_silicone"/>
         </visual>
         <collision name="damper_1_collision">
             <origin xyz="1.2757057665790938e-09 0.004763137285820527 0.002749999517758868" rpy="2.094395102393206 -8.29236839087377e-16 1.6844058813121968e-15" />
             <geometry>
-                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/damper_1.stl" scale="0.001 0.001 0.001" />
+                <mesh filename="package://lidar_mapper_visualizer/urdf/meshes/damper_1.stl" scale="0.001 0.001 0.001" />
             </geometry>
         </collision>
     </link>
@@ -290,14 +290,14 @@
         <visual name="damper_2_visual">
             <origin xyz="1.2757058831525114e-09 0.004763142093511945 0.0027499967420366155" rpy="2.094395102393206 -8.29236839087377e-16 1.6844058813121968e-15" />
             <geometry>
-                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/damper_2.stl" scale="0.001 0.001 0.001" />
+                <mesh filename="package://lidar_mapper_visualizer/urdf/meshes/damper_2.stl" scale="0.001 0.001 0.001" />
             </geometry>
             <material name="red_silicone"/>
         </visual>
         <collision name="damper_2_collision">
             <origin xyz="1.2757058831525114e-09 0.004763142093511945 0.0027499967420366155" rpy="2.094395102393206 -8.29236839087377e-16 1.6844058813121968e-15" />
             <geometry>
-                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/damper_2.stl" scale="0.001 0.001 0.001" />
+                <mesh filename="package://lidar_mapper_visualizer/urdf/meshes/damper_2.stl" scale="0.001 0.001 0.001" />
             </geometry>
         </collision>
     </link>
@@ -310,14 +310,14 @@
         <visual name="damper_3_visual">
             <origin xyz="1.2757058820422884e-09 0.004763138240949374 0.002749998966314502" rpy="2.094395102393206 -8.29236839087377e-16 1.6844058813121968e-15" />
             <geometry>
-                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/damper_3.stl" scale="0.001 0.001 0.001" />
+                <mesh filename="package://lidar_mapper_visualizer/urdf/meshes/damper_3.stl" scale="0.001 0.001 0.001" />
             </geometry>
             <material name="red_silicone"/>
         </visual>
         <collision name="damper_3_collision">
             <origin xyz="1.2757058820422884e-09 0.004763138240949374 0.002749998966314502" rpy="2.094395102393206 -8.29236839087377e-16 1.6844058813121968e-15" />
             <geometry>
-                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/damper_3.stl" scale="0.001 0.001 0.001" />
+                <mesh filename="package://lidar_mapper_visualizer/urdf/meshes/damper_3.stl" scale="0.001 0.001 0.001" />
             </geometry>
         </collision>
     </link>
@@ -330,14 +330,14 @@
         <visual name="ldlidar_base_visual">
             <origin xyz="1.2757057488155256e-09 -0.02026499368379815 0.011700001914315675" rpy="3.1415926535897913 -0.5235987755982936 -1.5707963267948966" />
             <geometry>
-                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/LD19.stl" scale="0.001 0.001 0.001" />
+                <mesh filename="package://lidar_mapper_visualizer/urdf/meshes/LD19.stl" scale="0.001 0.001 0.001" />
             </geometry>
             <material name="glossy_black"/>
         </visual>
         <collision name="ldlidar_base_collision">
             <origin xyz="1.2757057488155256e-09 -0.02026499368379815 0.011700001914315675" rpy="3.1415926535897913 -0.5235987755982936 -1.5707963267948966" />
             <geometry>
-                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/LD19.stl" scale="0.001 0.001 0.001" />
+                <mesh filename="package://lidar_mapper_visualizer/urdf/meshes/LD19.stl" scale="0.001 0.001 0.001" />
             </geometry>
         </collision>
     </link>
@@ -350,14 +350,14 @@
         <visual name="right_cover_H7_visual">
             <origin xyz="-0.015699998724294076 0.06899999631620124 0.0025000000000005153" rpy="3.141592653589793 -2.9421181203109734e-15 3.1415926535897913" />
             <geometry>
-                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/right_cover_H7.stl" scale="0.001 0.001 0.001" />
+                <mesh filename="package://lidar_mapper_visualizer/urdf/meshes/right_cover_H7.stl" scale="0.001 0.001 0.001" />
             </geometry>
             <material name="yellow_plastic"/>
         </visual>
         <collision name="right_cover_H7_collision">
             <origin xyz="-0.015699998724294076 0.06899999631620124 0.0025000000000005153" rpy="3.141592653589793 -2.9421181203109734e-15 3.1415926535897913" />
             <geometry>
-                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/right_cover_H7.stl" scale="0.001 0.001 0.001" />
+                <mesh filename="package://lidar_mapper_visualizer/urdf/meshes/right_cover_H7.stl" scale="0.001 0.001 0.001" />
             </geometry>
         </collision>
     </link>
@@ -370,14 +370,14 @@
         <visual name="left_cover_H7_visual">
             <origin xyz="0.015700001275705863 0.0689999963162013 0.0025000000000004797" rpy="3.141592653589793 -2.8866069690797156e-15 3.1415926535897922" />
             <geometry>
-                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/left_cover_H7.stl" scale="0.001 0.001 0.001" />
+                <mesh filename="package://lidar_mapper_visualizer/urdf/meshes/left_cover_H7.stl" scale="0.001 0.001 0.001" />
             </geometry>
             <material name="yellow_plastic"/>
         </visual>
         <collision name="left_cover_H7_collision">
             <origin xyz="0.015700001275705863 0.0689999963162013 0.0025000000000004797" rpy="3.141592653589793 -2.8866069690797156e-15 3.1415926535897922" />
             <geometry>
-                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/left_cover_H7.stl" scale="0.001 0.001 0.001" />
+                <mesh filename="package://lidar_mapper_visualizer/urdf/meshes/left_cover_H7.stl" scale="0.001 0.001 0.001" />
             </geometry>
         </collision>
     </link>
@@ -390,14 +390,14 @@
         <visual name="raspbox_visual">
             <origin xyz="0.051999996316201405 -1.2757058340555002e-09 -0.0012999999999996304" rpy="3.141592653589793 -1.5543257870023746e-15 1.5707963267948954" />
             <geometry>
-                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/raspbox.stl" scale="0.001 0.001 0.001" />
+                <mesh filename="package://lidar_mapper_visualizer/urdf/meshes/raspbox.stl" scale="0.001 0.001 0.001" />
             </geometry>
             <material name="yellow_plastic"/>
         </visual>
         <collision name="raspbox_collision">
             <origin xyz="0.051999996316201405 -1.2757058340555002e-09 -0.0012999999999996304" rpy="3.141592653589793 -1.5543257870023746e-15 1.5707963267948954" />
             <geometry>
-                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/raspbox.stl" scale="0.001 0.001 0.001" />
+                <mesh filename="package://lidar_mapper_visualizer/urdf/meshes/raspbox.stl" scale="0.001 0.001 0.001" />
             </geometry>
         </collision>
     </link>
@@ -410,14 +410,14 @@
         <visual name="raspbox_top_visual">
             <origin xyz="1.2757059769967146e-09 -0.06700717631620126 -0.013500000000000272" rpy="3.160991433881487e-16 8.881919722272811e-16 -3.1415926535897922" />
             <geometry>
-                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/raspbox_top.stl" scale="0.001 0.001 0.001" />
+                <mesh filename="package://lidar_mapper_visualizer/urdf/meshes/raspbox_top.stl" scale="0.001 0.001 0.001" />
             </geometry>
             <material name="yellow_plastic"/>
         </visual>
         <collision name="raspbox_top_collision">
             <origin xyz="1.2757059769967146e-09 -0.06700717631620126 -0.013500000000000272" rpy="3.160991433881487e-16 8.881919722272811e-16 -3.1415926535897922" />
             <geometry>
-                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/raspbox_top.stl" scale="0.001 0.001 0.001" />
+                <mesh filename="package://lidar_mapper_visualizer/urdf/meshes/raspbox_top.stl" scale="0.001 0.001 0.001" />
             </geometry>
         </collision>
     </link>
@@ -430,14 +430,14 @@
         <visual name="orangepi_visual">
             <origin xyz="-0.011499878724294206 -0.029000006316201178 -3.68594044175552e-16" rpy="-1.554325787002375e-15 -5.5497598704101764e-17 1.5707963267948977" />
             <geometry>
-                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/orangepi.stl" scale="0.001 0.001 0.001" />
+                <mesh filename="package://lidar_mapper_visualizer/urdf/meshes/orangepi.stl" scale="0.001 0.001 0.001" />
             </geometry>
             <material name="blue_plastic"/>
         </visual>
         <collision name="orangepi_collision">
             <origin xyz="-0.011499878724294206 -0.029000006316201178 -3.68594044175552e-16" rpy="-1.554325787002375e-15 -5.5497598704101764e-17 1.5707963267948977" />
             <geometry>
-                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/orangepi.stl" scale="0.001 0.001 0.001" />
+                <mesh filename="package://lidar_mapper_visualizer/urdf/meshes/orangepi.stl" scale="0.001 0.001 0.001" />
             </geometry>
         </collision>
     </link>
@@ -450,14 +450,14 @@
         <visual name="camera_1800TVL_visual">
             <origin xyz="0.009500001275705758 0.0020056336994618285 -0.01137453301844042" rpy="1.7453292519943302 -1.2073675392798554e-15 -1.7347370285039618e-15" />
             <geometry>
-                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/camera_1800TVL.stl" scale="0.001 0.001 0.001" />
+                <mesh filename="package://lidar_mapper_visualizer/urdf/meshes/camera_1800TVL.stl" scale="0.001 0.001 0.001" />
             </geometry>
             <material name="black_plastic"/>
         </visual>
         <collision name="camera_1800TVL_collision">
             <origin xyz="0.009500001275705758 0.0020056336994618285 -0.01137453301844042" rpy="1.7453292519943302 -1.2073675392798554e-15 -1.7347370285039618e-15" />
             <geometry>
-                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/camera_1800TVL.stl" scale="0.001 0.001 0.001" />
+                <mesh filename="package://lidar_mapper_visualizer/urdf/meshes/camera_1800TVL.stl" scale="0.001 0.001 0.001" />
             </geometry>
         </collision>
     </link>
@@ -470,14 +470,14 @@
         <visual name="CNHL_5S_2200MAH_LIPO_visual">
             <origin xyz="1.275705975716272e-09 -0.061249996888855525 0.020249999999999588" rpy="-1.5707963267948966 -1.8873926943899277e-15 1.0685896612017163e-15" />
             <geometry>
-                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/CNHL_5S_2200MAH_LIPO.stl" scale="0.001 0.001 0.001" />
+                <mesh filename="package://lidar_mapper_visualizer/urdf/meshes/CNHL_5S_2200MAH_LIPO.stl" scale="0.001 0.001 0.001" />
             </geometry>
             <material name="black_plastic"/>
         </visual>
         <collision name="CNHL_5S_2200MAH_LIPO_collision">
             <origin xyz="1.275705975716272e-09 -0.061249996888855525 0.020249999999999588" rpy="-1.5707963267948966 -1.8873926943899277e-15 1.0685896612017163e-15" />
             <geometry>
-                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/CNHL_5S_2200MAH_LIPO.stl" scale="0.001 0.001 0.001" />
+                <mesh filename="package://lidar_mapper_visualizer/urdf/meshes/CNHL_5S_2200MAH_LIPO.stl" scale="0.001 0.001 0.001" />
             </geometry>
         </collision>
     </link>
@@ -490,14 +490,14 @@
         <visual name="antenna_stick_visual">
             <origin xyz="1.2757133133233563e-09 -0.014016084181098485 0.013634749873974714" rpy="2.094395102393194 -6.513107630761974e-15 3.1415926535897913" />
             <geometry>
-                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/antenna_stick.stl" scale="0.001 0.001 0.001" />
+                <mesh filename="package://lidar_mapper_visualizer/urdf/meshes/antenna_stick.stl" scale="0.001 0.001 0.001" />
             </geometry>
             <material name="black_plastic"/>
         </visual>
         <collision name="antenna_stick_collision">
             <origin xyz="1.2757133133233563e-09 -0.014016084181098485 0.013634749873974714" rpy="2.094395102393194 -6.513107630761974e-15 3.1415926535897913" />
             <geometry>
-                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/antenna_stick.stl" scale="0.001 0.001 0.001" />
+                <mesh filename="package://lidar_mapper_visualizer/urdf/meshes/antenna_stick.stl" scale="0.001 0.001 0.001" />
             </geometry>
         </collision>
     </link>
@@ -510,14 +510,14 @@
         <visual name="7_inch_CCW_1_visual">
             <origin xyz="-4.7076220255348746e-09 -0.004024996537573893 4.16520945734078e-09" rpy="-1.5707963267948941 0.9599310885968843 -5.086312881550999e-16" />
             <geometry>
-                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/7_inch_CCW_1.stl" scale="0.001 0.001 0.001" />
+                <mesh filename="package://lidar_mapper_visualizer/urdf/meshes/7_inch_CCW_1.stl" scale="0.001 0.001 0.001" />
             </geometry>
             <material name="translucent_black_plastic"/>
         </visual>
         <collision name="7_inch_CCW_1_collision">
             <origin xyz="-4.7076220255348746e-09 -0.004024996537573893 4.16520945734078e-09" rpy="-1.5707963267948941 0.9599310885968843 -5.086312881550999e-16" />
             <geometry>
-                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/7_inch_CCW_1.stl" scale="0.001 0.001 0.001" />
+                <mesh filename="package://lidar_mapper_visualizer/urdf/meshes/7_inch_CCW_1.stl" scale="0.001 0.001 0.001" />
             </geometry>
         </collision>
     </link>
@@ -530,14 +530,14 @@
         <visual name="7_inch_CCW_2_visual">
             <origin xyz="2.676318224814622e-09 -0.004024996537573857 4.645788305168708e-09" rpy="-1.5707963267948941 0.9599310885968888 -6.218223845239212e-16" />
             <geometry>
-                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/7_inch_CCW_2.stl" scale="0.001 0.001 0.001" />
+                <mesh filename="package://lidar_mapper_visualizer/urdf/meshes/7_inch_CCW_2.stl" scale="0.001 0.001 0.001" />
             </geometry>
             <material name="translucent_black_plastic"/>
         </visual>
         <collision name="7_inch_CCW_2_collision">
             <origin xyz="2.676318224814622e-09 -0.004024996537573857 4.645788305168708e-09" rpy="-1.5707963267948941 0.9599310885968888 -6.218223845239212e-16" />
             <geometry>
-                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/7_inch_CCW_2.stl" scale="0.001 0.001 0.001" />
+                <mesh filename="package://lidar_mapper_visualizer/urdf/meshes/7_inch_CCW_2.stl" scale="0.001 0.001 0.001" />
             </geometry>
         </collision>
     </link>
@@ -550,14 +550,14 @@
         <visual name="7_inch_CW_1_visual">
             <origin xyz="-3.468952716190188e-09 -0.0040249965375738755 -3.083173432116837e-09" rpy="-1.570796326794896 0.610865238198011 -2.2972089585120473e-15" />
             <geometry>
-                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/7_inch_CW_1.stl" scale="0.001 0.001 0.001" />
+                <mesh filename="package://lidar_mapper_visualizer/urdf/meshes/7_inch_CW_1.stl" scale="0.001 0.001 0.001" />
             </geometry>
             <material name="translucent_black_plastic"/>
         </visual>
         <collision name="7_inch_CW_1_collision">
             <origin xyz="-3.468952716190188e-09 -0.0040249965375738755 -3.083173432116837e-09" rpy="-1.570796326794896 0.610865238198011 -2.2972089585120473e-15" />
             <geometry>
-                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/7_inch_CW_1.stl" scale="0.001 0.001 0.001" />
+                <mesh filename="package://lidar_mapper_visualizer/urdf/meshes/7_inch_CW_1.stl" scale="0.001 0.001 0.001" />
             </geometry>
         </collision>
     </link>
@@ -570,14 +570,14 @@
         <visual name="7_inch_CW_2_visual">
             <origin xyz="-2.4162642731084818e-09 -0.004024996537574017 -1.0759121060743838e-09" rpy="-1.5707963267948948 0.6108652381980118 -1.6980702535846234e-15" />
             <geometry>
-                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/7_inch_CW_2.stl" scale="0.001 0.001 0.001" />
+                <mesh filename="package://lidar_mapper_visualizer/urdf/meshes/7_inch_CW_2.stl" scale="0.001 0.001 0.001" />
             </geometry>
             <material name="translucent_black_plastic"/>
         </visual>
         <collision name="7_inch_CW_2_collision">
             <origin xyz="-2.4162642731084818e-09 -0.004024996537574017 -1.0759121060743838e-09" rpy="-1.5707963267948948 0.6108652381980118 -1.6980702535846234e-15" />
             <geometry>
-                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/7_inch_CW_2.stl" scale="0.001 0.001 0.001" />
+                <mesh filename="package://lidar_mapper_visualizer/urdf/meshes/7_inch_CW_2.stl" scale="0.001 0.001 0.001" />
             </geometry>
         </collision>
     </link>
@@ -590,7 +590,7 @@
         <visual name="SoloGood_M10_visual">
             <origin xyz="1.2757073917016564e-09 -0.003000000000000509 -0.008999998031276064" rpy="1.5707963267948961 9.879484617779267e-16 -3.14159265358979" />
             <geometry>
-                <mesh filename="package://lidar_mapper_visualiser/urdf/meshes/SoloGood_M10.stl" scale="0.001 0.001 0.001" />
+                <mesh filename="package://lidar_mapper_visualizer/urdf/meshes/SoloGood_M10.stl" scale="0.001 0.001 0.001" />
             </geometry>
             <material name="black_plastic"/>
         </visual>

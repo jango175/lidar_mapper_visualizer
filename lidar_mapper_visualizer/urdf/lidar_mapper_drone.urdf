@@ -34,7 +34,7 @@
     <joint name="base_to_body_joint" type="fixed">
         <parent link="base_link"/>
         <child link="drone_base"/>
-        <origin xyz="0 0 0" rpy="3.14159 0 0"/>
+        <origin xyz="0 0 -0.015" rpy="3.14159 0 0"/>
     </joint>
     <gazebo reference="base_to_body_joint">
         <preserveFixedJoint>true</preserveFixedJoint>

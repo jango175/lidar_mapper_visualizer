@@ -1,7 +1,7 @@
 /**
  * @file lidar_mapper_rviz.cpp
  * @author jango175
- * @brief LIDAR mapper visualizer ROS2 node
+ * @brief LiDAR mapper visualizer ROS2 node
  * 
  * @copyright Copyright (c) 2026
  * 
@@ -47,34 +47,34 @@ class LidarMappervisualizer : public rclcpp::Node
 {
 public:
   /**
-   * @brief Construct a new Lidar Mapper visualizer object
+   * @brief Construct a new LidarMapperVisualizer object
    * 
    */
   LidarMappervisualizer() : Node("lidar_mapper_visualizer")
   {
     // parameters
     auto lidar_mount_roll_param_desc = rcl_interfaces::msg::ParameterDescriptor{};
-    lidar_mount_roll_param_desc.description = "LIDAR mount roll angle in degrees";
+    lidar_mount_roll_param_desc.description = "LiDAR mount roll angle in degrees";
     this->declare_parameter("lidar_mount_roll_deg", 0.0, lidar_mount_roll_param_desc);
 
     auto lidar_mount_pitch_param_desc = rcl_interfaces::msg::ParameterDescriptor{};
-    lidar_mount_pitch_param_desc.description = "LIDAR mount pitch angle in degrees";
+    lidar_mount_pitch_param_desc.description = "LiDAR mount pitch angle in degrees";
     this->declare_parameter("lidar_mount_pitch_deg", 30.0, lidar_mount_pitch_param_desc);
 
     auto lidar_mount_yaw_param_desc = rcl_interfaces::msg::ParameterDescriptor{};
-    lidar_mount_yaw_param_desc.description = "LIDAR mount yaw angle in degrees";
+    lidar_mount_yaw_param_desc.description = "LiDAR mount yaw angle in degrees";
     this->declare_parameter("lidar_mount_yaw_deg", 0.0, lidar_mount_yaw_param_desc);
 
     auto lidar_mount_offset_x_param_desc = rcl_interfaces::msg::ParameterDescriptor{};
-    lidar_mount_offset_x_param_desc.description = "LIDAR mount offset in X axis in metres";
+    lidar_mount_offset_x_param_desc.description = "LiDAR mount offset in X axis in metres";
     this->declare_parameter("lidar_mount_offset_x", 0.088, lidar_mount_offset_x_param_desc);
 
     auto lidar_mount_offset_y_param_desc = rcl_interfaces::msg::ParameterDescriptor{};
-    lidar_mount_offset_y_param_desc.description = "LIDAR mount offset in Y axis in metres";
+    lidar_mount_offset_y_param_desc.description = "LiDAR mount offset in Y axis in metres";
     this->declare_parameter("lidar_mount_offset_y", 0.0, lidar_mount_offset_y_param_desc);
 
     auto lidar_mount_offset_z_param_desc = rcl_interfaces::msg::ParameterDescriptor{};
-    lidar_mount_offset_z_param_desc.description = "LIDAR mount offset in Z axis in metres";
+    lidar_mount_offset_z_param_desc.description = "LiDAR mount offset in Z axis in metres";
     this->declare_parameter("lidar_mount_offset_z", 0.073, lidar_mount_offset_z_param_desc);
 
     auto world_link_param_desc = rcl_interfaces::msg::ParameterDescriptor{};
@@ -86,7 +86,7 @@ public:
     this->declare_parameter("drone_link", "base_link", drone_link_param_desc);
 
     auto lidar_link_param_desc = rcl_interfaces::msg::ParameterDescriptor{};
-    lidar_link_param_desc.description = "LIDAR link name";
+    lidar_link_param_desc.description = "LiDAR link name";
     this->declare_parameter("lidar_link", "ldlidar_link", lidar_link_param_desc);
 
     auto mf_timeout_param_desc = rcl_interfaces::msg::ParameterDescriptor{};
@@ -110,11 +110,11 @@ public:
     this->declare_parameter("sor_std_dev_mult", 1.0, sor_std_dev_mult_param_desc);
 
     auto fake_3d_lidar_scan_num_param_desc = rcl_interfaces::msg::ParameterDescriptor{};
-    fake_3d_lidar_scan_num_param_desc.description = "Number of scans to accumulate for fake 3D LIDAR point cloud";
+    fake_3d_lidar_scan_num_param_desc.description = "Number of scans to accumulate for fake 3D LiDAR point cloud";
     this->declare_parameter("fake_3d_lidar_scan_num", 20, fake_3d_lidar_scan_num_param_desc);
 
     auto fake_3d_lidar_overlap_scan_num_param_desc = rcl_interfaces::msg::ParameterDescriptor{};
-    fake_3d_lidar_overlap_scan_num_param_desc.description = "Number of overlapping scans for fake 3D LIDAR point cloud";
+    fake_3d_lidar_overlap_scan_num_param_desc.description = "Number of overlapping scans for fake 3D LiDAR point cloud";
     this->declare_parameter("fake_3d_lidar_overlap_scan_num", 10, fake_3d_lidar_overlap_scan_num_param_desc);
 
     auto simulate_noise_param_desc = rcl_interfaces::msg::ParameterDescriptor{};
@@ -127,12 +127,12 @@ public:
     const double lidar_mount_offset_x = this->get_parameter("lidar_mount_offset_x").as_double();
     const double lidar_mount_offset_y = this->get_parameter("lidar_mount_offset_y").as_double();
     const double lidar_mount_offset_z = this->get_parameter("lidar_mount_offset_z").as_double();
-    RCLCPP_INFO(this->get_logger(), "LIDAR mounting roll: %f deg", lidar_mount_roll_deg);
-    RCLCPP_INFO(this->get_logger(), "LIDAR mounting pitch: %f deg", lidar_mount_pitch_deg);
-    RCLCPP_INFO(this->get_logger(), "LIDAR mounting yaw: %f deg", lidar_mount_yaw_deg);
-    RCLCPP_INFO(this->get_logger(), "LIDAR mounting offset X: %f m", lidar_mount_offset_x);
-    RCLCPP_INFO(this->get_logger(), "LIDAR mounting offset Y: %f m", lidar_mount_offset_y);
-    RCLCPP_INFO(this->get_logger(), "LIDAR mounting offset Z: %f m", lidar_mount_offset_z);
+    RCLCPP_INFO(this->get_logger(), "LiDAR mounting roll: %f deg", lidar_mount_roll_deg);
+    RCLCPP_INFO(this->get_logger(), "LiDAR mounting pitch: %f deg", lidar_mount_pitch_deg);
+    RCLCPP_INFO(this->get_logger(), "LiDAR mounting yaw: %f deg", lidar_mount_yaw_deg);
+    RCLCPP_INFO(this->get_logger(), "LiDAR mounting offset X: %f m", lidar_mount_offset_x);
+    RCLCPP_INFO(this->get_logger(), "LiDAR mounting offset Y: %f m", lidar_mount_offset_y);
+    RCLCPP_INFO(this->get_logger(), "LiDAR mounting offset Z: %f m", lidar_mount_offset_z);
 
     world_link_ = this->get_parameter("world_link").as_string();
     drone_link_ = this->get_parameter("drone_link").as_string();
@@ -166,8 +166,8 @@ public:
 
     fake_3d_lidar_scan_num_ = this->get_parameter("fake_3d_lidar_scan_num").as_int();
     fake_3d_lidar_overlap_scan_num_ = this->get_parameter("fake_3d_lidar_overlap_scan_num").as_int();
-    RCLCPP_INFO(this->get_logger(), "Number of fake 3D LIDAR scans to accumulate: %lu", fake_3d_lidar_scan_num_);
-    RCLCPP_INFO(this->get_logger(), "Number of fake 3D LIDAR scans to overlap: %lu", fake_3d_lidar_overlap_scan_num_);
+    RCLCPP_INFO(this->get_logger(), "Number of fake 3D LiDAR scans to accumulate: %lu", fake_3d_lidar_scan_num_);
+    RCLCPP_INFO(this->get_logger(), "Number of fake 3D LiDAR scans to overlap: %lu", fake_3d_lidar_overlap_scan_num_);
 
     if (fake_3d_lidar_overlap_scan_num_ > fake_3d_lidar_scan_num_)
     {
@@ -263,12 +263,12 @@ public:
       std::bind(&LidarMappervisualizer::octomap_callback, this, std::placeholders::_1)
     );
 
-    RCLCPP_INFO(this->get_logger(), "LIDAR mapper visualizer node has been started!");
+    RCLCPP_INFO(this->get_logger(), "LiDAR mapper visualizer node has been started!");
   }
 
 
   /**
-   * @brief Destroy the Lidar Mapper visualizer object
+   * @brief Destroy the LidarMapperVisualizer object
    * 
    */
   ~LidarMappervisualizer()
@@ -281,7 +281,7 @@ private:
   const std::string scan_topic_ = "/ldlidar_node/scan";
   const std::string orientation_topic_ = "/mavros/imu/data";
   const std::string odom_topic_ = "/mavros/local_position/odom";
-  const std::string octomap_topic_ = "/octomap_binary";
+  const std::string octomap_topic_ = "/octomap_full";
 
   const std::string slice_point_cloud_topic_ = "/lidar_mapper_visualizer/slice_point_cloud";
   const std::string sync_slice_point_cloud_topic_ = "/lidar_mapper_visualizer/sync_slice_point_cloud";
@@ -317,14 +317,16 @@ private:
   laser_geometry::LaserProjection laser_projector_;
   geometry_msgs::msg::TransformStamped drone_lidar_tf_;
 
+  pcl::PointCloud<pcl::PointXYZI>::Ptr sync_pcl_slice_ = pcl::make_shared<pcl::PointCloud<pcl::PointXYZI>>();
+  pcl::PointCloud<pcl::PointXYZI>::Ptr global_map_point_cloud_ = pcl::make_shared<pcl::PointCloud<pcl::PointXYZI>>();
+  pcl::PointCloud<pcl::PointXYZI>::Ptr local_point_cloud_ = pcl::make_shared<pcl::PointCloud<pcl::PointXYZI>>();
+  pcl::PointCloud<pcl::PointXYZI>::Ptr prev_overlapping_point_cloud_ = pcl::make_shared<pcl::PointCloud<pcl::PointXYZI>>();
+  pcl::PointCloud<pcl::PointXYZI>::Ptr next_overlapping_point_cloud_ = pcl::make_shared<pcl::PointCloud<pcl::PointXYZI>>();
+
   double window_size_ = 20.0;
 
   int sor_mean_k_ = 50;
   double sor_std_dev_mult_ = 1.0;
-
-  pcl::PointCloud<pcl::PointXYZI>::Ptr local_point_cloud_{new pcl::PointCloud<pcl::PointXYZI>()};
-  pcl::PointCloud<pcl::PointXYZI>::Ptr prev_overlapping_point_cloud_{new pcl::PointCloud<pcl::PointXYZI>()};
-  pcl::PointCloud<pcl::PointXYZI>::Ptr next_overlapping_point_cloud_{new pcl::PointCloud<pcl::PointXYZI>()};
 
   const char* home_ = std::getenv("HOME");
   const std::string home_dir_ = home_ ? std::string(home_) : std::string(".");
@@ -466,22 +468,22 @@ private:
     laser_projector_.transformLaserScanToPointCloud(drone_link_, *scan_msg, sync_slice_point_cloud_msg, *tf_buffer_);
 
     // point cloud filtering
-    pcl::PointCloud<pcl::PointXYZI>::Ptr sync_pcl_slice(new pcl::PointCloud<pcl::PointXYZI>());
-    pcl::fromROSMsg(sync_slice_point_cloud_msg, *sync_pcl_slice);
-    if (sync_pcl_slice->empty())
+    sync_pcl_slice_->clear();
+    pcl::fromROSMsg(sync_slice_point_cloud_msg, *sync_pcl_slice_);
+    if (sync_pcl_slice_->empty())
     {
       RCLCPP_WARN(this->get_logger(), "PCL slice empty...");
       return;
     }
 
     pcl::StatisticalOutlierRemoval<pcl::PointXYZI> sor;
-    sor.setInputCloud(sync_pcl_slice);
+    sor.setInputCloud(sync_pcl_slice_);
     sor.setMeanK(sor_mean_k_);
     sor.setStddevMulThresh(sor_std_dev_mult_);
-    sor.filter(*sync_pcl_slice);
+    sor.filter(*sync_pcl_slice_);
 
     sensor_msgs::msg::PointCloud2 filtered_sync_slice_point_cloud_msg;
-    pcl::toROSMsg(*sync_pcl_slice, filtered_sync_slice_point_cloud_msg);
+    pcl::toROSMsg(*sync_pcl_slice_, filtered_sync_slice_point_cloud_msg);
     filtered_sync_slice_point_cloud_msg.header = sync_slice_point_cloud_msg.header;
 
     // sync_slice_point_cloud_pub_->publish(sync_slice_point_cloud_msg); // unfiltered
@@ -490,7 +492,7 @@ private:
 
 
   /**
-   * @brief Callback for fake 3D LIDAR point clouds
+   * @brief Callback for fake 3D LiDAR point clouds
    * 
    * @param sync_slice_point_cloud_msg Point cloud message pointer
    */
@@ -554,7 +556,7 @@ private:
       pcl_ros::transformPointCloud(*local_point_cloud_, *local_point_cloud_, tf);
       local_point_cloud_->header.frame_id = drone_link_;
 
-      // publish fake 3D LIDAR data
+      // publish fake 3D LiDAR data
       sensor_msgs::msg::PointCloud2 fake_3d_lidar_point_cloud_msg;
       pcl::toROSMsg(*local_point_cloud_, fake_3d_lidar_point_cloud_msg);
       fake_3d_lidar_point_cloud_msg.header.frame_id = local_point_cloud_->header.frame_id;
@@ -563,8 +565,8 @@ private:
 
       // save point cloud to file
       std::string local_point_cloud_num = std::to_string((map_pub_cnt_ - 1) / fake_3d_lidar_scan_num_);
-      pcl::io::savePCDFileBinary(local_map_dir_ + "local_map_" + local_point_cloud_num + ".pcd",
-                                 *local_point_cloud_);
+      pcl::io::savePCDFile(local_map_dir_ + "local_map_" + local_point_cloud_num + ".pcd",
+                           *local_point_cloud_);
 
       local_point_cloud_->clear();
       prev_overlapping_point_cloud_->clear();
@@ -605,8 +607,8 @@ private:
   {
     if (!tf_buffer_->canTransform(world_link_,
                                   drone_link_,
-                                          octomap_msg->header.stamp,
-                                       rclcpp::Duration::from_seconds(0.0)))
+                                  octomap_msg->header.stamp,
+                                  rclcpp::Duration::from_seconds(0.0)))
     {
       RCLCPP_WARN_THROTTLE(this->get_logger(), *this->get_clock(), 1000, "Transform not available yet, skipping this octomap...");
       return;
@@ -623,17 +625,21 @@ private:
     double drone_y = transformStamped.transform.translation.y;
     double drone_z = transformStamped.transform.translation.z;
 
-    octomap::AbstractOcTree* raw_tree = octomap_msgs::binaryMsgToMap(*octomap_msg);
+    octomap::AbstractOcTree* raw_tree = octomap_msgs::msgToMap(*octomap_msg);
     std::unique_ptr<octomap::AbstractOcTree> abstract_tree(raw_tree);
     if (!abstract_tree)
+    {
       return;
+    }
 
     octomap::OcTree* octree = dynamic_cast<octomap::OcTree*>(abstract_tree.get());
     if (!octree)
+    {
       return;
+    }
 
-    pcl::PointCloud<pcl::PointXYZ>::Ptr global_map_point_cloud(new pcl::PointCloud<pcl::PointXYZ>());
-    global_map_point_cloud->header.frame_id = world_link_;
+    global_map_point_cloud_->clear();
+    global_map_point_cloud_->header.frame_id = world_link_;
 
     octomap::point3d min_pt(drone_x - window_size_,
                             drone_y - window_size_,
@@ -646,18 +652,18 @@ private:
     {
       if (octree->isNodeOccupied(*it))
       {
-        global_map_point_cloud->push_back(pcl::PointXYZ(it.getX(), it.getY(), it.getZ()));
+        global_map_point_cloud_->push_back(pcl::PointXYZI(it.getX(), it.getY(), it.getZ(), it->getOccupancy()));
       }
     }
 
     sensor_msgs::msg::PointCloud2 global_map_point_cloud_msg;
-    pcl::toROSMsg(*global_map_point_cloud, global_map_point_cloud_msg);
-    global_map_point_cloud_msg.header.frame_id = global_map_point_cloud->header.frame_id;
+    pcl::toROSMsg(*global_map_point_cloud_, global_map_point_cloud_msg);
+    global_map_point_cloud_msg.header.frame_id = global_map_point_cloud_->header.frame_id;
     global_map_point_cloud_msg.header.stamp = octomap_msg->header.stamp;
     global_map_pub_->publish(global_map_point_cloud_msg);
 
-    // save point cloud file
-    pcl::io::savePCDFileBinary(global_map_path_, *global_map_point_cloud);
+    // save point cloud filez
+    pcl::io::savePCDFile(global_map_path_, *global_map_point_cloud_);
   }
 };
 
@@ -674,7 +680,7 @@ int main(int argc, char* argv[])
 {
   rclcpp::init(argc, argv);
 
-  RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Starting LIDAR mapper visualizer node...");
+  RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Starting LiDAR mapper visualizer node...");
 
   rclcpp::spin(std::make_shared<LidarMappervisualizer>());
 

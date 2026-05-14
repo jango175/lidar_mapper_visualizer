@@ -29,7 +29,7 @@ def generate_launch_description():
   lidar_link_arg = DeclareLaunchArgument(
     'lidar_link',
     default_value = 'ldlidar_link',
-    description = 'LIDAR link name'
+    description = 'LiDAR link name'
   )
 
   use_sim_time_param = LaunchConfiguration('use_sim_time')

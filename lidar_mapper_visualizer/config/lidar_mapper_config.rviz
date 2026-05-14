@@ -162,6 +162,11 @@ Visualization Manager:
         Expand Link Details: false
         Expand Tree: false
         Link Tree Style: Links in Alphabetic Order
+        SoloGood_M10:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
         antenna_stick:
           Alpha: 1
           Show Axes: false
@@ -379,7 +384,7 @@ Visualization Manager:
       Enabled: true
       Invert Rainbow: true
       Max Color: 255; 255; 255
-      Max Intensity: 255
+      Max Intensity: 1
       Min Color: 0; 0; 0
       Min Intensity: 0
       Name: PointCloud2
@@ -592,4 +597,4 @@ Window Geometry:
     collapsed: true
   Width: 1854
   X: 66
-  Y: 688
+  Y: 40

@@ -1,4 +1,5 @@
-# LiDAR mapper visualizer
+# lidar_mapper_visualizer
+ROS 2 package for drone LiDAR 3D mapping visualization.
 
 ## Build
 ```bash
@@ -11,10 +12,16 @@ source ./install/local_setup.bash
 ## Run
 ```bash
 ros2 launch lidar_mapper_visualizer lidar_mapper_rviz.launch.py
+```
+
+In a separate terminal play the recorded flight bag file:
+```bash
+cd lidar_mapper_visualizer/example_bags/
 ros2 bag play lidar_bag_YY-MM-DD_hh:mm:ss/ --clock
 ```
 
 ## Sources
+* https://github.com/jango175/lidar_mapper
 * https://github.com/Myzhar/ldrobot-lidar-ros2
 * https://github.com/mavlink/mavros
 * https://github.com/OctoMap/octomap_mapping

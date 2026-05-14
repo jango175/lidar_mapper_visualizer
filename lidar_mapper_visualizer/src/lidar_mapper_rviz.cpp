@@ -656,6 +656,7 @@ private:
     global_map_point_cloud_msg.header.stamp = octomap_msg->header.stamp;
     global_map_pub_->publish(global_map_point_cloud_msg);
 
+    // save point cloud file
     pcl::io::savePCDFileBinary(global_map_path_, *global_map_point_cloud);
   }
 };

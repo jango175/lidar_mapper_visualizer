@@ -82,8 +82,8 @@ class GuidedFlight(Node):
     init_x: float = 0.0
     init_y: float = 0.0
     init_z: float = 2.5
-    R: float = 3.0
-    R_z: float = 1.5
+    R: float = 2.5
+    R_z: float = 1
     div: int = 10
     div_z: int = 4
 
@@ -156,7 +156,7 @@ class GuidedFlight(Node):
 
     if (self.position.pose.position.x - self.waypoints[self.waypoint_num].position.x)**2 + \
        (self.position.pose.position.y - self.waypoints[self.waypoint_num].position.y)**2 + \
-       (self.position.pose.position.z - self.waypoints[self.waypoint_num].position.z)**2 > 0.025:
+       (self.position.pose.position.z - self.waypoints[self.waypoint_num].position.z)**2 > 0.01:
 
       waypoint_msg: PoseStamped = PoseStamped()
       waypoint_msg.header.stamp = self.get_clock().now().to_msg()

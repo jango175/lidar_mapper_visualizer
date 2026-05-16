@@ -16,7 +16,7 @@ ros2 launch lidar_mapper_visualizer lidar_mapper_rviz.launch.py
 
 In a separate terminal play the recorded flight bag file:
 ```bash
-cd lidar_mapper_visualizer/example_bags/
+cd ../example_bags/
 ros2 bag play lidar_bag_YY-MM-DD_hh:mm:ss/ --clock
 ```
 
@@ -29,3 +29,4 @@ ros2 bag play lidar_bag_YY-MM-DD_hh:mm:ss/ --clock
 * https://github.com/alvinsunyixiao/vrpn_mocap
 * https://github.com/pointcloudlibrary/pcl
 * https://github.com/jango175/mark4_ardupilot_sitl.git
+* https://github.com/jango175/ICP_correction.git

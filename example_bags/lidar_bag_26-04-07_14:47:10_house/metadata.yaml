@@ -2,10 +2,10 @@ rosbag2_bagfile_information:
   version: 9
   storage_identifier: mcap
   duration:
-    nanoseconds: 97910746325
+    nanoseconds: 91428159256
   starting_time:
-    nanoseconds_since_epoch: 1775566318722503603
-  message_count: 16827
+    nanoseconds_since_epoch: 1775566030715843298
+  message_count: 15708
   topics_with_message_count:
     - topic_metadata:
         name: /sync_slice_point_cloud
@@ -14,7 +14,7 @@ rosbag2_bagfile_information:
         offered_qos_profiles:
           []
         type_description_hash: ""
-      message_count: 965
+      message_count: 899
     - topic_metadata:
         name: /ldlidar_node/scan
         type: sensor_msgs/msg/LaserScan
@@ -22,23 +22,7 @@ rosbag2_bagfile_information:
         offered_qos_profiles:
           []
         type_description_hash: ""
-      message_count: 966
-    - topic_metadata:
-        name: /mavros/local_position/pose
-        type: geometry_msgs/msg/PoseStamped
-        serialization_format: cdr
-        offered_qos_profiles:
-          []
-        type_description_hash: ""
-      message_count: 4900
-    - topic_metadata:
-        name: /mavros/local_position/odom
-        type: nav_msgs/msg/Odometry
-        serialization_format: cdr
-        offered_qos_profiles:
-          []
-        type_description_hash: ""
-      message_count: 4900
+      message_count: 901
     - topic_metadata:
         name: /mavros/imu/data
         type: sensor_msgs/msg/Imu
@@ -46,7 +30,23 @@ rosbag2_bagfile_information:
         offered_qos_profiles:
           []
         type_description_hash: ""
-      message_count: 4900
+      message_count: 4575
+    - topic_metadata:
+        name: /mavros/local_position/odom
+        type: nav_msgs/msg/Odometry
+        serialization_format: cdr
+        offered_qos_profiles:
+          []
+        type_description_hash: ""
+      message_count: 4575
+    - topic_metadata:
+        name: /mavros/local_position/pose
+        type: geometry_msgs/msg/PoseStamped
+        serialization_format: cdr
+        offered_qos_profiles:
+          []
+        type_description_hash: ""
+      message_count: 4575
     - topic_metadata:
         name: /mavros/rc/in
         type: mavros_msgs/msg/RCIn
@@ -54,17 +54,17 @@ rosbag2_bagfile_information:
         offered_qos_profiles:
           []
         type_description_hash: ""
-      message_count: 196
+      message_count: 183
   compression_format: ""
   compression_mode: ""
   relative_file_paths:
-    - lidar_bag_26-04-07_14:51:58_0.mcap
+    - lidar_bag_26-04-07_14:47:10_0.mcap
   files:
-    - path: lidar_bag_26-04-07_14:51:58_0.mcap
+    - path: lidar_bag_26-04-07_14:47:10_0.mcap
       starting_time:
-        nanoseconds_since_epoch: 1775566318722503603
+        nanoseconds_since_epoch: 1775566030715843298
       duration:
-        nanoseconds: 97910746325
-      message_count: 16827
+        nanoseconds: 91428159256
+      message_count: 15708
   custom_data: ~
   ros_distro: jazzy

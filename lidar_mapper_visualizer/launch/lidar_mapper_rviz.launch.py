@@ -58,8 +58,8 @@ def generate_launch_description():
       'window_size': 10.0,
       'sor_mean_k': 50,
       'sor_std_dev_mult': 1.0,
-      'fake_3d_lidar_scan_num': 25,
-      'fake_3d_lidar_overlap_scan_num': 5, # should be smaller than fake_3d_lidar_scan_num
+      'fake_3d_lidar_scan_num': 15,
+      'fake_3d_lidar_overlap_scan_num': 10, # should be smaller than fake_3d_lidar_scan_num
       'simulate_noise': False,
       'use_sim_time': use_sim_time_param
     }]

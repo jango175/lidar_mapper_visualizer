@@ -42,7 +42,7 @@
 #include <message_filters/sync_policies/approximate_time.h>
 
 
-// LidarMappervisualizer node class
+// LidarMapperVisualizer node class
 class LidarMappervisualizer : public rclcpp::Node
 {
 public:
@@ -594,6 +594,10 @@ private:
       prev_tf_ = curr_tf;
     }
 
+    // // save alternative point cloud file
+    // *global_map_point_cloud_ += pcl_slice;
+    // pcl::io::savePCDFile(global_map_path_, *global_map_point_cloud_);
+
     map_pub_cnt_++;
   }
 
@@ -662,7 +666,7 @@ private:
     global_map_point_cloud_msg.header.stamp = octomap_msg->header.stamp;
     global_map_pub_->publish(global_map_point_cloud_msg);
 
-    // save point cloud filez
+    // save point cloud file
     pcl::io::savePCDFile(global_map_path_, *global_map_point_cloud_);
   }
 };

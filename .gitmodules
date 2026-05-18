@@ -1,8 +1,8 @@
 [submodule "mark4_ardupilot_sitl"]
 	path = mark4_ardupilot_sitl
-	url = git@github.com:jango175/mark4_ardupilot_sitl.git
+	url = https://github.com/jango175/mark4_ardupilot_sitl.git
 	branch = main
 [submodule "ICP_correction"]
 	path = ICP_correction
-	url = git@github.com:jango175/ICP_correction.git
+	url = https://github.com/jango175/ICP_correction.git
 	branch = main

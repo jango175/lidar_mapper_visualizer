@@ -13,6 +13,7 @@
 #include <fstream>
 #include <limits>
 #include <memory>
+#include <iomanip>
 #include <rclcpp/node.hpp>
 #include <rclcpp/executors.hpp>
 #include <rclcpp/logging.hpp>
@@ -186,6 +187,9 @@ public:
     std::filesystem::create_directory(local_map_dir_);
     std::filesystem::create_directory(local_map_tf_dir_);
 
+    global_map_point_cloud_->clear();
+    global_map_point_cloud_->header.frame_id = world_link_;
+
     auto qos = rclcpp::SensorDataQoS();
 
     // tf
@@ -212,7 +216,7 @@ public:
     );
     tf_buffer_ = std::make_unique<tf2_ros::Buffer>(this->get_clock());
     tf_buffer_->setCreateTimerInterface(timer_interface);
-    tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
+    tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_, this);
     tf_broadcaster_ = std::make_shared<tf2_ros::TransformBroadcaster>(this);
 
     // publishers
@@ -220,12 +224,13 @@ public:
     sync_slice_point_cloud_pub_ = this->create_publisher<sensor_msgs::msg::PointCloud2>(sync_slice_point_cloud_topic_, qos);
     fake_3d_lidar_point_cloud_pub_ = this->create_publisher<sensor_msgs::msg::PointCloud2>(fake_3d_lidar_point_cloud_topic_, qos);
     global_map_pub_ = this->create_publisher<sensor_msgs::msg::PointCloud2>(global_map_topic_, qos);
+    global_octomap_pub_ = this->create_publisher<sensor_msgs::msg::PointCloud2>(global_octomap_topic_, qos);
 
     // subscribers
     mf_slice_scan_sub_.subscribe(this, scan_topic_, qos.get_rmw_qos_profile());
 
     mf_slice_scan_tf2_ = std::make_shared<tf2_ros::MessageFilter<sensor_msgs::msg::LaserScan>>(
-      mf_slice_scan_sub_, *tf_buffer_, drone_link_, 10,
+      mf_slice_scan_sub_, *tf_buffer_, world_link_, 10,
       this->get_node_logging_interface(),
       this->get_node_clock_interface(),
       tf2::durationFromSec(mf_timeout)
@@ -287,6 +292,7 @@ private:
   const std::string sync_slice_point_cloud_topic_ = "/lidar_mapper_visualizer/sync_slice_point_cloud";
   const std::string fake_3d_lidar_point_cloud_topic_ = "/lidar_mapper_visualizer/fake_3d_lidar_point_cloud";
   const std::string global_map_topic_ = "/lidar_mapper_visualizer/global_map";
+  const std::string global_octomap_topic_ = "/lidar_mapper_visualizer/global_octomap";
 
   std::unique_ptr<tf2_ros::Buffer> tf_buffer_;
   std::shared_ptr<tf2_ros::TransformListener> tf_listener_;
@@ -300,6 +306,7 @@ private:
   rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr sync_slice_point_cloud_pub_;
   rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr fake_3d_lidar_point_cloud_pub_;
   rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr global_map_pub_;
+  rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr global_octomap_pub_;
 
   message_filters::Subscriber<sensor_msgs::msg::LaserScan> mf_slice_scan_sub_;
   std::shared_ptr<tf2_ros::MessageFilter<sensor_msgs::msg::LaserScan>> mf_slice_scan_tf2_;
@@ -319,6 +326,7 @@ private:
 
   pcl::PointCloud<pcl::PointXYZI>::Ptr sync_pcl_slice_ = pcl::make_shared<pcl::PointCloud<pcl::PointXYZI>>();
   pcl::PointCloud<pcl::PointXYZI>::Ptr global_map_point_cloud_ = pcl::make_shared<pcl::PointCloud<pcl::PointXYZI>>();
+  pcl::PointCloud<pcl::PointXYZI>::Ptr global_octomap_point_cloud_ = pcl::make_shared<pcl::PointCloud<pcl::PointXYZI>>();
   pcl::PointCloud<pcl::PointXYZI>::Ptr local_point_cloud_ = pcl::make_shared<pcl::PointCloud<pcl::PointXYZI>>();
   pcl::PointCloud<pcl::PointXYZI>::Ptr prev_overlapping_point_cloud_ = pcl::make_shared<pcl::PointCloud<pcl::PointXYZI>>();
   pcl::PointCloud<pcl::PointXYZI>::Ptr next_overlapping_point_cloud_ = pcl::make_shared<pcl::PointCloud<pcl::PointXYZI>>();
@@ -331,7 +339,8 @@ private:
   const char* home_ = std::getenv("HOME");
   const std::string home_dir_ = home_ ? std::string(home_) : std::string(".");
   const std::string map_dir_ = home_dir_ + "/ros2_ws/src/lidar_mapper_visualizer/maps/";
-  const std::string global_map_path_ = map_dir_ + "/global_map.pcd";
+  const std::string global_map_path_ = map_dir_ + "global_map.pcd";
+  const std::string global_octomap_path_ = map_dir_ + "global_octomap.pcd";
   const std::string local_map_dir_ = map_dir_ + "local_map/";
   const std::string local_map_tf_dir_ = local_map_dir_ + "tf/";
   unsigned long int fake_3d_lidar_scan_num_ = 20;
@@ -353,7 +362,7 @@ private:
    * 
    * @param orientation_msg Orientation message pointer
    */
-  void orientation_callback(const sensor_msgs::msg::Imu::SharedPtr orientation_msg)
+  void orientation_callback(const sensor_msgs::msg::Imu::ConstSharedPtr orientation_msg)
   {
     latest_orientation_msg_ = orientation_msg;
 
@@ -407,10 +416,11 @@ private:
       rand_orient_noise_[3] += unif_orient_(gen_);
 
       tf2::Quaternion q_drone = {
-        world_drone_tf.transform.rotation.w + rand_orient_noise_[0],
-        world_drone_tf.transform.rotation.x + rand_orient_noise_[1],
-        world_drone_tf.transform.rotation.y + rand_orient_noise_[2],
-        world_drone_tf.transform.rotation.z + rand_orient_noise_[3]
+        world_drone_tf.transform.rotation.x + rand_orient_noise_[0],
+        world_drone_tf.transform.rotation.y + rand_orient_noise_[1],
+        world_drone_tf.transform.rotation.z + rand_orient_noise_[2],
+        world_drone_tf.transform.rotation.w + rand_orient_noise_[3]
+
       };
       q_drone.normalize();
 
@@ -436,7 +446,7 @@ private:
    * 
    * @param scan_msg Scan message pointer
    */
-  void scan_callback(const sensor_msgs::msg::LaserScan::SharedPtr scan_msg)
+  void scan_callback(const sensor_msgs::msg::LaserScan::ConstSharedPtr scan_msg)
   {
     latest_scan_msg_ = scan_msg;
 
@@ -451,21 +461,24 @@ private:
    * 
    * @param scan_msg Scan message pointer
    */
-  void sync_scan_callback(const sensor_msgs::msg::LaserScan::SharedPtr scan_msg)
+  void sync_scan_callback(const sensor_msgs::msg::LaserScan::ConstSharedPtr scan_msg)
   {
+    // scan deskewing requires world frame
     rclcpp::Duration scan_duration = rclcpp::Duration::from_seconds(scan_msg->ranges.size() * scan_msg->time_increment);
     rclcpp::Time end_of_scan = rclcpp::Time(scan_msg->header.stamp) + scan_duration;
-    if (!tf_buffer_->canTransform(drone_link_,
+    if (!tf_buffer_->canTransform(world_link_,
                                   scan_msg->header.frame_id,
                                   end_of_scan,
                                   rclcpp::Duration::from_seconds(0.0)))
     {
-      RCLCPP_WARN_THROTTLE(this->get_logger(), *this->get_clock(), 1000, "Waiting for TF data to cover the entire scan duration...");
+      RCLCPP_WARN_THROTTLE(this->get_logger(), *this->get_clock(), 1000, "Waiting for TF data from: %s to %s",
+                           scan_msg->header.frame_id.c_str(),
+                           world_link_.c_str());
       return;
     }
 
     sensor_msgs::msg::PointCloud2 sync_slice_point_cloud_msg;
-    laser_projector_.transformLaserScanToPointCloud(drone_link_, *scan_msg, sync_slice_point_cloud_msg, *tf_buffer_);
+    laser_projector_.transformLaserScanToPointCloud(world_link_, *scan_msg, sync_slice_point_cloud_msg, *tf_buffer_);
 
     // point cloud filtering
     sync_pcl_slice_->clear();
@@ -482,11 +495,32 @@ private:
     sor.setStddevMulThresh(sor_std_dev_mult_);
     sor.filter(*sync_pcl_slice_);
 
+    // transform back to drone frame for octomap
+    if (!tf_buffer_->canTransform(drone_link_,
+                                  sync_slice_point_cloud_msg.header.frame_id,
+                                  sync_slice_point_cloud_msg.header.stamp,
+                                  rclcpp::Duration::from_seconds(0.0)))
+    {
+      RCLCPP_WARN_THROTTLE(this->get_logger(), *this->get_clock(), 1000, "Waiting for TF data from: %s to %s",
+                           sync_slice_point_cloud_msg.header.frame_id.c_str(),
+                           drone_link_.c_str());
+      return;
+    }
+
+    geometry_msgs::msg::TransformStamped tf = tf_buffer_->lookupTransform(
+      drone_link_,
+      sync_pcl_slice_->header.frame_id,
+      sync_slice_point_cloud_msg.header.stamp,
+      rclcpp::Duration::from_seconds(0.0)
+    );
+    pcl_ros::transformPointCloud(*sync_pcl_slice_, *sync_pcl_slice_, tf);
+    sync_pcl_slice_->header.frame_id = drone_link_;
+
     sensor_msgs::msg::PointCloud2 filtered_sync_slice_point_cloud_msg;
     pcl::toROSMsg(*sync_pcl_slice_, filtered_sync_slice_point_cloud_msg);
-    filtered_sync_slice_point_cloud_msg.header = sync_slice_point_cloud_msg.header;
+    filtered_sync_slice_point_cloud_msg.header.frame_id = sync_pcl_slice_->header.frame_id;
+    filtered_sync_slice_point_cloud_msg.header.stamp = scan_msg->header.stamp;
 
-    // sync_slice_point_cloud_pub_->publish(sync_slice_point_cloud_msg); // unfiltered
     sync_slice_point_cloud_pub_->publish(filtered_sync_slice_point_cloud_msg);
   }
 
@@ -496,7 +530,7 @@ private:
    * 
    * @param sync_slice_point_cloud_msg Point cloud message pointer
    */
-  void point_cloud_callback(const sensor_msgs::msg::PointCloud2::SharedPtr sync_slice_point_cloud_msg)
+  void point_cloud_callback(const sensor_msgs::msg::PointCloud2::ConstSharedPtr sync_slice_point_cloud_msg)
   {
     pcl::PointCloud<pcl::PointXYZI> pcl_slice;
     pcl::fromROSMsg(*sync_slice_point_cloud_msg, pcl_slice);
@@ -594,9 +628,17 @@ private:
       prev_tf_ = curr_tf;
     }
 
-    // // save alternative point cloud file
-    // *global_map_point_cloud_ += pcl_slice;
-    // pcl::io::savePCDFile(global_map_path_, *global_map_point_cloud_);
+    // global map
+    *global_map_point_cloud_ += pcl_slice;
+
+    // sensor_msgs::msg::PointCloud2 global_map_point_cloud_msg;
+    // pcl::toROSMsg(*global_map_point_cloud_, global_map_point_cloud_msg);
+    // global_map_point_cloud_msg.header.frame_id = global_map_point_cloud_->header.frame_id;
+    // global_map_point_cloud_msg.header.stamp = sync_slice_point_cloud_msg->header.stamp;
+    // global_map_pub_->publish(global_map_point_cloud_msg);
+
+    // save map point cloud file
+    pcl::io::savePCDFile(global_map_path_, *global_map_point_cloud_);
 
     map_pub_cnt_++;
   }
@@ -607,7 +649,7 @@ private:
    * 
    * @param octomap_msg Octomap message pointer
    */
-  void octomap_callback(const octomap_msgs::msg::Octomap::SharedPtr octomap_msg)
+  void octomap_callback(const octomap_msgs::msg::Octomap::ConstSharedPtr octomap_msg)
   {
     if (!tf_buffer_->canTransform(world_link_,
                                   drone_link_,
@@ -642,8 +684,8 @@ private:
       return;
     }
 
-    global_map_point_cloud_->clear();
-    global_map_point_cloud_->header.frame_id = world_link_;
+    global_octomap_point_cloud_->clear();
+    global_octomap_point_cloud_->header.frame_id = world_link_;
 
     octomap::point3d min_pt(drone_x - window_size_,
                             drone_y - window_size_,
@@ -656,18 +698,18 @@ private:
     {
       if (octree->isNodeOccupied(*it))
       {
-        global_map_point_cloud_->push_back(pcl::PointXYZI(it.getX(), it.getY(), it.getZ(), it->getOccupancy()));
+        global_octomap_point_cloud_->push_back(pcl::PointXYZI(it.getX(), it.getY(), it.getZ(), it->getOccupancy()));
       }
     }
 
-    sensor_msgs::msg::PointCloud2 global_map_point_cloud_msg;
-    pcl::toROSMsg(*global_map_point_cloud_, global_map_point_cloud_msg);
-    global_map_point_cloud_msg.header.frame_id = global_map_point_cloud_->header.frame_id;
-    global_map_point_cloud_msg.header.stamp = octomap_msg->header.stamp;
-    global_map_pub_->publish(global_map_point_cloud_msg);
+    sensor_msgs::msg::PointCloud2 global_octomap_point_cloud_msg;
+    pcl::toROSMsg(*global_octomap_point_cloud_, global_octomap_point_cloud_msg);
+    global_octomap_point_cloud_msg.header.frame_id = global_octomap_point_cloud_->header.frame_id;
+    global_octomap_point_cloud_msg.header.stamp = octomap_msg->header.stamp;
+    global_octomap_pub_->publish(global_octomap_point_cloud_msg);
 
-    // save point cloud file
-    pcl::io::savePCDFile(global_map_path_, *global_map_point_cloud_);
+    // save octomap point cloud file
+    pcl::io::savePCDFile(global_octomap_path_, *global_octomap_point_cloud_);
   }
 };
 

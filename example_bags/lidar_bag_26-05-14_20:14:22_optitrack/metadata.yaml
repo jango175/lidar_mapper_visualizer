@@ -1,0 +1,62 @@
+rosbag2_bagfile_information:
+  version: 9
+  storage_identifier: mcap
+  duration:
+    nanoseconds: 253045220802
+  starting_time:
+    nanoseconds_since_epoch: 1778782462368195539
+  message_count: 22807
+  topics_with_message_count:
+    - topic_metadata:
+        name: /lidar_mapper/sync_slice_point_cloud
+        type: sensor_msgs/msg/PointCloud2
+        serialization_format: cdr
+        offered_qos_profiles:
+          []
+        type_description_hash: ""
+      message_count: 2031
+    - topic_metadata:
+        name: /mavros/local_position/odom
+        type: nav_msgs/msg/Odometry
+        serialization_format: cdr
+        offered_qos_profiles:
+          []
+        type_description_hash: ""
+      message_count: 8858
+    - topic_metadata:
+        name: /ldlidar_node/scan
+        type: sensor_msgs/msg/LaserScan
+        serialization_format: cdr
+        offered_qos_profiles:
+          []
+        type_description_hash: ""
+      message_count: 2487
+    - topic_metadata:
+        name: /mavros/imu/data
+        type: sensor_msgs/msg/Imu
+        serialization_format: cdr
+        offered_qos_profiles:
+          []
+        type_description_hash: ""
+      message_count: 8924
+    - topic_metadata:
+        name: /mavros/rc/in
+        type: mavros_msgs/msg/RCIn
+        serialization_format: cdr
+        offered_qos_profiles:
+          []
+        type_description_hash: ""
+      message_count: 507
+  compression_format: ""
+  compression_mode: ""
+  relative_file_paths:
+    - lidar_bag_26-05-14_20:14:22_0.mcap
+  files:
+    - path: lidar_bag_26-05-14_20:14:22_0.mcap
+      starting_time:
+        nanoseconds_since_epoch: 1778782462368195539
+      duration:
+        nanoseconds: 253045220802
+      message_count: 45614
+  custom_data: ~
+  ros_distro: jazzy

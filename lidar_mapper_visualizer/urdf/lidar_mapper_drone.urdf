@@ -200,9 +200,7 @@
         </collision>
     </link>
     <link name="motor_stator_4">
-        <inertial>    <gazebo reference="motor_stator_2_Rigid-7">
-        <preserveFixedJoint>true</preserveFixedJoint>
-    </gazebo>
+        <inertial>
             <origin xyz="0.00024746131236822675 -0.00017327002382527823 -0.007159919460084039" rpy="0.0 -0.0 0.0" />
             <mass value="0.02742038806759487" />
             <inertia ixx="1.434704219392788e-06" iyy="1.483333806859635e-06" izz="2.268260708053276e-06" ixy="6.680458477874816e-08" iyz="2.4731603621527712e-08" ixz="-3.532033351486333e-08" />

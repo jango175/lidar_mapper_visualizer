@@ -118,6 +118,10 @@ public:
     fake_3d_lidar_overlap_scan_num_param_desc.description = "Number of overlapping scans for fake 3D LiDAR point cloud";
     this->declare_parameter("fake_3d_lidar_overlap_scan_num", 10, fake_3d_lidar_overlap_scan_num_param_desc);
 
+    auto save_point_cloud_param_desc = rcl_interfaces::msg::ParameterDescriptor{};
+    save_point_cloud_param_desc.description = "Set to true to save the obtained point cloud as files";
+    this->declare_parameter("save_point_clouds", false, save_point_cloud_param_desc);
+
     auto simulate_noise_param_desc = rcl_interfaces::msg::ParameterDescriptor{};
     simulate_noise_param_desc.description = "Set to true to add a noise to pose for simulation";
     this->declare_parameter("simulate_noise", false, simulate_noise_param_desc);
@@ -174,6 +178,14 @@ public:
     {
       RCLCPP_ERROR(this->get_logger(), "Scan overlapping larger than point cloud save divider! Exiting...");
       return;
+    }
+
+    save_point_clouds_ = this->get_parameter("save_point_clouds").as_bool();
+    if (save_point_clouds_)
+    {
+      RCLCPP_INFO(this->get_logger(), "Saving point clouds to:\n\t-> %s\n\t-> %s",
+                  global_map_path_.c_str(),
+                  global_octomap_path_.c_str());
     }
 
     simulate_noise_ = this->get_parameter("simulate_noise").as_bool();
@@ -347,6 +359,8 @@ private:
   unsigned long int fake_3d_lidar_overlap_scan_num_ = 10;
   unsigned long int map_pub_cnt_ = 0;
   Eigen::Isometry3d prev_tf_ = Eigen::Isometry3d::Identity();
+
+  bool save_point_clouds_ = false;
 
   bool simulate_noise_ = false;
   std::random_device rd_;
@@ -599,8 +613,11 @@ private:
 
       // save point cloud to file
       std::string local_point_cloud_num = std::to_string((map_pub_cnt_ - 1) / fake_3d_lidar_scan_num_);
-      pcl::io::savePCDFile(local_map_dir_ + "local_map_" + local_point_cloud_num + ".pcd",
-                           *local_point_cloud_);
+      if (save_point_clouds_)
+      {
+        pcl::io::savePCDFile(local_map_dir_ + "local_map_" + local_point_cloud_num + ".pcd",
+                             *local_point_cloud_);
+      }
 
       local_point_cloud_->clear();
       prev_overlapping_point_cloud_->clear();
@@ -612,17 +629,20 @@ private:
       Eigen::Isometry3d delta_tf = prev_tf_ * curr_tf.inverse();
       Eigen::Matrix4d delta_matrix = delta_tf.matrix();
 
-      std::string file_name = local_map_tf_dir_ + "/tf_" + local_point_cloud_num + ".txt";
-      std::ofstream file(file_name);
-      if (file.is_open())
+      if (save_point_clouds_)
       {
-        file << std::fixed << std::setprecision(std::numeric_limits<double>::max_digits10);
-        file << delta_matrix << "\n";
-        file.close();
-      }
-      else
-      {
-        RCLCPP_ERROR(this->get_logger(), "Failed to open file for writing...");
+        std::string file_name = local_map_tf_dir_ + "/tf_" + local_point_cloud_num + ".txt";
+        std::ofstream file(file_name);
+        if (file.is_open())
+        {
+          file << std::fixed << std::setprecision(std::numeric_limits<double>::max_digits10);
+          file << delta_matrix << "\n";
+          file.close();
+        }
+        else
+        {
+          RCLCPP_ERROR(this->get_logger(), "Failed to open file for writing...");
+        }
       }
 
       prev_tf_ = curr_tf;
@@ -638,7 +658,10 @@ private:
     // global_map_pub_->publish(global_map_point_cloud_msg);
 
     // save map point cloud file
-    pcl::io::savePCDFile(global_map_path_, *global_map_point_cloud_);
+    if (save_point_clouds_)
+    {
+      pcl::io::savePCDFile(global_map_path_, *global_map_point_cloud_);
+    }
 
     map_pub_cnt_++;
   }
@@ -709,7 +732,10 @@ private:
     global_octomap_pub_->publish(global_octomap_point_cloud_msg);
 
     // save octomap point cloud file
-    pcl::io::savePCDFile(global_octomap_path_, *global_octomap_point_cloud_);
+    if (save_point_clouds_)
+    {
+      pcl::io::savePCDFile(global_octomap_path_, *global_octomap_point_cloud_);
+    }
   }
 };
 

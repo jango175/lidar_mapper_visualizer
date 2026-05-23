@@ -60,6 +60,7 @@ def generate_launch_description():
       'sor_std_dev_mult': 1.0,
       'fake_3d_lidar_scan_num': 15,
       'fake_3d_lidar_overlap_scan_num': 10, # should be smaller than fake_3d_lidar_scan_num
+      'save_point_clouds': True,
       'simulate_noise': False,
       'use_sim_time': use_sim_time_param
     }]

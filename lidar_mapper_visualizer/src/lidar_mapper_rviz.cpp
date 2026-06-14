@@ -44,14 +44,14 @@
 
 
 // LidarMapperVisualizer node class
-class LidarMappervisualizer : public rclcpp::Node
+class LidarMapperVisualizer : public rclcpp::Node
 {
 public:
   /**
    * @brief Construct a new LidarMapperVisualizer object
    * 
    */
-  LidarMappervisualizer() : Node("lidar_mapper_visualizer")
+  LidarMapperVisualizer() : Node("lidar_mapper_visualizer")
   {
     // parameters
     auto lidar_mount_roll_param_desc = rcl_interfaces::msg::ParameterDescriptor{};
@@ -248,36 +248,36 @@ public:
       tf2::durationFromSec(mf_timeout)
     );
     mf_slice_scan_tf2_->setTolerance(rclcpp::Duration::from_seconds(timestamp_tolerance));
-    mf_slice_scan_tf2_->registerCallback(&LidarMappervisualizer::sync_scan_callback, this);
+    mf_slice_scan_tf2_->registerCallback(&LidarMapperVisualizer::sync_scan_callback, this);
 
     orientation_sub_ = this->create_subscription<sensor_msgs::msg::Imu>(
       orientation_topic_,
       qos,
-      std::bind(&LidarMappervisualizer::orientation_callback, this, std::placeholders::_1)
+      std::bind(&LidarMapperVisualizer::orientation_callback, this, std::placeholders::_1)
     );
 
     odom_sub_ = this->create_subscription<nav_msgs::msg::Odometry>(
       odom_topic_,
       qos,
-      std::bind(&LidarMappervisualizer::odom_callback, this, std::placeholders::_1)
+      std::bind(&LidarMapperVisualizer::odom_callback, this, std::placeholders::_1)
     );
 
     scan_sub_ = this->create_subscription<sensor_msgs::msg::LaserScan>(
       scan_topic_,
       qos,
-      std::bind(&LidarMappervisualizer::scan_callback, this, std::placeholders::_1)
+      std::bind(&LidarMapperVisualizer::scan_callback, this, std::placeholders::_1)
     );
 
     point_cloud_sub_ = this->create_subscription<sensor_msgs::msg::PointCloud2>(
       sync_slice_point_cloud_topic_,
       qos,
-      std::bind(&LidarMappervisualizer::point_cloud_callback, this, std::placeholders::_1)
+      std::bind(&LidarMapperVisualizer::point_cloud_callback, this, std::placeholders::_1)
     );
 
     octomap_sub_ = this->create_subscription<octomap_msgs::msg::Octomap>(
       octomap_topic_,
       qos,
-      std::bind(&LidarMappervisualizer::octomap_callback, this, std::placeholders::_1)
+      std::bind(&LidarMapperVisualizer::octomap_callback, this, std::placeholders::_1)
     );
 
     RCLCPP_INFO(this->get_logger(), "LiDAR mapper visualizer node has been started!");
@@ -288,7 +288,7 @@ public:
    * @brief Destroy the LidarMapperVisualizer object
    * 
    */
-  ~LidarMappervisualizer()
+  ~LidarMapperVisualizer()
   {
 
   }
@@ -754,7 +754,7 @@ int main(int argc, char* argv[])
 
   RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Starting LiDAR mapper visualizer node...");
 
-  rclcpp::spin(std::make_shared<LidarMappervisualizer>());
+  rclcpp::spin(std::make_shared<LidarMapperVisualizer>());
 
   rclcpp::shutdown();
 
